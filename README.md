@@ -4,6 +4,15 @@ An AI-native office suite for macOS and Windows: word processor, spreadsheet,
 presentations, and PDF — five Electron apps sharing one engine layer, built
 around AI editing as a first-class workflow rather than a bolted-on chat box.
 
+## Download
+
+Signed installers built from `main`:
+
+- **macOS** (Apple Silicon): [GenOffice-0.4.110-arm64.dmg](https://github.com/genspark-ai/genoffice/releases/download/v0.4.110/GenOffice-0.4.110-arm64.dmg)
+- **Windows** (x64): [GenOfficeSetup-v0.4.110.exe](https://github.com/genspark-ai/genoffice/releases/download/v0.4.110/GenOfficeSetup-v0.4.110.exe)
+
+Other versions are on the [Releases](https://github.com/genspark-ai/genoffice/releases) page.
+
 ## Apps
 
 | App           | Product              | What it is                                                                                                                                                                                                                                                                                                                                                 |
