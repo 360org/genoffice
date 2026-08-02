@@ -32,10 +32,11 @@ calls through the Genspark service side; no model API key is stored locally.
 
 ## Engine packages
 
-All pure TypeScript, unit-tested, no Electron dependency:
+All pure TypeScript, no Electron dependency, unit-tested (except the UI kit):
 
-- `packages/docx-engine` — docx parsing → block tree (with `docxIndex` anchors
-  - passthrough), OOXML fragment generation, byte-level paragraph patching.
+- `packages/docx-engine` — docx parsing → block tree (with `docxIndex`
+  anchors and passthrough), OOXML fragment generation, byte-level paragraph
+  patching.
 - `packages/pptx-engine` / `packages/pptx-render` — pptx model and rendering.
 - `packages/file-parse` — text extraction for AI attachments (office formats,
   text formats).

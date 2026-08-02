@@ -31,7 +31,7 @@ import type {
   WebContents,
 } from 'electron'
 import { z } from 'zod'
-import { safeExternalUrl } from '@genoffice/electron-utils'
+import { installNavigationGuard, safeExternalUrl } from '@genoffice/electron-utils'
 import { createI18n, getUiLang, type Lang, normalizeLang, setUiLang } from '@genoffice/i18n'
 import { ProjectStore } from '@genoffice/project-store'
 
@@ -2716,6 +2716,7 @@ async function applyMainProcessProxy(): Promise<void> {
 }
 
 export function startSheetsStandalone(): void {
+  installNavigationGuard(app)
   // GENOFFICE_USER_DATA: test drivers point this at a scratch dir so automated
   // instances get their own userData AND single-instance lock (the lock is scoped
   // to userData), allowing parallel instances alongside a normal dev run.

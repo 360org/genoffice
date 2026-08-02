@@ -53,9 +53,12 @@ formatting diff.
 
 ## Building installers
 
+Run these from the repository root — they regenerate the third-party
+notices and build all five apps before packaging:
+
 ```bash
-npm run dist:mac -w @genoffice/shell   # dmg + zip
-npm run dist:win -w @genoffice/shell   # nsis installer
+npm run dist:mac   # dmg + zip
+npm run dist:win   # nsis installer
 ```
 
 Without Apple or Windows signing credentials in the environment these produce

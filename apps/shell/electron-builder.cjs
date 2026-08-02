@@ -14,7 +14,26 @@
  * app-update.yml into the app and in-app auto-update stays disabled.
  */
 
+const { existsSync } = require('node:fs')
+const { join } = require('node:path')
+
 const updateUrl = process.env.GENOFFICE_UPDATE_URL
+
+// The gsk CLI tree below is copied verbatim from node_modules, and the
+// nested commander path depends on npm's current hoisting layout — fail the
+// build with a clear message if an install ever changes it, instead of
+// shipping an installer with a broken gsk runtime.
+for (const rel of [
+  '../../node_modules/@genspark/cli',
+  '../../node_modules/@genspark/cli/node_modules/commander',
+  '../../node_modules/ws',
+]) {
+  if (!existsSync(join(__dirname, rel))) {
+    throw new Error(
+      `electron-builder extraResources source missing: ${rel} (npm hoisting changed?)`,
+    )
+  }
+}
 
 /** @type {import('electron-builder').Configuration} */
 const config = {

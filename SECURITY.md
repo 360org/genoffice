@@ -3,8 +3,8 @@
 ## Reporting a Vulnerability
 
 Please report suspected vulnerabilities privately via GitHub's
-[private vulnerability reporting](../../security/advisories/new) on this
-repository. Do not open public issues for security reports. We aim to
+[private vulnerability reporting](https://github.com/genspark-ai/genoffice/security/advisories/new)
+on this repository. Do not open public issues for security reports. We aim to
 acknowledge reports within 72 hours.
 
 ## Process Security Posture

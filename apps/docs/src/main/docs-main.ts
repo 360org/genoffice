@@ -11,7 +11,11 @@ import {
 } from 'node:fs'
 import { basename, join } from 'node:path'
 import { BrowserWindow, Menu, WebContentsView, app, dialog, ipcMain, shell } from 'electron'
-import { fetchWithSsrfGuard, safeExternalUrl } from '@genoffice/electron-utils'
+import {
+  fetchWithSsrfGuard,
+  installNavigationGuard,
+  safeExternalUrl,
+} from '@genoffice/electron-utils'
 import { createI18n, getUiLang, normalizeLang, setUiLang } from '@genoffice/i18n'
 import { ProjectStore } from '@genoffice/project-store'
 import type {
@@ -3399,6 +3403,7 @@ export function hasDocsWindow(): boolean {
 // ---- standalone lifecycle (apps/docs running on its own) ----
 
 export function startDocsStandalone(): void {
+  installNavigationGuard(app)
   // dev runs must not share the packaged app's userData (recent files, AI settings)
   // or its single-instance lock — otherwise `npm run dev` silently quits whenever
   // the installed GenOffice Docs is open and forwards its argv there instead.

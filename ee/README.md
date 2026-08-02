@@ -1,8 +1,8 @@
 # GenOffice Enterprise (`ee/`)
 
-This directory is reserved for future enterprise modules (private
-deployment, offline license verification — see the M4 roadmap). It is
-intentionally empty today except for this notice and the license.
+This directory is reserved for future enterprise modules (for example
+private deployment and offline license verification). It is intentionally
+empty today except for this notice and the license.
 
 ## License boundary
 

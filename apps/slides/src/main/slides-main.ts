@@ -24,7 +24,7 @@ import { existsSync, mkdirSync } from 'node:fs'
 import { userInfo } from 'node:os'
 import { dirname, join } from 'node:path'
 import { gskApiKey, gskSlideGenerate } from '@genoffice/ai-search'
-import { safeExternalUrl } from '@genoffice/electron-utils'
+import { installNavigationGuard, safeExternalUrl } from '@genoffice/electron-utils'
 import { getUiLang, normalizeLang, setUiLang } from '@genoffice/i18n'
 import { ProjectStore } from '@genoffice/project-store'
 import {
@@ -3859,6 +3859,7 @@ async function applyMainProcessProxy(): Promise<void> {
 }
 
 export function startSlidesStandalone(): void {
+  installNavigationGuard(app)
   // Optional debug switch: enable CDP only in dev with SLIDES_CDP_PORT explicitly set (for
   // automated testing/troubleshooting); packaged builds (isPackaged) are unaffected.
   if (!app.isPackaged && process.env.SLIDES_CDP_PORT) {

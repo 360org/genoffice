@@ -56,9 +56,11 @@ an individual is officially representing the community in public spaces.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement through the
-repository's security advisory channel or the contact listed in
-[SECURITY.md](SECURITY.md). All complaints will be reviewed and investigated
+reported to the community leaders responsible for enforcement through
+GitHub's
+[private vulnerability reporting](https://github.com/genspark-ai/genoffice/security/advisories/new)
+channel on this repository (used here as the private contact channel for
+conduct reports as well). All complaints will be reviewed and investigated
 promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

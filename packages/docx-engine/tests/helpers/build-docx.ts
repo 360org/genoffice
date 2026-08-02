@@ -110,6 +110,11 @@ export async function buildDocx(options: BuildDocxOptions): Promise<Uint8Array> 
     `${XML_DECL}<w:document ${DOC_NS}><w:body>${options.bodyXml}${sectPr}</w:body></w:document>`,
   )
 
+  // Pin zip entry mtimes (JSZip defaults them to "now") so regenerating the
+  // committed fixtures is byte-deterministic and CI can diff for drift.
+  zip.forEach((_path, entry) => {
+    entry.date = new Date(Date.UTC(2026, 0, 1))
+  })
   return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' })
 }
 
@@ -119,8 +124,7 @@ export const IMAGE_PARAGRAPH_XML =
   '<pic:pic><pic:blipFill><a:blip r:embed="rId10"/></pic:blipFill></pic:pic>' +
   '</a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>'
 
-export const MATH_PARAGRAPH_XML =
-  '<w:p><m:oMath><m:r><m:t>E=mc^2</m:t></m:r></m:oMath></w:p>'
+export const MATH_PARAGRAPH_XML = '<w:p><m:oMath><m:r><m:t>E=mc^2</m:t></m:r></m:oMath></w:p>'
 
 export const CHART_PARAGRAPH_XML =
   '<w:p><w:r><w:drawing><wp:inline><wp:extent cx="5486400" cy="3200400"/>' +
@@ -137,9 +141,7 @@ const chartStrCache = (values: string[], f: string) =>
 const chartNumCache = (values: (number | null)[], f: string) =>
   `<c:numRef><c:f>${f}</c:f><c:numCache><c:formatCode>General</c:formatCode>` +
   `<c:ptCount val="${values.length}"/>` +
-  values
-    .map((v, i) => (v === null ? '' : `<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`))
-    .join('') +
+  values.map((v, i) => (v === null ? '' : `<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`)).join('') +
   '</c:numCache></c:numRef>'
 
 /** bar chart part: title, 2 series over 3 categories, with a gap in series 2 */

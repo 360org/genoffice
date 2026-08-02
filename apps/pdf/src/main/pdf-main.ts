@@ -3,7 +3,7 @@ import { readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { BrowserWindow, WebContentsView, app, dialog, ipcMain, shell } from 'electron'
 import type { WebContents } from 'electron'
-import { safeExternalUrl } from '@genoffice/electron-utils'
+import { installNavigationGuard, safeExternalUrl } from '@genoffice/electron-utils'
 import { createI18n, getUiLang } from '@genoffice/i18n'
 import { PDF_CHANNELS } from '../shared/ipc'
 import type {
@@ -494,6 +494,7 @@ export function createPdfView(openPath?: string | null): WebContentsView {
 
 /** Standalone window mode: `npm run dev -w @genoffice/pdf`, pdf path passed via argv */
 export function startPdfStandalone(): void {
+  installNavigationGuard(app)
   configurePdfRuntime({
     preloadPath: join(__dirname, '../preload/index.js'),
     rendererUrl: process.env.ELECTRON_RENDERER_URL,

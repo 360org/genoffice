@@ -21,6 +21,7 @@
     "@genoffice/ai-search": "*",
     "@genoffice/docs": "*",
     "@genoffice/docx-engine": "*",
+    "@genoffice/electron-utils": "*",
     "@genoffice/i18n": "*",
     "@genoffice/pptx-engine": "*",
     "@genoffice/pptx-render": "*",

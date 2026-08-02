@@ -28,6 +28,7 @@ import menuXlsxIcon2x from './assets/menu-xlsx@2x.png?asset'
 import menuPptxIcon1x from './assets/menu-pptx.png?asset'
 import menuPptxIcon2x from './assets/menu-pptx@2x.png?asset'
 import { createI18n, isLang, normalizeLang, setUiLang, type Lang } from '@genoffice/i18n'
+import { installNavigationGuard } from '@genoffice/electron-utils'
 import { readAppSettings, writeAppSetting } from './app-settings'
 import { isOnboardingLive } from './onboarding-gate'
 import { ProjectStore } from '@genoffice/project-store'
@@ -1650,6 +1651,7 @@ app.on('second-instance', (_event, argv, _cwd, additionalData) => {
   if (!file || !openDocumentPath(file)) tabManager?.openHomeTab()
 })
 
+installNavigationGuard(app)
 registerAiIpc()
 registerProjectIpc()
 registerDocsIpc()

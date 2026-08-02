@@ -33,6 +33,9 @@
     "dist:mac": "npm run notices && npm run build:all && npm run dist:mac -w @genoffice/shell",
     "dist:win": "npm run notices && npm run build:all && npm run dist:win -w @genoffice/shell"
   },
+  "dependencies": {
+    "ws": "^8.21.1"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "concurrently": "^9.2.4",

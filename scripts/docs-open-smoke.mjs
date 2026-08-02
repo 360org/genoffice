@@ -6,7 +6,9 @@
  * Archives a screenshot per document and emits Markdown + JSON reports.
  *
  * Usage: node scripts/docs-open-smoke.mjs [--filter substring] [--dir directory] [--timeout ms]
- * Prereq: npm run build (electron-vite output must match the current code)
+ * Prereq: npm run build (electron-vite output must match the current code).
+ * The default --dir (example/docx) is gitignored and not shipped — supply
+ * your own corpus of .docx files there or point --dir at one.
  * Output: .task/docs-open-report/report.md / report.json / *.png
  */
 
