@@ -61,7 +61,6 @@ if (baseRef) {
       `Formatting base ${baseRef} is not available in this checkout (rewritten history?); ` +
         'checking working-tree changes only.',
     )
-    baseRef = ''
   } else {
     addNullSeparated(
       git(['diff', '--name-only', '--diff-filter=ACMRT', '-z', `${baseRef}...HEAD`]).stdout,
