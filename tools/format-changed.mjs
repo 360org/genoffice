@@ -11,9 +11,11 @@ if (mode !== '--check' && mode !== '--write') {
 }
 
 let baseRef = process.env.FORMAT_BASE_REF || ''
+let baseFromArg = false
 if (args[0] === '--base') {
   args.shift()
   baseRef = args.shift() || ''
+  baseFromArg = true
 }
 // The all-zero id means "no previous commit" (the first push of a branch or
 // repo); there is nothing to diff against, so only working-tree changes are checked.
@@ -48,12 +50,23 @@ if (baseRef) {
     allowFailure: true,
   })
   if (verification.status !== 0) {
-    console.error(`Formatting base is not a commit available in this checkout: ${baseRef}`)
-    process.exit(2)
+    // An explicit --base must resolve; a CI-provided ref may legitimately be
+    // gone (force-pushed/rewritten history), where no diff base exists and
+    // only working-tree changes can be checked.
+    if (baseFromArg) {
+      console.error(`Formatting base is not a commit available in this checkout: ${baseRef}`)
+      process.exit(2)
+    }
+    console.warn(
+      `Formatting base ${baseRef} is not available in this checkout (rewritten history?); ` +
+        'checking working-tree changes only.',
+    )
+    baseRef = ''
+  } else {
+    addNullSeparated(
+      git(['diff', '--name-only', '--diff-filter=ACMRT', '-z', `${baseRef}...HEAD`]).stdout,
+    )
   }
-  addNullSeparated(
-    git(['diff', '--name-only', '--diff-filter=ACMRT', '-z', `${baseRef}...HEAD`]).stdout,
-  )
 }
 
 addNullSeparated(git(['diff', '--name-only', '--diff-filter=ACMRT', '-z']).stdout)
