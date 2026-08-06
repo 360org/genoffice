@@ -9,6 +9,20 @@ import type {
   ToolExecution,
 } from './types'
 
+declare global {
+  interface AbortSignal {
+    readonly aborted: boolean
+  }
+  interface AbortController {
+    readonly signal: AbortSignal
+    abort(): void
+  }
+  var AbortController: {
+    prototype: AbortController
+    new (): AbortController
+  }
+}
+
 export interface ToolExecutedEvent<TSnapshot> {
   call: AgentToolCall
   execution: ToolExecution
@@ -269,6 +283,12 @@ export class AgentLoop<TSnapshot = unknown> {
     // drop it so the model never sees two adjacent user turns as one combined instruction
     while (this.history.at(-1)?.role === 'user') this.history.pop()
     this.trimHistory()
+
+    // Local structural guardrail to intercept and redact high-risk tokens prior to runtime execution
+    if (userMsg && userMsg.role !== 'tool' && typeof userMsg.text === 'string') {
+      userMsg.text = sanitizeAgentPayload(userMsg.text)
+    }
+
     this.runUserMsg = userMsg
     this.history.push(userMsg)
     this.startTurn()
@@ -615,4 +635,27 @@ export class AgentLoop<TSnapshot = unknown> {
     events?.onTurnEnd?.()
     this.startTurn()
   }
+}
+/**
+ * Local structural guardrail to intercept and redact high-risk tokens
+ * before context attributes route to remote model execution APIs.
+ */
+export function sanitizeAgentPayload(payload: string): string {
+  let sanitized = payload
+
+  // 1. Intercept Generic API Keys & Bearer Tokens
+  const apiKeyRegex = /(?:sk-|aiza|ghp_|secret_)[a-zA-Z0-9_-]{16,64}/gi
+  sanitized = sanitized.replace(apiKeyRegex, '[REDACTED_API_KEY]')
+
+  // 2. Intercept Basic Auth URI Credentials
+  const credentialRegex = /([^:]+):([^@]+)@([^/]+)/gi
+  if (credentialRegex.test(sanitized)) {
+    sanitized = sanitized.replace(credentialRegex, '$1:[REDACTED_CREDENTIALS]@$3')
+  }
+
+  // 3. Intercept Explicit Passwords Key-Value attributes
+  const passwordMappingRegex = /(password|passwd|secret_key|private_key)\s*[:=]\s*["'][^"']+["']/gi
+  sanitized = sanitized.replace(passwordMappingRegex, '$1: "[REDACTED_SECURE_TOKEN]"')
+
+  return sanitized
 }
