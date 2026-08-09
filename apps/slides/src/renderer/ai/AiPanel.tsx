@@ -305,6 +305,9 @@ function clampPanelWidth(w: number): number {
 }
 
 function loadPanelWidth(): number {
+  if (typeof localStorage === 'undefined') {
+    return PANEL_WIDTH_DEFAULT
+  }
   const saved = Number(localStorage.getItem(PANEL_WIDTH_KEY))
   return Number.isFinite(saved) && saved > 0 ? clampPanelWidth(saved) : PANEL_WIDTH_DEFAULT
 }
