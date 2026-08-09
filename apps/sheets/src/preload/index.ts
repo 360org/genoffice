@@ -1078,7 +1078,8 @@ function parseSaveRequest(input: WorkbookSaveRequest): WorkbookSaveRequest {
         typeof state.protected !== 'boolean',
     ) ||
     !isDefinedNamesState(input.definedNamesState) ||
-    (input.edits.length === 0 &&
+    (input.mode !== 'save-as' &&
+      input.edits.length === 0 &&
       input.structuralOps.length === 0 &&
       input.chartEdits.length === 0 &&
       input.visualEdits.length === 0 &&

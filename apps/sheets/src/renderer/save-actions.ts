@@ -148,7 +148,7 @@ export async function handleSave(
     visualEdits.length +
     tableAdditions.length +
     pivotAdditions.length
-  if (total === 0) {
+  if (total === 0 && mode !== 'save-as') {
     if (mode !== 'recovery') ctx.setMessage(t('appNoEditsToSave'))
     return
   }
