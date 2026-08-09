@@ -30,14 +30,14 @@ jobs:
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
             tag="${{ github.ref_name }}"
           else
-            tag="v$(node -p "require('./package.json').version")"
+            tag="v$(node -p "require('./apps/shell/package.json').version")"
           fi
           version="${tag#v}"
           if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Release tag must be a semantic version, got: $tag" >&2
             exit 1
           fi
-          manifest="$(node -p "require('./package.json').version")"
+          manifest="$(node -p "require('./apps/shell/package.json').version")"
           if [[ "$version" != "$manifest" ]]; then
             echo "Tag $tag does not match package.json ($manifest). Bump the version first." >&2
             exit 1
