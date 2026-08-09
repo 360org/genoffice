@@ -78,6 +78,18 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
     keyPlaceholder: 'sk-...',
   },
   {
+    id: 'openrouter',
+    label: 'OpenRouter',
+    models: [
+      'anthropic/claude-3.5-sonnet',
+      'google/gemini-2.5-pro',
+      'deepseek/deepseek-chat',
+      'openai/gpt-4o-mini',
+    ],
+    defaultModel: 'anthropic/claude-3.5-sonnet',
+    keyPlaceholder: 'sk-or-...',
+  },
+  {
     id: 'custom',
     label: 'Custom',
     models: [],
