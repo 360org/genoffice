@@ -111,6 +111,20 @@ function applyWhitelabel() {
     }
   }
 
+  // 4.5. Patch packages/ai-provider/tests/providers.test.ts
+  const providersTestPath = path.join(ROOT_DIR, 'packages', 'ai-provider', 'tests', 'providers.test.ts')
+  if (fs.existsSync(providersTestPath)) {
+    let testContent = fs.readFileSync(providersTestPath, 'utf8')
+    if (testContent.includes("expect(settings.provider).toBe('genspark')")) {
+      testContent = testContent.replace(
+        "expect(settings.provider).toBe('genspark')",
+        `expect(settings.provider).toBe('${config.defaultProvider}')`,
+      )
+      fs.writeFileSync(providersTestPath, testContent, 'utf8')
+      log('Patched packages/ai-provider/tests/providers.test.ts')
+    }
+  }
+
   // 5. Patch packages/ai-provider/src/stream.ts
   const streamPath = path.join(ROOT_DIR, 'packages', 'ai-provider', 'src', 'stream.ts')
   if (fs.existsSync(streamPath)) {
@@ -194,6 +208,7 @@ function restoreOfficial() {
     'apps/shell/package.json',
     'packages/ai-provider/src/types.ts',
     'packages/ai-provider/src/providers.ts',
+    'packages/ai-provider/tests/providers.test.ts',
     'packages/ai-provider/src/stream.ts',
     'apps/shell/src/renderer/src/strings.ts',
     'apps/shell/src/renderer/src/assets/genoffice-logo.svg',

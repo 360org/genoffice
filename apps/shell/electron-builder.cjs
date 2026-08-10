@@ -34,7 +34,7 @@ for (const rel of [
   '../../node_modules/ws',
   '../../node_modules/electron/dist/LICENSES.chromium.html',
   '../../node_modules/@embedpdf/pdfium/dist/pdfium.wasm',
-  '../pdf/node_modules/harfbuzzjs/hb-subset.wasm',
+  '../../node_modules/harfbuzzjs/dist/harfbuzz-subset.wasm',
 ]) {
   if (!existsSync(join(__dirname, rel))) {
     throw new Error(
@@ -116,7 +116,7 @@ const config = {
       to: 'wasm/pdfium.wasm',
     },
     {
-      from: '../pdf/node_modules/harfbuzzjs/hb-subset.wasm',
+      from: '../../node_modules/harfbuzzjs/dist/harfbuzz-subset.wasm',
       to: 'wasm/hb-subset.wasm',
     },
     {

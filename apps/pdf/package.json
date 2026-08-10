@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@embedpdf/pdfium": "^2.15.0",
     "@genoffice/agent-core": "*",
     "@genoffice/ai-provider": "*",
     "@genoffice/electron-utils": "*",
@@ -24,6 +25,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "electron": "^43.3.0",
     "electron-vite": "^5.0.0",
+    "harfbuzzjs": "^1.4.0",
     "jsdom": "^28.0.0",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.2.108",

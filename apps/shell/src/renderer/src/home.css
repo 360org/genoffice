@@ -1978,3 +1978,95 @@ body.vib .home {
     transform: rotate(360deg);
   }
 }
+
+/* ---- AI Settings Dialog ---- */
+.ai-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.ai-settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-settings-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.ai-settings-input,
+.ai-settings-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.ai-settings-input:focus,
+.ai-settings-select:focus {
+  border-color: var(--accent);
+}
+
+.ai-settings-input::placeholder {
+  color: var(--text-muted);
+}
+
+.ai-settings-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.input-password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-password-wrap input {
+  padding-right: 50px;
+}
+
+.input-password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 0;
+  font-size: 12px;
+}
+
+.input-password-toggle:hover {
+  color: var(--text);
+}
+
