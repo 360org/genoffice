@@ -393,7 +393,7 @@ function ProjectPanel({ projects, selectedId, onSelect, onRefresh }: ProjectPane
 }
 
 // ── Account entry (bottom-left) ──────────────────────────
-// Currently the Genspark (gsk) login entry; to be upgraded to a signup/account system later.
+// Currently the 360 CORP (gsk) login entry; to be upgraded to a signup/account system later.
 // Language switching also lives in this popup menu.
 
 const LOGIN_POLL_MS = 2500
@@ -1108,7 +1108,7 @@ function AccountEntry({
             <>
               <span className="account-name">{email ? email.split('@')[0] : t('loggedIn')}</span>
               <span className="account-sub" title={email}>
-                {email || 'Genspark'}
+                {email || '360 CORP'}
               </span>
             </>
           ) : (
@@ -1125,7 +1125,7 @@ function AccountEntry({
   )
 }
 
-// ── Cloud (Genspark web) projects view ──────────────────
+// ── Cloud (360 CORP web) projects view ──────────────────
 
 /** kind filter segments; labels shared with the recents type filter */
 const CLOUD_FILTERS = [
@@ -1478,7 +1478,7 @@ export function Home() {
   const [navCounts, setNavCounts] = useState({ recent: 0, starred: 0 })
   const [loadingMore, setLoadingMore] = useState(false)
   const [view, setView] = useState<'recent' | 'starred'>('recent')
-  // Genspark web projects take over the content area (like a selected project)
+  // 360 CORP web projects take over the content area (like a selected project)
   const [cloudMode, setCloudMode] = useState(false)
   const [filter, setFilter] = useState('all')
   const [rowMenu, setRowMenu] = useState<string | null>(null)
@@ -1487,7 +1487,7 @@ export function Home() {
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
   // name in the greeting; omitted when logged out
   const [accountName, setAccountName] = useState('')
-  // Genspark Projects is web-account data, so its nav entry only shows when logged in
+  // 360 CORP Projects is web-account data, so its nav entry only shows when logged in
   const [loggedIn, setLoggedIn] = useState(false)
   // single source of account state: AccountEntry reports every change (initial
   // load, login, logout), keeping the greeting name and the nav entry in sync
@@ -2353,7 +2353,7 @@ export function Home() {
     <div className="home">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img className="logo-lockup" src={logoLockup} alt="GenOffice" />
+          <img className="logo-lockup" src={logoLockup} alt="VuaOffice" />
         </div>
 
         <nav className="sidebar-nav">

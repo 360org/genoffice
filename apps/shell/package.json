@@ -1,13 +1,13 @@
 {
   "name": "@genoffice/shell",
-  "productName": "GenOffice",
+  "productName": "VuaOffice",
   "version": "0.6.0",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/genspark-ai/genoffice",
+  "homepage": "https://github.com/360org/vuaoffice",
   "private": true,
   "description": "Unified GenOffice shell: one app hosting the docs and sheets modules behind a home/launcher window",
   "main": "out/main/index.js",
-  "desktopName": "genoffice.desktop",
+  "desktopName": "vuaoffice.desktop",
   "scripts": {
     "dev": "electron-vite dev --watch",
     "build": "electron-vite build",
@@ -44,5 +44,5 @@
     "vite": "^7.3.1",
     "vitest": "^4.1.10"
   },
-  "author": "GenOffice"
+  "author": "360org"
 }

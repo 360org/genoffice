@@ -85,7 +85,31 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
     keyPlaceholder: 'API Key',
     needsBaseUrl: true,
   },
+  // 360 CORP's own OpenAI-compatible gateways. baseUrl is editable so a
+  // self-hosted deployment can point elsewhere; defaults live in DEFAULT_BASE_URLS.
+  {
+    id: 'omirouter',
+    label: 'OmiRouter AI',
+    models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'deepseek-chat'],
+    defaultModel: 'claude-3-5-sonnet',
+    keyPlaceholder: 'sk-or-...',
+    needsBaseUrl: true,
+  },
+  {
+    id: 'ninerouter',
+    label: '9Router AI',
+    models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'deepseek-chat'],
+    defaultModel: 'claude-3-5-sonnet',
+    keyPlaceholder: 'sk-or-...',
+    needsBaseUrl: true,
+  },
 ]
+
+/** preset endpoints for providers whose baseUrl has a known default */
+const DEFAULT_BASE_URLS: Partial<Record<AiProviderId, string>> = {
+  omirouter: 'https://api.omirouter.com/v1',
+  ninerouter: 'https://api.9router.com/v1',
+}
 
 /**
  * Fresh settings with every provider's default model and an empty key,
@@ -101,10 +125,10 @@ export function defaultAiSettings(
     providers[meta.id] = {
       apiKey: defaultApiKeys?.[meta.id] ?? '',
       model: meta.defaultModel,
-      baseUrl: meta.needsBaseUrl ? '' : undefined,
+      baseUrl: meta.needsBaseUrl ? (DEFAULT_BASE_URLS[meta.id] ?? '') : undefined,
     }
   }
-  return { provider: 'genspark', providers }
+  return { provider: 'omirouter', providers }
 }
 
 /**
