@@ -45,42 +45,132 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-  build_macos:
+  build_mac_x64:
+    name: 1. macOS Intel (x64)
     needs: version
-    runs-on: macos-14
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
+      - name: Install dependencies
+        run: npm ci
+      - name: Build macOS Intel (x64)
+        run: |
+          npm run notices
+          npm run build:all
+          npm run dist:mac:x64 -w @genoffice/shell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload macOS Intel Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          files: |
+            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-x64.dmg
+            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-x64-mac.zip
+            apps/shell/release/*.dmg
+            apps/shell/release/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  build_mac_arm64:
+    name: 2. macOS Silicon (arm64)
+    needs: [version, build_mac_x64]
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
-
       - name: Install dependencies
         run: npm ci
-
-      - name: Build applications and package DMG/ZIP
+      - name: Build macOS Silicon (arm64)
         run: |
-          # Build all renderer workspaces first
+          npm run notices
           npm run build:all
-          # Pack installers with electron-builder
-          npm run dist:mac
+          npm run dist:mac:arm64 -w @genoffice/shell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release and Upload Assets
-        uses: softprops/action-gh-release@c95fe146b397d8adad44d8438d4de774e1d64c09 # v2.2.0
+      - name: Upload macOS Silicon Assets
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.version.outputs.tag }}
-          name: Release ${{ needs.version.outputs.tag }}
           files: |
-            apps/shell/release/GenOffice-${{ needs.version.outputs.version }}.dmg
-            apps/shell/release/GenOffice-${{ needs.version.outputs.version }}-mac.zip
-          draft: false
-          prerelease: false
+            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-arm64.dmg
+            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-arm64-mac.zip
+            apps/shell/release/*.dmg
+            apps/shell/release/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build_windows:
+    name: 3. Windows 10/11 (x64)
+    needs: [version, build_mac_arm64]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Windows (x64)
+        run: |
+          npm run notices
+          npm run build:all
+          npm run dist:win -w @genoffice/shell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Windows Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          files: |
+            apps/shell/release/VuaOffice Setup ${{ needs.version.outputs.version }}.exe
+            apps/shell/release/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build_linux:
+    name: 4. Linux 22.04/24.04 (AppImage & deb)
+    needs: [version, build_windows]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install dependencies
+        run: npm ci
+      - name: Build Linux (AppImage & deb)
+        run: |
+          npm run notices
+          npm run build:all
+          npm run dist:linux -w @genoffice/shell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Linux Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          files: |
+            apps/shell/release/*.AppImage
+            apps/shell/release/*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
