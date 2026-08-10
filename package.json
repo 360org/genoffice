@@ -18,6 +18,8 @@
   ],
   "scripts": {
     "postinstall": "install-electron",
+    "whitelabel:apply": "node scripts/whitelabel.js apply",
+    "whitelabel:restore": "node scripts/whitelabel.js restore",
     "format": "node tools/format-changed.mjs --write",
     "format:check": "node tools/format-changed.mjs --check",
     "lint": "eslint .",

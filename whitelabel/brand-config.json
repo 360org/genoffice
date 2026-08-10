@@ -1,0 +1,18 @@
+{
+  "appName": "vOffice",
+  "appId": "com.vuahethong.voffice",
+  "executableName": "voffice",
+  "author": "360 CORP",
+  "defaultProvider": "omirouter",
+  "omirouterUrl": "https://api.omirouter.com/v1",
+  "ninerouterUrl": "https://api.9router.com/v1",
+  "textReplacements": [
+    {
+      "files": ["apps/shell/src/renderer/src/strings.ts"],
+      "rules": [
+        { "regex": "\\bGenOffice\\b", "to": "vOffice" },
+        { "regex": "\\bGenspark\\b", "to": "360 CORP" }
+      ]
+    }
+  ]
+}
