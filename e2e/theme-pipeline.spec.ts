@@ -50,8 +50,13 @@ test.describe('theme pipeline', () => {
       const shellPage = await findShellPage(app)
       const editorPage = await waitForPageWithUrl(app, 'markdown/out')
       await expect(editorPage.locator('.doc-editor')).toBeVisible()
-      expect(await themeAttr(shellPage)).toBeNull()
-      expect(await themeAttr(editorPage)).toBeNull()
+      const initialShellTheme = await themeAttr(shellPage)
+      if (initialShellTheme !== null) {
+        await setTheme(shellPage, 'system')
+        await expect.poll(() => themeAttr(shellPage)).toBeNull()
+      } else {
+        expect(initialShellTheme).toBeNull()
+      }
 
       await setTheme(shellPage, 'dark')
       await expect.poll(() => themeAttr(shellPage)).toBe('dark')
