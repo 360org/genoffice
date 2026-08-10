@@ -68,20 +68,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload macOS Intel Assets
-        uses: softprops/action-gh-release@v2
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ needs.version.outputs.tag }}
-          files: |
-            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-x64.dmg
-            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-x64-mac.zip
-            apps/shell/release/*.dmg
-            apps/shell/release/*.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: macos-x64
+          path: apps/shell/release/*
 
   build_mac_arm64:
     name: 2. macOS Silicon (arm64)
-    needs: [version, build_mac_x64]
+    needs: version
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -102,20 +96,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload macOS Silicon Assets
-        uses: softprops/action-gh-release@v2
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ needs.version.outputs.tag }}
-          files: |
-            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-arm64.dmg
-            apps/shell/release/VuaOffice-${{ needs.version.outputs.version }}-arm64-mac.zip
-            apps/shell/release/*.dmg
-            apps/shell/release/*.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: macos-arm64
+          path: apps/shell/release/*
 
   build_windows:
     name: 3. Windows 10/11 (x64)
-    needs: [version, build_mac_arm64]
+    needs: version
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -136,18 +124,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Windows Assets
-        uses: softprops/action-gh-release@v2
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ needs.version.outputs.tag }}
-          files: |
-            apps/shell/release/VuaOffice Setup ${{ needs.version.outputs.version }}.exe
-            apps/shell/release/*.exe
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: windows-x64
+          path: apps/shell/release/*
 
   build_linux:
     name: 4. Linux 22.04/24.04 (AppImage & deb)
-    needs: [version, build_windows]
+    needs: version
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -166,11 +150,30 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload Linux Assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: apps/shell/release/*
+
+  publish_release:
+    name: 5. Publish Official Release
+    needs: [version, build_mac_x64, build_mac_arm64, build_windows, build_linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.version.outputs.tag }}
+          name: VuaOffice ${{ needs.version.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
           files: |
-            apps/shell/release/*.AppImage
-            apps/shell/release/*.deb
+            artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
