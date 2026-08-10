@@ -107,6 +107,7 @@ jobs:
           npm run dist:mac:x64 -w @genoffice/shell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GENOFFICE_UPDATE_URL: https://github.com/360org/vuaoffice/releases/latest/download
       - name: Upload macOS Intel Assets
         uses: actions/upload-artifact@v4
         with:
@@ -137,6 +138,7 @@ jobs:
           npm run dist:mac:arm64 -w @genoffice/shell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GENOFFICE_UPDATE_URL: https://github.com/360org/vuaoffice/releases/latest/download
       - name: Upload macOS Silicon Assets
         uses: actions/upload-artifact@v4
         with:
@@ -167,6 +169,7 @@ jobs:
           npm run dist:win -w @genoffice/shell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GENOFFICE_UPDATE_URL: https://github.com/360org/vuaoffice/releases/latest/download
       - name: Upload Windows Assets
         uses: actions/upload-artifact@v4
         with:
@@ -195,6 +198,7 @@ jobs:
           npm run dist:linux -w @genoffice/shell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GENOFFICE_UPDATE_URL: https://github.com/360org/vuaoffice/releases/latest/download
       - name: Upload Linux Assets
         uses: actions/upload-artifact@v4
         with:
