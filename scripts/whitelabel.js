@@ -188,23 +188,8 @@ function applyWhitelabel() {
 function restoreOfficial() {
   log('Restoring official GenOffice codebase...')
 
-  // Cố gắng đọc config để lấy danh sách files trong textReplacements
-  let textFiles = []
-  try {
-    const config = readConfig()
-    if (config.textReplacements) {
-      for (const entry of config.textReplacements) {
-        if (entry.files) {
-          textFiles = textFiles.concat(entry.files)
-        }
-      }
-    }
-  } catch (e) {
-    log('Warning: could not read brand-config.json for dynamic files list')
-  }
-
   // Danh sách các file bị thay đổi cấu trúc sẽ được hoàn tác qua git checkout
-  const filesToRestore = Array.from(new Set([
+  const filesToRestore = [
     'apps/shell/electron-builder.cjs',
     'apps/shell/package.json',
     'packages/ai-provider/src/types.ts',
@@ -216,8 +201,7 @@ function restoreOfficial() {
     'apps/shell/build/icon.icns',
     'apps/shell/build/icon.ico',
     'apps/shell/build/icon-mac.png',
-    ...textFiles
-  ]))
+  ]
 
   for (const f of filesToRestore) {
     const fullPath = path.join(ROOT_DIR, f)

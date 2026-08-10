@@ -152,6 +152,7 @@ export const strings = {
     onbBody3: '无授权费用，无广告，无水印。',
     onbNote3: 'AI 功能可能消耗 360 CORP 积分。',
     onbBack: '上一步',
+    aiSettingsTitle: 'AI 设置',
   },
   en: {
     navRecent: 'Recent',
@@ -300,6 +301,7 @@ export const strings = {
     onbBody3: 'No license fees. No ads. No watermarks.',
     onbNote3: 'AI features may consume 360 CORP credits.',
     onbBack: 'Back',
+    aiSettingsTitle: 'AI Settings',
   },
   ja: {
     // Sidebar navigation
@@ -464,6 +466,7 @@ export const strings = {
     onbBody3: 'ライセンス料なし、広告なし、透かしなし。',
     onbNote3: 'AI 機能は 360 CORP クレジットを消費する場合があります。',
     onbBack: '戻る',
+    aiSettingsTitle: 'AI 設定',
   },
   ko: {
     // Sidebar navigation
@@ -623,6 +626,7 @@ export const strings = {
     onbBody3: '라이선스 비용 없음, 광고 없음, 워터마크 없음.',
     onbNote3: 'AI 기능은 360 CORP 크레딧을 소모할 수 있습니다.',
     onbBack: '이전',
+    aiSettingsTitle: 'AI 설정',
   },
   fr: {
     // Sidebar navigation
@@ -787,6 +791,7 @@ export const strings = {
     onbBody3: 'Pas de licence. Pas de publicité. Pas de filigrane.',
     onbNote3: 'Les fonctions IA peuvent consommer des crédits 360 CORP.',
     onbBack: 'Retour',
+    aiSettingsTitle: 'Paramètres IA',
   },
   de: {
     // Sidebar navigation
@@ -953,6 +958,7 @@ export const strings = {
     onbBody3: 'Keine Lizenzgebühren. Keine Werbung. Keine Wasserzeichen.',
     onbNote3: 'KI-Funktionen können 360 CORP-Credits verbrauchen.',
     onbBack: 'Zurück',
+    aiSettingsTitle: 'KI-Einstellungen',
   },
   es: {
     // Sidebar navigation
@@ -1118,6 +1124,7 @@ export const strings = {
     onbBody3: 'Sin licencias. Sin anuncios. Sin marcas de agua.',
     onbNote3: 'Las funciones de IA pueden consumir créditos de 360 CORP.',
     onbBack: 'Atrás',
+    aiSettingsTitle: 'Configuración de IA',
   },
   th: {
     // Sidebar navigation
@@ -1276,6 +1283,7 @@ export const strings = {
     onbBody3: 'ไม่มีค่าลิขสิทธิ์ ไม่มีโฆษณา ไม่มีลายน้ำ',
     onbNote3: 'ฟีเจอร์ AI อาจใช้เครดิต 360 CORP',
     onbBack: 'ย้อนกลับ',
+    aiSettingsTitle: 'การตั้งค่า AI',
   },
   id: {
     // Sidebar navigation
@@ -1437,6 +1445,7 @@ export const strings = {
     onbBody3: 'Tanpa biaya lisensi. Tanpa iklan. Tanpa watermark.',
     onbNote3: 'Fitur AI dapat menggunakan kredit 360 CORP.',
     onbBack: 'Kembali',
+    aiSettingsTitle: 'Pengaturan AI',
   },
   ru: {
     // Sidebar navigation
@@ -1598,6 +1607,7 @@ export const strings = {
     onbBody3: 'Без лицензий. Без рекламы. Без водяных знаков.',
     onbNote3: 'Функции ИИ могут расходовать кредиты 360 CORP.',
     onbBack: 'Назад',
+    aiSettingsTitle: 'Параметры ИИ',
   },
   ar: {
     // Sidebar navigation
@@ -1757,6 +1767,7 @@ export const strings = {
     onbBody3: 'بلا رسوم ترخيص، بلا إعلانات، بلا علامات مائية.',
     onbNote3: 'قد تستهلك ميزات الذكاء الاصطناعي أرصدة 360 CORP.',
     onbBack: 'رجوع',
+    aiSettingsTitle: 'إعدادات الذكاء الاصطناعي',
   },
   pt: {
     navRecent: 'Recentes',
@@ -1909,6 +1920,7 @@ export const strings = {
     onbBody3: "Sem licenças. Sem anúncios. Sem marcas d'água.",
     onbNote3: 'Os recursos de IA podem consumir créditos 360 CORP.',
     onbBack: 'Voltar',
+    aiSettingsTitle: 'Configurações de IA',
   },
   it: {
     navRecent: 'Recenti',
@@ -2061,6 +2073,7 @@ export const strings = {
     onbBody3: 'Nessuna licenza. Nessuna pubblicità. Nessuna filigrana.',
     onbNote3: 'Le funzioni IA possono consumare crediti 360 CORP.',
     onbBack: 'Indietro',
+    aiSettingsTitle: 'Impostazioni IA',
   },
   pl: {
     navRecent: 'Ostatnie',
@@ -2212,6 +2225,7 @@ export const strings = {
     onbBody3: 'Bez opłat licencyjnych. Bez reklam. Bez znaków wodnych.',
     onbNote3: 'Funkcje AI mogą zużywać kredyty 360 CORP.',
     onbBack: 'Wstecz',
+    aiSettingsTitle: 'Ustawienia AI',
   },
   nl: {
     navRecent: 'Recent',
@@ -2364,6 +2378,7 @@ export const strings = {
     onbBody3: 'Geen licentiekosten. Geen advertenties. Geen watermerken.',
     onbNote3: 'AI-functies kunnen 360 CORP-credits verbruiken.',
     onbBack: 'Terug',
+    aiSettingsTitle: 'AI-instellingen',
   },
   ms: {
     navRecent: 'Terkini',
@@ -2515,6 +2530,7 @@ export const strings = {
     onbBody3: 'Tiada yuran lesen. Tiada iklan. Tiada tera air.',
     onbNote3: 'Ciri AI mungkin menggunakan kredit 360 CORP.',
     onbBack: 'Kembali',
+    aiSettingsTitle: 'Tetapan AI',
   },
   he: {
     navRecent: 'אחרונים',
@@ -2662,6 +2678,7 @@ export const strings = {
     onbBody3: 'ללא דמי רישיון, ללא פרסומות, ללא סימני מים.',
     onbNote3: 'תכונות AI עשויות לצרוך קרדיטים של 360 CORP.',
     onbBack: 'חזרה',
+    aiSettingsTitle: 'הגדרות AI',
   },
   hi: {
     navRecent: 'हाल के',
@@ -2814,6 +2831,7 @@ export const strings = {
     onbBody3: 'कोई लाइसेंस शुल्क नहीं। कोई विज्ञापन नहीं। कोई वॉटरमार्क नहीं।',
     onbNote3: 'AI सुविधाएँ 360 CORP क्रेडिट खर्च कर सकती हैं।',
     onbBack: 'वापस',
+    aiSettingsTitle: 'AI सेटिंग्स',
   },
   'zh-TW': {
     navRecent: '最近',
@@ -2958,5 +2976,6 @@ export const strings = {
     onbBody3: '無授權費用，無廣告，無浮水印。',
     onbNote3: 'AI 功能可能消耗 360 CORP 點數。',
     onbBack: '上一步',
+    aiSettingsTitle: 'AI 設定',
   },
 } as const

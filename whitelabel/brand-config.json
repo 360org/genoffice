@@ -1,22 +1,16 @@
 {
-  "appName": "VuaOffice",
-  "appId": "com.vuahethong.vuaoffice",
-  "executableName": "vuaoffice",
+  "appName": "vOffice",
+  "appId": "com.vuahethong.voffice",
+  "executableName": "voffice",
   "author": "360 CORP",
   "defaultProvider": "omirouter",
   "omirouterUrl": "https://api.omirouter.com/v1",
   "ninerouterUrl": "https://api.9router.com/v1",
   "textReplacements": [
     {
-      "files": [
-        "apps/shell/src/renderer/src/strings.ts",
-        "apps/shell/index.html",
-        "apps/shell/src/renderer/index.html",
-        "apps/shell/src/renderer/src/Home.tsx",
-        "apps/shell/src/main/index.ts"
-      ],
+      "files": ["apps/shell/src/renderer/src/strings.ts"],
       "rules": [
-        { "regex": "\\bGenOffice\\b", "to": "VuaOffice" },
+        { "regex": "\\bGenOffice\\b", "to": "vOffice" },
         { "regex": "\\bGenspark\\b", "to": "360 CORP" }
       ]
     }

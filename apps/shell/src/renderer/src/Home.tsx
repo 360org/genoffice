@@ -439,8 +439,10 @@ type ThemeValue = (typeof THEME_OPTIONS)[number]['value']
 
 function AccountEntry({
   onStatusChange,
+  onOpenAiSettings,
 }: {
   onStatusChange?: (status: AccountStatus | null) => void
+  onOpenAiSettings?: () => void
 }) {
   const { lang, setLang, t } = useI18n()
   const [status, setStatus] = useState<AccountStatus | null>(null)
@@ -1003,6 +1005,30 @@ function AccountEntry({
               </div>
             )}
           </div>
+          <div className="account-menu-divider" />
+          <button
+            className="account-menu-item lang-row"
+            role="menuitem"
+            onClick={() => {
+              closeMenu()
+              onOpenAiSettings?.()
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M8 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"
+                stroke="currentColor"
+                strokeWidth="1.2"
+              />
+              <path
+                d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="lang-row-label">{t('aiSettingsTitle')}</span>
+          </button>
           {appVersion && (
             <div className="account-menu-version">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

@@ -837,7 +837,7 @@ async function openAiCompatibleTurn(
   if (stopReason) cb.onStopReason?.(stopReason)
 }
 
-const OPENAI_COMPATIBLE_BASE_URLS: Partial<Record<AiProviderId, string>> = {
+const OPENAI_COMPATIBLE_BASE_URLS: Record<Extract<AiProviderId, 'deepseek' | 'openai' | 'openrouter' | 'omirouter' | 'ninerouter'>, string> = {
   deepseek: 'https://api.deepseek.com/v1',
   openai: 'https://api.openai.com/v1',
   openrouter: 'https://openrouter.ai/api/v1',
@@ -896,8 +896,9 @@ export async function streamForProvider(
       return streamGemini(config, system, messages, tools, maxTokens, cb)
     case 'deepseek':
     case 'openai':
+    case 'openrouter':
       return streamOpenAiCompatible(
-        OPENAI_COMPATIBLE_BASE_URLS[provider]!,
+        OPENAI_COMPATIBLE_BASE_URLS[provider],
         config,
         system,
         messages,
