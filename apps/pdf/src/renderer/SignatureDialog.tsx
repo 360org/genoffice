@@ -43,10 +43,7 @@ export type SignatureData =
     }
 
 /** Decode + downscale an image file onto a canvas (null if it can't be decoded) */
-export async function fileToCanvas(
-  file: File,
-  maxDim: number = MAX_IMG,
-): Promise<HTMLCanvasElement | null> {
+async function fileToCanvas(file: File): Promise<HTMLCanvasElement | null> {
   const url = URL.createObjectURL(file)
   try {
     const img = new Image()
@@ -55,7 +52,7 @@ export async function fileToCanvas(
       img.onerror = () => reject(new Error('decode'))
       img.src = url
     })
-    const k = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight, 1))
+    const k = Math.min(1, MAX_IMG / Math.max(img.naturalWidth, img.naturalHeight, 1))
     const canvas = document.createElement('canvas')
     canvas.width = Math.max(1, Math.round(img.naturalWidth * k))
     canvas.height = Math.max(1, Math.round(img.naturalHeight * k))

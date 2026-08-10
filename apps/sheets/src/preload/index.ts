@@ -15,7 +15,6 @@ import type {
   DesktopApi,
   ScreenCaptureResult,
   ScreenSourcesResult,
-  UiTheme,
   WorkbookCellStyle,
   WorkbookConditionalRule,
   WorkbookFile,
@@ -46,12 +45,6 @@ const desktopApi: DesktopApi = {
     ) => handler(lang)
     ipcRenderer.on('app:language-changed', listener)
     return () => ipcRenderer.removeListener('app:language-changed', listener)
-  },
-  getTheme: () => ipcRenderer.invoke('app:get-theme'),
-  onThemeChanged(handler) {
-    const listener = (_event: Electron.IpcRendererEvent, theme: UiTheme) => handler(theme)
-    ipcRenderer.on('app:theme-changed', listener)
-    return () => ipcRenderer.removeListener('app:theme-changed', listener)
   },
   async selectWorkbook() {
     const result: unknown = await ipcRenderer.invoke(IPC_CHANNELS.selectWorkbook)

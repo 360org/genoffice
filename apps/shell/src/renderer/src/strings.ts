@@ -574,7 +574,7 @@ export const strings = {
     login: '로그인',
     loginGenspark: '360 CORP 계정으로 로그인',
     loggedIn: '로그인됨',
-    loggedInGenspark: 'Genspark에 로그인됨',
+    loggedInGenspark: '360 CORP에 로그인됨',
     waitingLogin: '브라우저 로그인을 기다리는 중… 클릭하면 로그인 페이지를 다시 엽니다',
     waitingShort: '로그인 대기 중…',
     loginTimeout: '로그인 시간이 초과되었습니다. 클릭하여 다시 시도',
@@ -582,7 +582,7 @@ export const strings = {
     loginOpenManually: '브라우저가 열리지 않았나요? 여기를 클릭해 직접 열기',
     loginCopyUrl: '로그인 링크 복사',
     loginCopied: '복사됨',
-    loginNetworkError: 'Genspark에 연결할 수 없습니다. 네트워크 또는 프록시 설정을 확인하세요',
+    loginNetworkError: '360 CORP에 연결할 수 없습니다. 네트워크 또는 프록시 설정을 확인하세요',
     loginExpired: '로그인이 만료되었습니다. 클릭하여 다시 시도',
     loginFailed: '로그인에 실패했습니다. 클릭하여 다시 시도',
     loggingOut: '로그아웃 중…',
@@ -606,13 +606,13 @@ export const strings = {
     tabList: '모든 탭',
     newTab: '새 탭',
     // First-run onboarding
-    onbTitle1: 'GenOffice에 오신 것을 환영합니다',
+    onbTitle1: 'VuaOffice에 오신 것을 환영합니다',
     onbSubtitle1: '최초의 오픈소스 AI 네이티브 오피스 제품군',
     onbBody1:
       '문서 작성, 스프레드시트 제작, 프레젠테이션 생성, PDF 검토. 모든 단계에 AI가 녹아 있습니다.',
     onbTitle2: '이제 시작일 뿐입니다',
     onbBody2:
-      'GenOffice는 아직 알파 단계입니다. GenTeam 그룹 채팅에 참여해 피드백을 공유하고 앞으로의 방향을 함께 만들어 가세요.',
+      'VuaOffice는 아직 알파 단계입니다. GenTeam 그룹 채팅에 참여해 피드백을 공유하고 앞으로의 방향을 함께 만들어 가세요.',
     onbCredits: '활발한 기여자를 위한 혜택 **1,000+ 360 CORP 크레딧**',
     onbJoinGenTeam: 'GenTeam 참여하기',
     onbSkip: '건너뛰기',

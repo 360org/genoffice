@@ -7,7 +7,6 @@ import {
   frontmatterInner,
   parseDocText,
   serializeDocText,
-  stripLegacyFencedDivs,
   type DocEnvelope,
 } from './markdown/docText'
 import { buildExtensions } from './editor/extensions'
@@ -19,7 +18,7 @@ import { SlashMenu, type SlashMenuHandle } from './components/SlashMenu'
 import { TableMenu } from './components/TableMenu'
 import { FrontmatterPanel } from './components/FrontmatterPanel'
 import { AiPanel, GensparkMark, type AiPreset, type MarkdownAiDeps } from './ai/AiPanel'
-import { DOCX_MAX_IMAGE_PX, exportDocxBytes } from './export/docxExport'
+import { exportDocxBytes } from './export/docxExport'
 import { buildPrintHtml } from './export/printHtml'
 import { resolveImageSrc } from './editor/localImage'
 import type { ExportFormat, SaveMode } from '../shared/ipc'
@@ -59,6 +58,9 @@ function measureImage(displaySrc: string): Promise<{ width: number; height: numb
   })
 }
 
+/** widest image that fits the A4 text column */
+const DOCX_MAX_IMAGE_PX = 620
+
 /** File name for an AI-generated untitled document: first heading, else first words */
 export function deriveAutoFileName(editor: Editor): string {
   const doc = editor.state.doc
@@ -83,7 +85,6 @@ export default function App() {
   const [fmText, setFmText] = useState('')
   const [aiOpen, setAiOpen] = useState(true)
   const [aiPreset, setAiPreset] = useState<AiPreset | null>(null)
-  const [autoSave, setAutoSave] = useState(() => localStorage.getItem('mdapp.autoSave') === '1')
 
   const statusRef = useRef<LoadStatus>('loading')
   const dirtyRef = useRef(false)
@@ -159,7 +160,7 @@ export default function App() {
           editor
             .chain()
             .setMeta('addToHistory', false)
-            .setContent(stripLegacyFencedDivs(envelope.body), { contentType: 'markdown' })
+            .setContent(envelope.body, { contentType: 'markdown' })
             .run()
           setFilePath(path)
           const inner = frontmatterInner(envelope.frontmatter)
@@ -301,28 +302,6 @@ export default function App() {
     }
   }, [doSave])
 
-  useEffect(() => {
-    localStorage.setItem('mdapp.autoSave', autoSave ? '1' : '0')
-  }, [autoSave])
-
-  // autosave: every 30s and on window blur, silently persist pending changes
-  // (same policy as the docs app; untitled documents are skipped — the first
-  // save must go through the explicit save path that names the file)
-  useEffect(() => {
-    if (!autoSave || !filePath) return
-    const tick = () => {
-      if (!dirtyRef.current) return
-      if (editorRef.current?.view.composing) return // don't interrupt IME input
-      void doSave('save')
-    }
-    const id = window.setInterval(tick, 30_000)
-    window.addEventListener('blur', tick)
-    return () => {
-      window.clearInterval(id)
-      window.removeEventListener('blur', tick)
-    }
-  }, [autoSave, filePath, doSave])
-
   const aiDeps: MarkdownAiDeps = {
     getEditor: () => editorRef.current,
     getSnapshot: () => editorRef.current?.getMarkdown() ?? '',
@@ -365,10 +344,6 @@ export default function App() {
       <Ribbon
         editor={editor}
         disabled={status !== 'ready'}
-        dirty={dirty}
-        onSave={() => void doSave('save')}
-        autoSave={autoSave}
-        onToggleAutoSave={setAutoSave}
         imageEnabled={Boolean(filePath)}
         onInsertImage={insertImage}
         frontmatterOpen={fmOpen}

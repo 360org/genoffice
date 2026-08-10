@@ -115,9 +115,10 @@ async function chatOpenAiCompatible(
   return { ok: true, content }
 }
 
-const OPENAI_COMPATIBLE_BASE_URLS: Partial<Record<AiProviderId, string>> = {
+const OPENAI_COMPATIBLE_BASE_URLS: Record<Extract<AiProviderId, 'deepseek' | 'openai' | 'openrouter'>, string> = {
   deepseek: 'https://api.deepseek.com/v1',
   openai: 'https://api.openai.com/v1',
+  openrouter: 'https://openrouter.ai/api/v1',
 }
 
 /** route a one-shot (non-streaming, non-tool-calling) chat call by provider id */
@@ -147,9 +148,10 @@ export async function chatForProvider(
         return chatGemini(wd, config, system, user)
       case 'deepseek':
       case 'openai':
+      case 'openrouter':
         return chatOpenAiCompatible(
           wd,
-          OPENAI_COMPATIBLE_BASE_URLS[provider]!,
+          OPENAI_COMPATIBLE_BASE_URLS[provider],
           config,
           system,
           user,

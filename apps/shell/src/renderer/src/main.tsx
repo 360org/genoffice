@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { htmlLang } from '@genoffice/i18n'
 import { AppFrame } from './AppFrame'
 import { LocaleProvider } from './locale'
-import '@genoffice/ui/tokens.css'
 import './home.css'
 import './tabbar.css'
 
@@ -24,10 +23,6 @@ void Promise.all([
   if (theme !== 'system') {
     document.documentElement.setAttribute('data-theme', theme)
   }
-  window.aiOffice.onThemeChanged((next) => {
-    if (next === 'system') document.documentElement.removeAttribute('data-theme')
-    else document.documentElement.setAttribute('data-theme', next)
-  })
   createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <LocaleProvider initial={lang}>

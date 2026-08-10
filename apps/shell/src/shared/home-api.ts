@@ -1,4 +1,5 @@
 import type { UpdateChannel } from './update-api'
+import type { AiSettings } from '@genoffice/ai-provider'
 
 /** UI language; kept self-contained here (mirrors Lang in @genoffice/i18n) */
 export type UiLanguage =
@@ -118,8 +119,6 @@ export interface HomeApi {
   getTheme(): Promise<UiTheme>
   /** switch + persist the UI theme; broadcasts 'app:theme-changed' to all web contents */
   setTheme(theme: UiTheme): Promise<void>
-  /** theme switched anywhere (broadcast from the main process) */
-  onThemeChanged(handler: (theme: UiTheme) => void): () => void
   /** open the GenTeam community page in the default browser */
   openGenTeam(): Promise<void>
   /** locally stored full cloud project list (instant; null when no store or logged out) */
@@ -128,6 +127,10 @@ export interface HomeApi {
   cloudProjectsSync(): Promise<CloudProjectsSnapshot | null>
   /** open a cloud project (relative '/agents?id=...' URL) in the default browser */
   openCloudProject(projectUrl: string): Promise<void>
+  /** get AI settings containing API keys, models, etc. */
+  getAiSettings(): Promise<AiSettings>
+  /** save AI settings */
+  setAiSettings(settings: AiSettings): Promise<void>
 }
 
 export type CloudProjectKind = 'docs' | 'sheets' | 'slides'

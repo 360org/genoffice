@@ -5,7 +5,7 @@
  * inputs via key.
  */
 import React, { useEffect, useRef, useState } from 'react'
-import type { PictureRenderNode, RenderNode, ShapeRenderNode } from '@genoffice/pptx-render'
+import type { RenderNode, ShapeRenderNode } from '@genoffice/pptx-render'
 import type { GradientFillSpec, LinkTargetOp } from '../../shared/ipc'
 import { useI18n } from '../i18n/locale'
 import { armColorInput } from '../color-input'
@@ -107,12 +107,11 @@ export function FormatPane({
   const canTransform = !!node && TRANSFORMABLE.has(node.type)
   const shape =
     node && (node.type === 'shape' || node.type === 'text') ? (node as ShapeRenderNode) : null
-  const pic = node && node.type === 'picture' ? (node as PictureRenderNode) : null
   const fillColor = shape?.fill.kind === 'solid' ? toHex6(shape.fill.color) : null
   const fillAlpha = shape?.fill.kind === 'solid' ? alphaOf(shape.fill.color) : 255
   // 0..100 transparency shown in the dropdown (0 = opaque)
   const fillTransparency = Math.round(((255 - fillAlpha) / 255) * 100)
-  const stroke = (shape ?? pic)?.stroke
+  const stroke = shape?.stroke
   const strokeWidthPt = stroke ? Math.max(0.5, Math.round(stroke.widthPt * 2) / 2) : 1
   const strokeColor = stroke ? toHex6(stroke.color) : '#000000'
   const strokeDash = stroke?.dashPreset ?? 'solid'
@@ -377,7 +376,7 @@ export function FormatPane({
             </>
           )}
 
-          {(shape || pic) && (
+          {shape && (
             <>
               <div className="fp-section">{t('paneFormatOutline')}</div>
               <div className="fp-row">

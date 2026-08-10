@@ -16,6 +16,7 @@ import type {
 import { HOME_CHANNELS, PROJECT_CHANNELS } from '../shared/home-api'
 import type { TabsApi, TabSummary } from '../shared/tabs-api'
 import { TABS_CHANNELS } from '../shared/tabs-api'
+import type { AiSettings } from '@genoffice/ai-provider'
 
 const UI_LANGUAGES: readonly UiLanguage[] = [
   'zh',
@@ -167,13 +168,6 @@ const homeApi: HomeApi = {
       throw new Error('Invalid theme.')
     await ipcRenderer.invoke(HOME_CHANNELS.setTheme, theme)
   },
-  onThemeChanged(handler) {
-    const listener = (_event: Electron.IpcRendererEvent, theme: unknown) => {
-      if (theme === 'light' || theme === 'dark' || theme === 'system') handler(theme)
-    }
-    ipcRenderer.on('app:theme-changed', listener)
-    return () => ipcRenderer.removeListener('app:theme-changed', listener)
-  },
   async openGenTeam() {
     await ipcRenderer.invoke(HOME_CHANNELS.openGenTeam)
   },
@@ -193,6 +187,12 @@ const homeApi: HomeApi = {
   async openCloudProject(projectUrl) {
     if (typeof projectUrl !== 'string' || !projectUrl) throw new Error('Invalid project URL.')
     await ipcRenderer.invoke(HOME_CHANNELS.openCloudProject, projectUrl)
+  },
+  async getAiSettings() {
+    return (await ipcRenderer.invoke('ai:get-settings')) as AiSettings
+  },
+  async setAiSettings(settings) {
+    await ipcRenderer.invoke('ai:set-settings', settings)
   },
 }
 

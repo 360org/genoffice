@@ -1,90 +1,25 @@
-/* Per-app accent (excel-green family) + sheets-only tokens.
- * Chrome tokens (surface/text/border/…, AI panel --color-*) come from
- * @genoffice/ui/tokens.css; nothing here may shadow those names. */
 :root {
+  color-scheme: light;
   --excel-green: #217346;
   --excel-green-dark: #185c37;
   --excel-green-soft: #e9f3ed;
-  --accent: var(--excel-green);
-  --accent-dark: var(--excel-green-dark);
-  --accent-soft: var(--excel-green-soft);
-
+  --surface: #ffffff;
+  --surface-subtle: #f5f6f7;
   --surface-hover: #edf1ee;
   /* ribbon toggle states match the slides ribbon (--hover / --active-bg):
      neutral gray, not the app's green-tinted surface hover */
-  --ribbon-hover: var(--color-bg-subtle);
+  --ribbon-hover: #f3f2f1;
   --ribbon-active: #eaeaea;
+  --border: #d5d9dc;
+  --border-strong: #b9bec3;
+  --text: #242424;
+  --text-muted: #61666b;
+  /* quick-access icon gray shared with the docs/slides ribbons (their --text-dim) */
+  --text-dim: #605e5c;
   --focus: rgb(33 115 70 / 24%);
-  --radius-4: 4px;
-  --radius-6: 6px;
-  --radius-small: var(--radius-4);
-  --radius-medium: var(--radius-6);
+  --radius-small: 3px;
+  --radius-medium: 6px;
   --shadow-panel: 0 8px 24px rgb(0 0 0 / 10%);
-  --shadow-modal: 0 3px 30px rgb(0 0 0 / 8%);
-
-  /* sheets-local chrome shades */
-  --sheets-error: #b3261e;
-  --sheets-ai-error: #c62828;
-  --sheets-ai-error-border: rgb(198 40 40 / 45%);
-  --sheets-ai-error-bg: rgb(198 40 40 / 8%);
-  --sheets-notice-border: rgb(33 115 70 / 25%);
-  --sheets-statusbar-bg: #f3f4f6;
-  --sheets-statusbar-border: #e1e4e8;
-  --sheets-statusbar-hover: rgb(0 0 0 / 8%);
-  --sheets-zoom-slider: #8a8886;
-  --sheets-focus-ring: rgb(35 36 37 / 20%);
-  --sheets-shimmer-base: #666666;
-  --sheets-shimmer-hi: #d9d9d9;
-  --sheets-scroll-thumb: rgb(0 0 0 / 25%);
-  --sheets-chip-bg: #f3f7f4;
-  --sheets-member-bg: #f6f8f7;
-  --sheets-member-ink: #5c6660;
-
-  /* content-side constants: charts, shapes and their selection chrome sit on
-   * the paper-like grid and never follow the theme */
-  --sheets-paper: #ffffff;
-  --sheets-on-accent: #ffffff;
-  --sheets-knob-dot: #ffffff;
-  --sheets-chart-border: #c9cdd1;
-  --sheets-chart-ink: #333;
-  --sheets-chart-label: #555;
-  --sheets-chart-label-dim: #888;
-  --sheets-pie-label-in: #fff;
-  --sheets-pie-label-out: #444;
-  --sheets-pie-label-stroke: rgb(0 0 0 / 25%);
-  --sheets-select-blue: #1f5aa8;
-  --sheets-select-blue-bg: rgb(31 90 168 / 6%);
-  --sheets-el-selected: #107c41;
-  --sheets-float-btn-bg: rgb(255 255 255 / 92%);
-  --sheets-shape-border: #aeb4b8;
-  --sheets-shape-bg: rgb(255 255 255 / 94%);
-  --sheets-shape-ink: #596068;
-  --sheets-shape-err-border: #d9a4a4;
-  --sheets-shape-err-ink: #9a3030;
-  --sheets-content-danger: #b42318;
-
-  /* dark chips and black translucent masks/shadows hold in both themes */
-  --sheets-chip-remove-bg: #000;
-  --sheets-chip-remove-hover: #4b4e51;
-  --sheets-chip-remove-ink: #fff;
-  --sheets-toast-bg: rgb(35 35 37 / 92%);
-  --sheets-toast-error-bg: rgb(196 49 75 / 95%);
-  --sheets-toast-ink: #fff;
-  --sheets-toast-ok: #34c759;
-  --sheets-on-accent-hover: rgb(255 255 255 / 22%);
-  --sheets-mask-bg: rgb(0 0 0 / 50%);
-  --sheets-mask-bg-strong: rgb(0 0 0 / 50%);
-  --sheets-shadow-drop: 0 6px 20px rgb(0 0 0 / 14%), 0 1px 3px rgb(0 0 0 / 8%);
-  --sheets-shadow-menu: 0 6px 20px rgb(0 0 0 / 18%);
-  --sheets-shadow-pane: 0 4px 18px rgb(0 0 0 / 12%);
-  --sheets-shadow-card: 0 1px 2px rgb(0 0 0 / 4%);
-  --sheets-shadow-chart: 0 1px 3px rgb(0 0 0 / 12%);
-  --sheets-shadow-copilot: 4px 0 16px rgb(24 60 40 / 5%);
-  --sheets-shadow-badge: 0 2px 6px rgb(74 92 255 / 25%);
-  --sheets-shadow-slicer: 0 6px 18px rgb(15 40 30 / 14%);
-  --sheets-shadow-toast: 0 4px 16px rgb(0 0 0 / 18%);
-  --sheets-shadow-composer: 0 6px 30px rgb(0 0 0 / 8%);
-
   /* Same stack as docs/slides — an Inter fallback here made ribbon labels
      render in a different face than the other apps on machines with Inter */
   font-family:
@@ -96,62 +31,6 @@
   color: var(--text);
   background: var(--surface);
   font-synthesis: none;
-}
-
-[data-theme='dark'] {
-  --accent: #34a853;
-  --accent-dark: #58b380;
-  --accent-soft: #1d3328;
-  --surface-hover: #333;
-  --ribbon-hover: #333;
-  --ribbon-active: #454545;
-  --focus: rgb(52 168 83 / 40%);
-  --shadow-panel: 0 8px 24px rgb(0 0 0 / 45%);
-  --sheets-error: #e57373;
-  --sheets-ai-error: #f28b82;
-  --sheets-ai-error-border: rgb(242 139 130 / 45%);
-  --sheets-ai-error-bg: rgb(242 139 130 / 12%);
-  --sheets-notice-border: rgb(52 168 83 / 35%);
-  --sheets-statusbar-bg: #252525;
-  --sheets-statusbar-border: #3a3a3a;
-  --sheets-statusbar-hover: rgb(255 255 255 / 10%);
-  --sheets-zoom-slider: #777;
-  --sheets-focus-ring: rgb(228 228 228 / 25%);
-  --sheets-shimmer-base: #8a8a8a;
-  --sheets-shimmer-hi: #d0d0d0;
-  --sheets-scroll-thumb: rgb(255 255 255 / 28%);
-  --sheets-chip-bg: #24312a;
-  --sheets-member-bg: #2f2f2f;
-  --sheets-member-ink: #a9b2ac;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']):not([data-theme='dark']) {
-    --accent: #34a853;
-    --accent-dark: #58b380;
-    --accent-soft: #1d3328;
-    --surface-hover: #333;
-    --ribbon-hover: #333;
-    --ribbon-active: #454545;
-    --focus: rgb(52 168 83 / 40%);
-    --shadow-panel: 0 8px 24px rgb(0 0 0 / 45%);
-    --sheets-error: #e57373;
-    --sheets-ai-error: #f28b82;
-    --sheets-ai-error-border: rgb(242 139 130 / 45%);
-    --sheets-ai-error-bg: rgb(242 139 130 / 12%);
-    --sheets-notice-border: rgb(52 168 83 / 35%);
-    --sheets-statusbar-bg: #252525;
-    --sheets-statusbar-border: #3a3a3a;
-    --sheets-statusbar-hover: rgb(255 255 255 / 10%);
-    --sheets-zoom-slider: #777;
-    --sheets-focus-ring: rgb(228 228 228 / 25%);
-    --sheets-shimmer-base: #8a8a8a;
-    --sheets-shimmer-hi: #d0d0d0;
-    --sheets-scroll-thumb: rgb(255 255 255 / 28%);
-    --sheets-chip-bg: #24312a;
-    --sheets-member-bg: #2f2f2f;
-    --sheets-member-ink: #a9b2ac;
-  }
 }
 
 /* UI CJK fonts per language (documentElement.lang is set at bootstrap and on switch);
@@ -246,7 +125,7 @@ textarea:disabled {
 }
 
 .name-box.invalid {
-  border-color: var(--sheets-error);
+  border-color: #b3261e;
 }
 
 .name-box-goto {
@@ -299,7 +178,7 @@ textarea:disabled {
   position: relative;
   z-index: 10;
   /* same divider weight as the docs/slides ribbons: their --border-strong, no drop shadow */
-  border-bottom: 1px solid var(--border-strong);
+  border-bottom: 1px solid #c8c6c4;
   background: var(--surface);
 }
 
@@ -307,12 +186,12 @@ textarea:disabled {
   display: flex;
   align-items: center;
   gap: 2px;
-  /* tab-row text ink matches the ribbon band below */
-  color: var(--text-primary);
+  /* tab-row text ink matches the ribbon band below (#232425) */
+  color: #232425;
   /* same tab-row metrics as PowerPoint's ribbon (slides app): 5px top inset, no
      bottom padding, no divider line — the row blends into the band below */
   padding: 5px 10px 0;
-  background: var(--surface);
+  background: #fff;
   /* the tab row doubles as the frameless-window drag region */
   -webkit-app-region: drag;
   user-select: none;
@@ -354,7 +233,7 @@ textarea:disabled {
   width: 1px;
   height: 16px;
   margin: 0 6px;
-  background: var(--border-strong);
+  background: var(--border-strong, #c8c6c4);
   flex-shrink: 0;
   align-self: center;
 }
@@ -371,7 +250,7 @@ textarea:disabled {
   padding: 0;
   border: none;
   border-radius: 4px;
-  color: var(--text-primary);
+  color: #232325;
   background: none;
   cursor: pointer;
 }
@@ -387,9 +266,9 @@ textarea:disabled {
 }
 
 .ribbon-tabs .qa-btn:disabled {
-  color: var(--text-tertiary);
+  color: #909499;
   /* neutralize the global button:disabled opacity so the glyph reads exactly
-     the shared quick-access gray of the docs and slides buttons */
+     #909499, matching the docs and slides quick-access buttons */
   opacity: 1;
   cursor: default;
 }
@@ -428,12 +307,12 @@ textarea:disabled {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--sheets-knob-dot);
+  background: #fff;
   transition: left 0.15s;
 }
 
 .autosave-toggle.on .autosave-knob {
-  background: var(--accent);
+  background: var(--excel-green);
 }
 
 .autosave-toggle.on .autosave-knob::after {
@@ -449,7 +328,7 @@ textarea:disabled {
 .workbook-status {
   max-width: min(360px, 30vw);
   overflow: hidden;
-  color: var(--text-muted);
+  color: var(--text-muted, #605e5c);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -457,11 +336,11 @@ textarea:disabled {
 
 /* Hovering a tab tints the label, it doesn't paint a box */
 .ribbon-tabs > button:not(.qa-btn):hover {
-  color: var(--accent-dark);
+  color: var(--excel-green-dark);
 }
 
 .ribbon-tabs > button:not(.qa-btn).active {
-  color: var(--accent-dark);
+  color: var(--excel-green-dark);
   font-weight: 600;
 }
 
@@ -474,14 +353,14 @@ textarea:disabled {
   left: 13px;
   height: 2.5px;
   border-radius: 1px;
-  background: var(--accent);
+  background: var(--excel-green);
   content: '';
 }
 
 /* Contextual tabs (Chart Design) stand out even while inactive, with a
    colored caption. */
 .ribbon-tabs > button:not(.qa-btn).contextual {
-  color: var(--accent-dark);
+  color: var(--excel-green-dark);
   font-weight: 600;
 }
 
@@ -491,9 +370,9 @@ textarea:disabled {
   display: flex;
   align-items: stretch;
   gap: 2px;
-  /* ribbon text ink, a touch off the app's --text — same shade
+  /* ribbon text ink, a touch off the app's --text (#242424) — same shade
      as the .inline-tools glyphs */
-  color: var(--text-primary);
+  color: #232425;
   /* band metrics shared with the slides ribbon */
   height: 80px;
   /* Groups must never shrink below content (they would paint over each
@@ -502,7 +381,7 @@ textarea:disabled {
   overflow-y: hidden;
   scrollbar-width: none;
   padding: 6px 12px;
-  background: var(--surface);
+  background: #fff;
 }
 
 .ribbon::-webkit-scrollbar {
@@ -662,7 +541,7 @@ textarea:disabled {
   place-items: center;
   width: 28px;
   height: 28px;
-  color: var(--color-brand-secondary);
+  color: #0f7fff;
 }
 
 .ribbon-tool.ai-entry .ai-feature-icon svg {
@@ -687,7 +566,7 @@ textarea:disabled {
 
 .ribbon-tool.large.as-button.ai-entry.active {
   /* neutral gray, shared with the docs/slides Genspark entries */
-  background: var(--ribbon-active);
+  background: #eaeaea;
 }
 
 .ribbon-tool.large.ai-entry:hover .tool-icon-row,
@@ -704,8 +583,8 @@ textarea:disabled {
   width: 20px;
   height: 20px;
   place-items: center;
-  /* ribbon glyphs share the toolbar ink (was Excel green) */
-  color: var(--text-primary);
+  /* ribbon glyphs share the toolbar's #232425 ink (was Excel green) */
+  color: #232425;
   font-size: 15px;
   font-weight: 600;
 }
@@ -805,8 +684,8 @@ textarea:disabled {
   align-items: center;
   gap: 3px;
   /* inline glyphs, letterforms and trigger labels share one ink color,
-     a touch off the app's --text */
-  color: var(--text-primary);
+     a touch off the app's --text (#242424) */
+  color: #232425;
 }
 
 /* Two stacked control rows inside one group.
@@ -1202,10 +1081,12 @@ textarea:disabled {
   max-height: 320px;
   overflow-y: auto;
   padding: 4px;
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
+  background: var(--surface, #fff);
+  border: 1px solid var(--border-strong, #c8c6c4);
   border-radius: 8px;
-  box-shadow: var(--sheets-shadow-drop);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.14),
+    0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .menu-select-drop button {
@@ -1220,16 +1101,16 @@ textarea:disabled {
   padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
-  color: var(--text);
+  color: var(--text, #222);
   white-space: nowrap;
 }
 
 .menu-select-drop button:hover {
-  background: var(--ribbon-hover);
+  background: var(--ribbon-hover, rgba(0, 0, 0, 0.06));
 }
 
 .menu-select-drop button.on {
-  background: var(--ribbon-hover);
+  background: var(--ribbon-hover, rgba(0, 0, 0, 0.08));
   font-weight: 600;
 }
 
@@ -1242,7 +1123,7 @@ textarea:disabled {
 .shape-gallery-title {
   padding: 6px 6px 2px;
   font-size: 11px;
-  color: var(--text-dim);
+  color: var(--text-dim, #797775);
 }
 
 .shape-gallery-grid {
@@ -1256,7 +1137,7 @@ textarea:disabled {
   justify-content: center;
   width: auto;
   padding: 5px 0;
-  color: var(--text);
+  color: var(--text, #444);
 }
 
 /* Insert tab's small chart-type buttons, arranged as an icon cluster. */
@@ -1339,7 +1220,7 @@ button.check-item:hover {
   border: 1px solid var(--border-strong);
   border-radius: 2px;
   background: var(--surface);
-  color: var(--text-primary);
+  color: #232425;
   font-size: 9px;
   font-style: normal;
 }
@@ -1349,8 +1230,8 @@ button.check-item:hover {
 }
 
 select.select-like {
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
+  border: 1px solid var(--border-color, #d0d0d0);
+  background: var(--surface, #fff);
   font: inherit;
   font-size: 12px;
 }
@@ -1361,7 +1242,7 @@ select.select-like {
   display: grid;
   grid-template-columns: var(--copilot-width, 360px) minmax(0, 1fr);
   min-height: 0;
-  transition: grid-template-columns 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: grid-template-columns 180ms ease;
 }
 
 /* formula-bar row + spreadsheet */
@@ -1389,9 +1270,9 @@ select.select-like {
   padding: 0 12px;
   height: 24px;
   font-size: 11.5px;
-  color: var(--text-dim);
-  background: var(--sheets-statusbar-bg);
-  border-top: 1px solid var(--sheets-statusbar-border);
+  color: #605e5c;
+  background: #f3f4f6;
+  border-top: 1px solid #e1e4e8;
 }
 
 .status-left {
@@ -1428,12 +1309,12 @@ select.select-like {
 }
 
 .zoom-btn:hover {
-  background: var(--sheets-statusbar-hover);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .zoom-slider {
   width: 110px;
-  accent-color: var(--sheets-zoom-slider);
+  accent-color: #8a8886;
   height: 3px;
 }
 
@@ -1452,6 +1333,36 @@ select.select-like {
   background: var(--surface);
 }
 
+/* Design tokens — AI panel chrome only.
+ * Canonical names/values from colors_and_type.css; the spreadsheet chrome
+ * around the panel keeps its own variables. */
+:root {
+  --gs-font-sans:
+    'Arial', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    sans-serif;
+  --color-btn-primary: #232425;
+  --color-btn-primary-hover: #393a3b;
+  --color-btn-primary-text: #ffffff;
+  --color-brand-secondary: #0f7fff;
+  --color-text-primary: #232425;
+  --color-text-secondary: #606366;
+  --color-text-tertiary: #909499;
+  --color-bg-page: #ffffff;
+  --color-bg-subtle: #f5f5f5;
+  --color-border-default: #eaeaea;
+  --color-border-strong: #d0d3d8;
+  --color-border-brand: #0f7fff;
+  --color-error: #ef4444;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --radius-30: 30px;
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --text-body-lg: 18px;
+  --text-small: 14px;
+  --text-caption: 12px;
+}
+
 .copilot {
   position: relative;
   display: flex;
@@ -1460,7 +1371,7 @@ select.select-like {
   overflow: hidden;
   border-right: 1px solid var(--color-border-default);
   background: var(--color-bg-page);
-  box-shadow: var(--sheets-shadow-copilot);
+  box-shadow: 4px 0 16px rgb(24 60 40 / 5%);
   font-family: var(--gs-font-sans);
   color: var(--color-text-primary);
 }
@@ -1501,12 +1412,12 @@ select.select-like {
   padding: 12px 2px;
   border: none;
   background: none;
-  color: var(--text-primary);
+  color: #232425;
   cursor: pointer;
 }
 
 .expand-copilot:hover {
-  background: var(--hover);
+  background: #f3f2f1;
 }
 
 .expand-copilot span {
@@ -1541,7 +1452,7 @@ select.select-like {
   width: 22px;
   height: 22px;
   border-radius: 7px;
-  box-shadow: var(--sheets-shadow-badge);
+  box-shadow: 0 2px 6px rgb(74 92 255 / 25%);
 }
 
 /* Genspark brand logo (shared by the collapse button and the AI panel title) */
@@ -1587,10 +1498,10 @@ select.select-like {
 .ai-notice {
   margin: 10px 12px 0;
   padding: 7px 12px;
-  border: 1px solid var(--sheets-notice-border);
+  border: 1px solid rgb(33 115 70 / 25%);
   border-radius: 9px;
-  background: var(--accent-soft);
-  color: var(--accent-dark);
+  background: var(--excel-green-soft);
+  color: var(--excel-green-dark);
   font-size: 11.5px;
   line-height: 1.5;
 }
@@ -1630,7 +1541,7 @@ textarea {
 }
 
 textarea:focus {
-  border-color: var(--accent);
+  border-color: var(--excel-green);
 }
 
 .primary-action,
@@ -1641,13 +1552,13 @@ textarea:focus {
 }
 
 .primary-action {
-  border: 1px solid var(--accent);
-  color: var(--sheets-on-accent);
-  background: var(--accent);
+  border: 1px solid var(--excel-green);
+  color: #ffffff;
+  background: var(--excel-green);
 }
 
 .primary-action:hover {
-  background: var(--accent-dark);
+  background: var(--excel-green-dark);
 }
 
 .secondary {
@@ -1668,7 +1579,7 @@ textarea:focus {
   border-radius: var(--radius-medium);
   padding: 12px;
   background: var(--surface);
-  box-shadow: var(--sheets-shadow-card);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
 }
 
 .preview h3 {
@@ -1715,10 +1626,10 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--sheets-chart-border);
-  background: var(--sheets-paper);
-  box-shadow: var(--sheets-shadow-chart);
-  color: var(--sheets-chart-ink);
+  border: 1px solid #c9cdd1;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+  color: #333;
   font-family: Calibri, 'Segoe UI', sans-serif;
 }
 
@@ -1731,14 +1642,14 @@ textarea:focus {
   height: 26px;
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
-  background: var(--sheets-float-btn-bg);
+  background: rgb(255 255 255 / 92%);
   color: var(--text-muted);
   font-size: 13px;
 }
 
 .chart-edit-button:hover {
   color: var(--excel-green-dark);
-  background: var(--sheets-paper);
+  background: #ffffff;
 }
 
 .shape-editable .chart-edit-button {
@@ -1761,7 +1672,7 @@ textarea:focus {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-medium);
   padding: 10px;
-  background: var(--surface);
+  background: #ffffff;
   box-shadow: var(--shadow-panel);
   font-size: 11px;
 }
@@ -1814,7 +1725,7 @@ textarea:focus {
 }
 
 .chart-editor-error {
-  color: var(--danger);
+  color: #b42318;
   font-size: 10px;
   max-width: 210px;
 }
@@ -1830,7 +1741,7 @@ textarea:focus {
   margin: -2px -10px -10px;
   padding: 8px 10px 10px;
   border-top: 1px solid var(--border);
-  background: var(--surface);
+  background: #ffffff;
 }
 
 .chart-editor-actions button {
@@ -1847,9 +1758,9 @@ textarea:focus {
 }
 
 .chart-editor-apply {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--sheets-on-accent);
+  border: 1px solid var(--excel-green);
+  background: var(--excel-green);
+  color: #ffffff;
 }
 
 .xlsx-chart {
@@ -1874,12 +1785,12 @@ textarea:focus {
 }
 
 .chart-svg text {
-  fill: var(--sheets-chart-label);
+  fill: #555;
   font-size: 10px;
 }
 
 .chart-svg .axis-label {
-  fill: var(--sheets-chart-label-dim);
+  fill: #888;
   font-size: 9px;
 }
 
@@ -1903,7 +1814,7 @@ textarea:focus {
   padding: 6px;
   text-align: center;
   font-size: 12px;
-  color: var(--sheets-chart-ink);
+  color: #333;
   overflow: hidden;
 }
 
@@ -1922,7 +1833,7 @@ textarea:focus {
   content: '';
   position: absolute;
   inset: 0;
-  border: 2px solid var(--sheets-select-blue);
+  border: 2px solid #1f5aa8;
   pointer-events: none;
   z-index: 1;
 }
@@ -1937,9 +1848,9 @@ textarea:focus {
   display: none;
   width: 9px;
   height: 9px;
-  border: 1.5px solid var(--sheets-select-blue);
+  border: 1.5px solid #1f5aa8;
   border-radius: 50%;
-  background: var(--sheets-paper);
+  background: #fff;
   box-sizing: border-box;
   z-index: 2;
 }
@@ -1999,7 +1910,7 @@ textarea:focus {
   height: 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-small);
-  background: var(--sheets-float-btn-bg);
+  background: rgb(255 255 255 / 92%);
   color: var(--text-muted);
   font-size: 11px;
   line-height: 1;
@@ -2012,8 +1923,8 @@ textarea:focus {
 }
 
 .shape-editable .shape-delete-button:hover {
-  color: var(--sheets-content-danger);
-  background: var(--sheets-paper);
+  color: #b42318;
+  background: #ffffff;
 }
 
 /* Body-level clone shown while moving a visual: escapes the float
@@ -2029,7 +1940,7 @@ textarea:focus {
   position: absolute;
   top: 0;
   left: 0;
-  border: 1.5px dashed var(--sheets-select-blue);
+  border: 1.5px dashed #1f5aa8;
   box-sizing: border-box;
   pointer-events: none;
 }
@@ -2042,8 +1953,8 @@ textarea:focus {
   padding: 6px;
   text-align: center;
   font-size: 12px;
-  color: var(--sheets-chart-ink);
-  outline: 2px solid var(--sheets-select-blue);
+  color: #333;
+  outline: 2px solid #1f5aa8;
   outline-offset: -2px;
   cursor: text;
   overflow: hidden;
@@ -2054,8 +1965,8 @@ textarea:focus {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  border: 1.5px solid var(--sheets-select-blue);
-  background: var(--sheets-select-blue-bg);
+  border: 1.5px solid #1f5aa8;
+  background: rgb(31 90 168 / 6%);
   pointer-events: none;
 }
 
@@ -2085,15 +1996,15 @@ textarea:focus {
 
 .pie-svg .pie-label-inside {
   font-size: 11px;
-  fill: var(--sheets-pie-label-in);
+  fill: #fff;
   paint-order: stroke;
-  stroke: var(--sheets-pie-label-stroke);
+  stroke: rgb(0 0 0 / 25%);
   stroke-width: 0.6px;
 }
 
 .pie-svg .pie-label-outside {
   font-size: 10px;
-  fill: var(--sheets-pie-label-out);
+  fill: #444;
 }
 
 /* In-cell sparkline minicharts */
@@ -2106,7 +2017,7 @@ textarea:focus {
 
 /* Element-level chart selection (title / legend) */
 .chart-el-selected {
-  outline: 2px solid var(--sheets-el-selected);
+  outline: 2px solid #107c41;
   outline-offset: 1px;
   border-radius: 2px;
 }
@@ -2125,10 +2036,10 @@ textarea:focus {
   min-width: 168px;
   flex-direction: column;
   padding: 4px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid #d0d0d0;
   border-radius: 6px;
-  background: var(--surface);
-  box-shadow: var(--sheets-shadow-menu);
+  background: #fff;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 18%);
 }
 
 .chart-menu button {
@@ -2142,7 +2053,7 @@ textarea:focus {
 }
 
 .chart-menu button:hover {
-  background: var(--surface-hover);
+  background: #eef6f0;
 }
 
 /* Chart format pane, docked to the right edge as a task pane */
@@ -2157,10 +2068,10 @@ textarea:focus {
   flex-direction: column;
   overflow-y: auto;
   padding: 12px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid #d8d8d8;
   border-radius: 8px;
-  background: var(--surface);
-  box-shadow: var(--sheets-shadow-pane);
+  background: #fdfdfd;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 12%);
   font-size: 12px;
   gap: 10px;
 }
@@ -2184,12 +2095,12 @@ textarea:focus {
   flex-direction: column;
   gap: 6px;
   padding-top: 8px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid #ececec;
 }
 
 .chart-format-pane .pane-section > strong {
   font-size: 11px;
-  color: var(--text-secondary);
+  color: #555;
 }
 
 .chart-format-pane label {
@@ -2204,7 +2115,7 @@ textarea:focus {
 .chart-format-pane select {
   width: 120px;
   padding: 3px 6px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 12px;
 }
@@ -2254,7 +2165,7 @@ textarea:focus {
 
 .select-data-row input:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--excel-green);
 }
 
 .select-data-row input::placeholder {
@@ -2293,7 +2204,12 @@ textarea:focus {
 }
 
 .select-data-actions button {
-  padding: 0 14px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  border-radius: var(--radius-small);
+  font-size: 12px;
+  color: var(--text);
 }
 
 .select-data-actions button:hover:not(:disabled) {
@@ -2361,7 +2277,7 @@ textarea:focus {
 
 .axis-title {
   font-size: 11px;
-  fill: var(--sheets-chart-label);
+  fill: #555;
 }
 
 .chart-legend {
@@ -2395,9 +2311,9 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--sheets-shape-border);
-  background: var(--sheets-shape-bg);
-  color: var(--sheets-shape-ink);
+  border: 1px solid #aeb4b8;
+  background: rgb(255 255 255 / 94%);
+  color: #596068;
   font:
     12px 'Segoe UI',
     sans-serif;
@@ -2405,8 +2321,8 @@ textarea:focus {
 }
 
 .xlsx-visual-error {
-  border-color: var(--sheets-shape-err-border);
-  color: var(--sheets-shape-err-ink);
+  border-color: #d9a4a4;
+  color: #9a3030;
 }
 
 .inline-tools .color-tool {
@@ -2422,7 +2338,7 @@ textarea:focus {
 }
 
 .inline-tools .color-tool:hover {
-  background: var(--ribbon-hover);
+  background: rgba(15, 23, 42, 0.08);
 }
 
 .inline-tools .color-tool input[type='color'] {
@@ -2441,8 +2357,7 @@ textarea:focus {
   z-index: 40;
   display: grid;
   place-items: center;
-  background: var(--sheets-mask-bg);
-  backdrop-filter: blur(4px);
+  background: rgb(0 0 0 / 25%);
 }
 
 .format-cells-dialog {
@@ -2450,10 +2365,10 @@ textarea:focus {
   gap: 10px;
   width: 420px;
   border: 1px solid var(--border-strong);
-  border-radius: 16px;
+  border-radius: var(--radius-medium);
   padding: 14px;
   background: var(--surface);
-  box-shadow: var(--shadow-modal);
+  box-shadow: var(--shadow-panel);
 }
 
 .format-cells-dialog header {
@@ -2475,9 +2390,9 @@ textarea:focus {
 }
 
 .dialog-tabs button.active {
-  color: var(--accent-dark);
+  color: var(--excel-green-dark);
   font-weight: 600;
-  box-shadow: inset 0 -2px 0 var(--accent);
+  box-shadow: inset 0 -2px 0 var(--excel-green);
 }
 
 .dialog-body {
@@ -2550,8 +2465,8 @@ textarea:focus {
 }
 
 .numfmt-cats button.active {
-  background: var(--accent);
-  color: var(--sheets-on-accent);
+  background: var(--excel-green);
+  color: #ffffff;
 }
 
 .numfmt-body {
@@ -2630,12 +2545,12 @@ textarea:focus {
 }
 
 .numfmt-list button.red {
-  color: var(--danger);
+  color: #d13438;
 }
 
 .numfmt-list button.active {
-  background: var(--accent);
-  color: var(--sheets-on-accent);
+  background: var(--excel-green);
+  color: #ffffff;
 }
 
 .numfmt-note {
@@ -2650,68 +2565,28 @@ textarea:focus {
   gap: 8px;
 }
 
-/* Genspark DS modal footer buttons: secondary = bg-subtle, primary = black (#232425) */
-.dialog-actions button,
-.select-data-actions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  /* .primary-action/.secondary set min-height: 34px globally; the DS sm size wins here */
-  min-height: 32px;
-  padding: 0 14px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 12px;
-  background: var(--color-bg-page);
-  color: var(--color-text-primary);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.dialog-actions button:hover:not(:disabled),
-.select-data-actions button:hover:not(:disabled) {
-  background: var(--color-bg-subtle);
-  color: var(--color-text-primary);
-}
-
-.dialog-actions button:active:not(:disabled),
-.select-data-actions button:active:not(:disabled) {
-  filter: brightness(0.88);
-  transform: scale(0.98);
-}
-
-.dialog-actions button:focus-visible,
-.select-data-actions button:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--sheets-focus-ring);
-}
-
-.dialog-actions button:disabled,
-.select-data-actions button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.dialog-actions button.primary,
-.dialog-actions .primary-action,
-.select-data-actions button.primary {
-  border-color: var(--color-btn-primary);
-  background: var(--color-btn-primary);
-  color: var(--color-btn-primary-text);
-}
-
-.dialog-actions button.primary:hover:not(:disabled),
-.dialog-actions .primary-action:hover:not(:disabled),
-.select-data-actions button.primary:hover:not(:disabled) {
-  border-color: var(--color-btn-primary-hover);
-  background: var(--color-btn-primary-hover);
-  color: var(--color-btn-primary-text);
-}
-
 .dialog-actions button {
   min-width: 68px;
+  padding: 5px 14px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  border-radius: var(--radius-small);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.dialog-actions button:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.dialog-actions button.primary {
+  border-color: var(--excel-green);
+  background: var(--excel-green);
+  color: #ffffff;
+}
+
+.dialog-actions button.primary:hover:not(:disabled) {
+  background: var(--excel-green-dark);
 }
 
 /* Consolidate dialog */
@@ -2818,7 +2693,7 @@ textarea:focus {
 }
 
 .fn-row.active {
-  background: var(--accent-soft);
+  background: var(--excel-green-soft);
 }
 
 .fn-syntax code {
@@ -2937,7 +2812,7 @@ textarea:focus {
 }
 
 .icons-colors button.active {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent, #217346);
   outline-offset: 1px;
 }
 
@@ -3016,7 +2891,7 @@ textarea:focus {
 
 .equation-error {
   padding: 0 12px;
-  color: var(--danger);
+  color: var(--error, #c00000);
   font-size: 12px;
 }
 
@@ -3057,7 +2932,7 @@ textarea:focus {
 }
 
 .recommended-charts-grid span {
-  color: var(--text-secondary);
+  color: var(--text-secondary, #666);
 }
 
 /* Insert/Edit Link dialog */
@@ -3068,11 +2943,11 @@ textarea:focus {
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #444;
 }
 .link-dialog .dialog-body input {
   padding: 6px 8px;
-  border: 1px solid var(--border-strong);
+  border: 1px solid #c8c8c8;
   border-radius: 4px;
   font-size: 13px;
 }
@@ -3085,7 +2960,7 @@ textarea:focus {
 .format-cells-dialog .dialog-note {
   margin: 0 0 8px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: #555;
 }
 .format-cells-dialog .dialog-note {
   grid-column: 1 / -1;
@@ -3103,7 +2978,7 @@ textarea:focus {
 .name-manager-table td {
   text-align: left;
   padding: 4px 6px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #e3e3e3;
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3113,13 +2988,13 @@ textarea:focus {
   cursor: pointer;
 }
 .name-manager-table tbody tr.selected {
-  background: var(--accent-soft);
+  background: #e7f0e9;
 }
 .name-manager-empty {
-  color: var(--text-muted);
+  color: #888;
 }
 .dialog-error {
-  color: var(--sheets-error);
+  color: #b3261e;
 }
 .sort-header-check {
   display: flex;
@@ -3146,7 +3021,7 @@ textarea:focus {
   padding: 0;
 }
 .styles-row.as-button:hover {
-  color: var(--accent-dark);
+  color: #1a7340;
 }
 
 /* AI settings modal (ported from apps/docs' SettingsModal, excel-green themed) */
@@ -3154,8 +3029,7 @@ textarea:focus {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--sheets-mask-bg-strong);
-  backdrop-filter: blur(4px);
+  background: rgb(0 0 0 / 35%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3165,9 +3039,9 @@ textarea:focus {
 .modal {
   width: 440px;
   background: var(--surface);
-  border-radius: 16px;
+  border-radius: var(--radius-medium);
   padding: 22px 24px;
-  box-shadow: var(--shadow-modal);
+  box-shadow: var(--shadow-panel);
 }
 
 .modal h2 {
@@ -3198,7 +3072,7 @@ textarea:focus {
 
 .modal input:focus,
 .modal select:focus {
-  border-color: var(--accent);
+  border-color: var(--excel-green);
 }
 
 .modal-actions {
@@ -3212,25 +3086,25 @@ textarea:focus {
   height: 34px;
   padding: 0 16px;
   border: none;
-  border-radius: 12px;
-  background: var(--accent);
-  color: var(--sheets-on-accent);
+  border-radius: var(--radius-small);
+  background: var(--excel-green);
+  color: #fff;
   font-size: 13px;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background: var(--accent-dark);
+  background: var(--excel-green-dark);
 }
 
 .btn-ghost {
   border: none;
   background: none;
-  color: var(--accent);
+  color: var(--excel-green);
   font-size: 13px;
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 12px;
+  border-radius: var(--radius-small);
 }
 
 .btn-ghost:hover {
@@ -3258,13 +3132,13 @@ textarea:focus {
 }
 
 .provider-tab:hover {
-  border-color: var(--accent);
+  border-color: var(--excel-green);
 }
 
 .provider-tab-active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-dark);
+  border-color: var(--excel-green);
+  background: var(--excel-green-soft);
+  color: var(--excel-green-dark);
   font-weight: 600;
 }
 
@@ -3272,7 +3146,7 @@ textarea:focus {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--excel-green);
 }
 
 /* ---- AI chat panel ---- */
@@ -3296,7 +3170,7 @@ textarea:focus {
   justify-content: center;
   height: 30px;
   font-size: 14px;
-  color: var(--color-text-tertiary);
+  color: #999;
 }
 
 .ai-chat-empty {
@@ -3350,8 +3224,8 @@ textarea:focus {
 }
 
 .ai-msg-error {
-  border-color: var(--sheets-ai-error-border);
-  color: var(--sheets-ai-error);
+  border-color: rgb(192 57 43 / 45%);
+  color: #c0392b;
 }
 
 .ai-md p,
@@ -3428,22 +3302,22 @@ textarea:focus {
   font-family: inherit;
   font-size: 14px;
   line-height: 1.5;
-  color: var(--color-text-tertiary);
+  color: #909499;
   transition: color 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ai-work-group-summary:hover {
-  color: var(--color-text-secondary);
+  color: #606366;
 }
 
 .ai-work-group-summary:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--sheets-focus-ring);
+  box-shadow: 0 0 0 3px rgba(35, 36, 37, 0.2);
   border-radius: 4px;
 }
 
 .ai-work-group-summary.running {
-  color: var(--color-text-secondary);
+  color: #606366;
 }
 
 .ai-work-group-summary.running .ai-work-group-label {
@@ -3489,7 +3363,7 @@ textarea:focus {
   align-items: flex-start;
   gap: 12px;
   padding: 8px 0;
-  color: var(--color-text-tertiary);
+  color: #909499;
   animation: ai-row-ease-in 320ms ease-out;
 }
 
@@ -3504,7 +3378,7 @@ textarea:focus {
   top: 32px;
   bottom: -4px;
   width: 1px;
-  background: var(--color-border-default);
+  background: #eaeaea;
 }
 
 .ai-step-icon {
@@ -3514,15 +3388,15 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-tertiary);
+  color: #909499;
 }
 
 .ai-step-icon.done {
-  color: var(--color-text-secondary);
+  color: #606366;
 }
 
 .ai-step-icon.error {
-  color: var(--sheets-ai-error);
+  color: #b91c1c;
 }
 
 .ai-step-icon.running svg {
@@ -3556,7 +3430,7 @@ textarea:focus {
 .ai-step-title {
   font-size: 14px;
   line-height: 1.3;
-  color: var(--color-text-secondary);
+  color: #606366;
   text-align: left;
   background: none;
   border: none;
@@ -3571,12 +3445,12 @@ textarea:focus {
 }
 
 .ai-step-title.clickable:hover {
-  color: var(--color-text-primary);
+  color: #232425;
 }
 
 .ai-step-title.clickable:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px var(--sheets-focus-ring);
+  box-shadow: 0 0 0 3px rgba(35, 36, 37, 0.2);
   border-radius: 4px;
 }
 
@@ -3611,7 +3485,7 @@ textarea:focus {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--color-brand-secondary);
+  background: #0f7fff;
 }
 
 .ai-tool-chip-spinner::before {
@@ -3693,13 +3567,13 @@ textarea:focus {
 
 /* expanded step detail: subtle gray card, no border */
 .ai-tool-output {
-  background: var(--color-bg-subtle);
+  background: #f5f5f5;
   border: none;
   border-radius: 12px;
   font-family:
     ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
   font-size: 14px;
-  color: var(--color-text-primary);
+  color: #232425;
   max-height: 300px;
   overflow-y: auto;
   width: 100%;
@@ -3721,32 +3595,32 @@ textarea:focus {
   margin-top: 8px;
   padding: 4px 10px;
   border-radius: 6px;
-  background: var(--surface-subtle);
-  border: 1px solid var(--border);
+  background: var(--surface-subtle, #f4f5f6);
+  border: 1px solid var(--border, #e0e0e0);
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--text-muted, #6b7280);
 }
 
 .ai-auto-applied-text {
-  color: var(--text-secondary);
+  color: var(--text-secondary, #374151);
   font-size: 12px;
 }
 
 .ai-undo-btn {
   padding: 2px 8px;
   border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--accent);
+  border: 1px solid var(--border, #d1d5db);
+  background: var(--surface, #ffffff);
+  color: var(--excel-green, #217346);
   font-size: 11.5px;
   cursor: pointer;
   transition: background 0.1s;
 }
 
 .ai-undo-btn:hover {
-  background: var(--accent);
-  color: var(--sheets-on-accent);
-  border-color: var(--accent);
+  background: var(--excel-green, #217346);
+  color: #ffffff;
+  border-color: var(--excel-green, #217346);
 }
 
 /* Thinking indicator (white background, no container):
@@ -3771,14 +3645,15 @@ textarea:focus {
   font-size: 14px;
   line-height: 1;
   letter-spacing: 0.01em;
-  color: var(--sheets-shimmer-base);
+  color: #666;
   -webkit-text-fill-color: transparent;
-  background: var(--sheets-shimmer-base)
-    linear-gradient(
-      to left,
-      var(--sheets-shimmer-base),
-      var(--sheets-shimmer-hi) 50%,
-      var(--sheets-shimmer-base)
+  background: #666 -webkit-gradient(
+      linear,
+      100% 0,
+      0 0,
+      from(#666),
+      color-stop(0.5, #d9d9d9),
+      to(#666)
     );
   background-clip: text;
   -webkit-background-clip: text;
@@ -3815,7 +3690,7 @@ textarea:focus {
 
 .ai-typing-dot-grow,
 .ai-typing-dot-shrink {
-  background: var(--color-brand-secondary);
+  background: #0f7fff;
   border-radius: 50%;
 }
 
@@ -3863,7 +3738,7 @@ textarea:focus {
   height: 1em;
   margin-left: 2px;
   border-radius: 1px;
-  background: var(--color-text-secondary);
+  background: #606366;
   vertical-align: text-bottom;
   animation: ai-caret-blink 900ms steps(1, end) infinite;
 }
@@ -3902,7 +3777,7 @@ textarea:focus {
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-16);
   background: var(--color-bg-page);
-  box-shadow: var(--sheets-shadow-composer);
+  box-shadow: 0 6px 30px rgb(0 0 0 / 8%);
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast);
@@ -4066,7 +3941,7 @@ textarea:focus {
 }
 
 .ai-attachments.is-scrolling::-webkit-scrollbar-thumb {
-  background: var(--sheets-scroll-thumb);
+  background: rgb(0 0 0 / 25%);
 }
 
 /* Image attachments: square thumbnail with a round dark remove button on its corner */
@@ -4094,8 +3969,8 @@ textarea:focus {
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: var(--sheets-chip-remove-bg);
-  color: var(--sheets-chip-remove-ink);
+  background: #000;
+  color: #fff;
   font-size: 15px;
   font-weight: 700;
   line-height: 1;
@@ -4103,7 +3978,7 @@ textarea:focus {
 }
 
 .ai-attachment-thumb-remove:hover {
-  background: var(--sheets-chip-remove-hover);
+  background: #4b4e51;
 }
 
 /* The card's 1px border shifts its absolutely-positioned button inward by 1px
@@ -4121,7 +3996,7 @@ textarea:focus {
   width: 56px;
   height: 56px;
   border-radius: 12px;
-  background: var(--bg-content);
+  background: #fafafa;
 }
 
 .ai-attachment-thumb .ai-attachment-thumb-pending img {
@@ -4139,9 +4014,9 @@ textarea:focus {
   width: 190px;
   height: 56px;
   padding: 0 14px 0 8px;
-  border: 1px solid var(--color-border-default);
+  border: 1px solid #ececee;
   border-radius: 12px;
-  background: var(--bg-content);
+  background: #fafafa;
 }
 
 /* the type icon sits in its own bordered white tile, like the Genspark card */
@@ -4153,7 +4028,7 @@ textarea:focus {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--surface);
+  background: #fff;
 }
 
 .ai-attachment-card-icon img {
@@ -4174,7 +4049,7 @@ textarea:focus {
   overflow: hidden;
   font-size: 13px;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: #232425;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4182,7 +4057,7 @@ textarea:focus {
 .ai-attachment-card-size {
   margin-top: 4px;
   font-size: 11px;
-  color: var(--color-text-tertiary);
+  color: #9ca3af;
 }
 
 .ai-attachment-chip {
@@ -4192,7 +4067,7 @@ textarea:focus {
   padding: 2px 4px 2px 9px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: var(--sheets-chip-bg);
+  background: #f3f7f4;
   font-size: 11.5px;
   color: var(--text);
   max-width: 100%;
@@ -4200,7 +4075,7 @@ textarea:focus {
 
 .ai-attachment-chip svg {
   flex-shrink: 0;
-  color: var(--accent);
+  color: var(--excel-green);
 }
 
 .ai-attachment-remove {
@@ -4227,12 +4102,12 @@ textarea:focus {
 .ai-attach-notice {
   margin-bottom: 7px;
   font-size: 11.5px;
-  color: var(--sheets-ai-error);
+  color: #c62828;
 }
 
 /* whole-panel drop target highlight */
 .ai-panel-dragover {
-  outline: 2px dashed var(--accent);
+  outline: 2px dashed var(--excel-green);
   outline-offset: -4px;
 }
 
@@ -4240,7 +4115,7 @@ textarea:focus {
   display: inline;
   border: none;
   padding: 0;
-  color: var(--accent-dark);
+  color: var(--excel-green-dark);
   background: none;
   font-size: inherit;
   text-decoration: underline;
@@ -4261,14 +4136,14 @@ textarea:focus {
   padding: 6px 14px;
   border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: var(--surface);
+  background: #ffffff;
   font-size: 12.5px;
   cursor: pointer;
 }
 
 .slicer-picker-field:hover {
-  border-color: var(--accent);
-  color: var(--accent-dark);
+  border-color: var(--excel-green);
+  color: var(--excel-green-dark);
 }
 
 /* Slicer overlay stack on the right side of the worksheet */
@@ -4288,8 +4163,8 @@ textarea:focus {
   width: 190px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: var(--surface);
-  box-shadow: var(--sheets-shadow-slicer);
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 40, 30, 0.14);
   overflow: hidden;
 }
 
@@ -4298,8 +4173,8 @@ textarea:focus {
   align-items: center;
   gap: 6px;
   padding: 6px 8px 6px 10px;
-  background: var(--accent);
-  color: var(--sheets-on-accent);
+  background: var(--excel-green);
+  color: #ffffff;
   font-size: 12.5px;
   font-weight: 600;
 }
@@ -4315,7 +4190,7 @@ textarea:focus {
 .slicer-close {
   border: none;
   background: transparent;
-  color: var(--sheets-on-accent);
+  color: #ffffff;
   font-size: 13px;
   line-height: 1;
   padding: 2px 4px;
@@ -4330,7 +4205,7 @@ textarea:focus {
 
 .slicer-clear:hover:not(:disabled),
 .slicer-close:hover {
-  background: var(--sheets-on-accent-hover);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .slicer-members {
@@ -4347,8 +4222,8 @@ textarea:focus {
   padding: 4px 10px;
   border: 1px solid var(--border-strong);
   border-radius: 5px;
-  background: var(--sheets-member-bg);
-  color: var(--sheets-member-ink);
+  background: #f6f8f7;
+  color: #5c6660;
   font-size: 12.5px;
   cursor: pointer;
   overflow: hidden;
@@ -4357,18 +4232,18 @@ textarea:focus {
 }
 
 .slicer-member.selected {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--sheets-on-accent);
+  background: var(--excel-green);
+  border-color: var(--excel-green);
+  color: #ffffff;
 }
 
 .slicer-member:hover:not(.selected) {
-  border-color: var(--accent);
+  border-color: var(--excel-green);
 }
 
 .timeline-range {
   padding: 6px 10px 0;
-  color: var(--sheets-member-ink);
+  color: #5c6660;
   font-size: 12px;
 }
 
@@ -4386,27 +4261,27 @@ textarea:focus {
   padding: 4px 4px;
   border: 1px solid var(--border-strong);
   border-radius: 4px;
-  background: var(--sheets-member-bg);
-  color: var(--sheets-member-ink);
+  background: #f6f8f7;
+  color: #5c6660;
   font-size: 11.5px;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .timeline-month.selected {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--sheets-on-accent);
+  background: var(--excel-green);
+  border-color: var(--excel-green);
+  color: #ffffff;
 }
 
 .timeline-month:hover:not(.selected) {
-  border-color: var(--accent);
+  border-color: var(--excel-green);
 }
 
 /* Univer's bottom sheet-switcher: the selected tab label ships in Univer's
    primary blue (univer-text-primary-700); recolor it to the Excel green. */
 [data-u-comp='slide-tab-item'][aria-selected='true'] {
-  color: var(--accent) !important;
+  color: var(--excel-green) !important;
 }
 
 /* The gridlines toggle at the right of the sheet bar is a two-tone icon whose
@@ -4421,31 +4296,31 @@ textarea:focus {
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: var(--sheets-ai-error);
+  color: #c62828;
 }
 
 .ai-retry-btn {
-  border: 1px solid var(--sheets-ai-error-border);
+  border: 1px solid rgb(198 40 40 / 45%);
   border-radius: 4px;
   background: none;
   padding: 1px 8px;
   font-size: 12px;
-  color: var(--sheets-ai-error);
+  color: #c62828;
   cursor: pointer;
 }
 
 .ai-retry-btn:hover {
-  background: var(--sheets-ai-error-bg);
+  background: rgb(198 40 40 / 8%);
 }
 
 .ai-login-btn {
   margin-top: 8px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent, #1a73e8);
   border-radius: 6px;
-  background: var(--accent);
+  background: var(--accent, #1a73e8);
   padding: 4px 14px;
   font-size: 13px;
-  color: var(--sheets-on-accent);
+  color: #fff;
   cursor: pointer;
 }
 
@@ -4466,10 +4341,10 @@ textarea:focus {
   gap: 8px;
   padding: 8px 16px;
   border-radius: 8px;
-  background: var(--sheets-toast-bg);
-  color: var(--sheets-toast-ink);
+  background: rgba(35, 35, 37, 0.92);
+  color: #fff;
   font-size: 13px;
-  box-shadow: var(--sheets-shadow-toast);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   opacity: 0;
   pointer-events: none;
   transition:
@@ -4487,7 +4362,7 @@ textarea:focus {
 }
 
 .app-toast.error {
-  background: var(--sheets-toast-error-bg);
+  background: rgba(196, 49, 75, 0.95);
 }
 
 .app-toast-icon {
@@ -4497,7 +4372,7 @@ textarea:focus {
 }
 
 .app-toast.success .app-toast-icon {
-  color: var(--sheets-toast-ok);
+  color: #34c759;
 }
 
 /* Shape gallery dropdown (slides/docs parity: grouped, outline-icon grid) */
@@ -4511,7 +4386,7 @@ textarea:focus {
 .rb-drop-title {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-dim);
+  color: var(--text-dim, #777);
   padding: 4px 2px 3px;
 }
 
@@ -4528,7 +4403,7 @@ textarea:focus {
   border: 1px solid transparent;
   border-radius: 4px;
   background: none;
-  color: var(--text);
+  color: var(--text, #222);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -4537,8 +4412,8 @@ textarea:focus {
 }
 
 .menu-select-drop.rb-shape-gallery .rb-shape-cell:hover {
-  border-color: var(--accent);
-  background: var(--ribbon-hover);
+  border-color: var(--accent, #217346);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 /* Shape draw mode: crosshair over the whole grid while armed */

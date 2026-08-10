@@ -62,7 +62,6 @@ import {
   IUndoRedoService,
   LocaleType,
   mergeLocales,
-  ThemeService,
   type ICellData,
   type IRange,
   type IStyleData,
@@ -1087,16 +1086,9 @@ export function App(): React.JSX.Element {
   }, [])
 
   useEffect(() => {
-    // Univer paints the grid on canvas, so it can't follow the CSS tokens —
-    // mirror the <html data-theme> state into its official darkMode flag
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
-    const isDarkTheme = () =>
-      document.documentElement.getAttribute('data-theme') === 'dark' ||
-      (!document.documentElement.hasAttribute('data-theme') && prefersDark.matches)
     const runtime = createUniver({
       // green selection/highlight instead of Univer's default blue
       theme: greenTheme,
-      darkMode: isDarkTheme(),
       locale: LocaleType.EN_US,
       locales: {
         [LocaleType.EN_US]: mergeLocales(
@@ -1165,13 +1157,6 @@ export function App(): React.JSX.Element {
     })
     loadSnapshotIntoUniver(runtime, initialSnapshot, 'new-workbook', 'Untitled')
     univerRef.current = runtime
-    // live theme switching: main.tsx updates data-theme first (its listener
-    // registered at bootstrap), so reading the attribute here is safe; the
-    // matchMedia listener covers OS appearance flips while in system mode
-    const themeService = runtime.univer.__getInjector().get(ThemeService)
-    const applyUniverDark = () => themeService.setDarkMode(isDarkTheme())
-    const offThemeChanged = window.desktopApi?.onThemeChanged?.(applyUniverDark)
-    prefersDark.addEventListener('change', applyUniverDark)
     // The window always starts blank now; still consume the one-shot
     // new-blank flag so it doesn't leak into the next workbook open.
     void window.desktopApi?.consumeNewBlankWorkbook?.()
@@ -2032,8 +2017,6 @@ export function App(): React.JSX.Element {
     return () => {
       unsubscribeMenu()
       unsubscribeCloseSave()
-      offThemeChanged?.()
-      prefersDark.removeEventListener('change', applyUniverDark)
       dateTextDisposable.dispose()
       filteredCopyDisposable.dispose()
       tsvClipboardDisposable.dispose()
