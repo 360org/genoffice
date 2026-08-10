@@ -9,7 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  version:
+  version_and_sync:
+    name: 0. Verify Sync & Whitelabel Integrity
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.release.outputs.tag }}
@@ -23,8 +24,45 @@ jobs:
         with:
           node-version: 22
 
+      - name: Configure upstream & Pull latest code
+        shell: bash
+        run: |
+          echo "=== 1. Checking git remotes and syncing origin/upstream ==="
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch origin
+          git fetch origin main
+
+          # Check for unmerged conflicts
+          if ! git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main > /dev/null 2>&1; then
+            echo "::error::Conflict detected between release commit and origin/main! Aborting release."
+            exit 1
+          fi
+
+          echo "Sync check against origin/main passed without conflicts."
+
+      - name: Verify Whitelabel Apply & Integrity
+        shell: bash
+        run: |
+          echo "=== 2. Verifying Whitelabel engine application ==="
+          node scripts/whitelabel.js apply
+
+          # Verify key files are customized properly without being overwritten
+          if ! grep -q "VuaOffice" apps/shell/electron-builder.cjs; then
+            echo "::error::Whitelabel verification failed: electron-builder.cjs does not contain VuaOffice!"
+            exit 1
+          fi
+
+          if ! grep -q "VuaOffice" apps/shell/package.json; then
+            echo "::error::Whitelabel verification failed: package.json does not contain VuaOffice!"
+            exit 1
+          fi
+
+          echo "Whitelabel integrity check passed."
+
       - id: release
-        name: Take the version from the tag that triggered this run
+        name: Validate Release Version Tag
         shell: bash
         run: |
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
@@ -47,7 +85,7 @@ jobs:
 
   build_mac_x64:
     name: 1. macOS Intel (x64)
-    needs: version
+    needs: version_and_sync
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
@@ -58,8 +96,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-apple-darwin,aarch64-apple-darwin
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies & Apply Whitelabel
+        run: |
+          npm ci
+          node scripts/whitelabel.js apply
       - name: Build macOS Intel (x64)
         run: |
           npm run notices
@@ -75,7 +115,7 @@ jobs:
 
   build_mac_arm64:
     name: 2. macOS Silicon (arm64)
-    needs: version
+    needs: version_and_sync
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -86,8 +126,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies & Apply Whitelabel
+        run: |
+          npm ci
+          node scripts/whitelabel.js apply
       - name: Build macOS Silicon (arm64)
         run: |
           npm run notices
@@ -103,7 +145,7 @@ jobs:
 
   build_windows:
     name: 3. Windows 10/11 (x64)
-    needs: version
+    needs: version_and_sync
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -114,8 +156,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies & Apply Whitelabel
+        run: |
+          npm ci
+          node scripts/whitelabel.js apply
       - name: Build Windows (x64)
         run: |
           npm run notices
@@ -131,7 +175,7 @@ jobs:
 
   build_linux:
     name: 4. Linux 22.04/24.04 (AppImage & deb)
-    needs: version
+    needs: version_and_sync
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -140,8 +184,10 @@ jobs:
           node-version: 22
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install dependencies
-        run: npm ci
+      - name: Install dependencies & Apply Whitelabel
+        run: |
+          npm ci
+          node scripts/whitelabel.js apply
       - name: Build Linux (AppImage & deb)
         run: |
           npm run notices
@@ -157,7 +203,7 @@ jobs:
 
   publish_release:
     name: 5. Publish Official Release
-    needs: [version, build_mac_x64, build_mac_arm64, build_windows, build_linux]
+    needs: [version_and_sync, build_mac_x64, build_mac_arm64, build_windows, build_linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -168,8 +214,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ needs.version.outputs.tag }}
-          name: VuaOffice ${{ needs.version.outputs.tag }}
+          tag_name: ${{ needs.version_and_sync.outputs.tag }}
+          name: VuaOffice ${{ needs.version_and_sync.outputs.tag }}
           draft: false
           prerelease: false
           generate_release_notes: true
