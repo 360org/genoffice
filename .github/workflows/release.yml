@@ -86,7 +86,7 @@ jobs:
   build_mac_x64:
     name: 1. macOS Intel (x64)
     needs: version_and_sync
-    runs-on: macos-14-large
+    runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
