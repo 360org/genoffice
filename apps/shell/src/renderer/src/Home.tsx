@@ -18,6 +18,8 @@ import type {
 import { fileCountKey, visiblePageCount } from './counts'
 import { useI18n } from './locale'
 import type { I18n, StringKey } from './locale'
+import { AiSettingsModal } from './AiSettingsModal'
+import { AboutModal } from './AboutModal'
 
 declare global {
   interface Window {
@@ -440,9 +442,11 @@ type ThemeValue = (typeof THEME_OPTIONS)[number]['value']
 function AccountEntry({
   onStatusChange,
   onOpenAiSettings,
+  onOpenAbout,
 }: {
   onStatusChange?: (status: AccountStatus | null) => void
   onOpenAiSettings?: () => void
+  onOpenAbout?: () => void
 }) {
   const { lang, setLang, t } = useI18n()
   const [status, setStatus] = useState<AccountStatus | null>(null)
@@ -1030,7 +1034,14 @@ function AccountEntry({
             <span className="lang-row-label">{t('aiSettingsTitle')}</span>
           </button>
           {appVersion && (
-            <div className="account-menu-version">
+            <button
+              className="account-menu-item lang-row"
+              role="menuitem"
+              onClick={() => {
+                closeMenu()
+                onOpenAbout?.()
+              }}
+            >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <circle cx="8" cy="8" r="6.3" stroke="currentColor" strokeWidth="1.2" />
                 <path
@@ -1043,7 +1054,7 @@ function AccountEntry({
               </svg>
               <span className="version-row-label">{t('versionLabel')}</span>
               <span className="version-row-value">{appVersion}</span>
-            </div>
+            </button>
           )}
           {loggedIn && (
             <button
@@ -1511,6 +1522,15 @@ export function Home() {
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
   const [renaming, setRenaming] = useState<{ path: string; value: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
+  const [showAiSettings, setShowAiSettings] = useState(false)
+  const [showAbout, setShowAbout] = useState(false)
+  const [appVersion, setAppVersion] = useState('')
+
+  useEffect(() => {
+    void window.aiOffice.getAppVersion?.().then((v) => {
+      if (v) setAppVersion(v)
+    })
+  }, [])
   // name in the greeting; omitted when logged out
   const [accountName, setAccountName] = useState('')
   // 360 CORP Projects is web-account data, so its nav entry only shows when logged in
@@ -2480,7 +2500,11 @@ export function Home() {
           </>
         )}
 
-        <AccountEntry onStatusChange={handleAccountStatus} />
+        <AccountEntry
+          onStatusChange={handleAccountStatus}
+          onOpenAiSettings={() => setShowAiSettings(true)}
+          onOpenAbout={() => setShowAbout(true)}
+        />
       </aside>
 
       {selectedProjectId ? (
@@ -2531,6 +2555,9 @@ export function Home() {
           </div>
         </div>
       )}
+
+      {showAiSettings && <AiSettingsModal onClose={() => setShowAiSettings(false)} />}
+      {showAbout && <AboutModal appVersion={appVersion} onClose={() => setShowAbout(false)} />}
     </div>
   )
 }
