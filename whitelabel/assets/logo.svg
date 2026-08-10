@@ -1,0 +1,13 @@
+<svg width="1091" height="240" viewBox="0 0 1091 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g clip-path="url(#clip0_voffice)">
+    <rect width="240" height="240" rx="54" fill="#0066FF"/>
+    <text x="120" y="155" font-family="system-ui, -apple-system, sans-serif" font-size="130" font-weight="bold" fill="white" text-anchor="middle">v</text>
+  </g>
+  <text x="290" y="160" font-family="system-ui, -apple-system, sans-serif" font-size="120" font-weight="bold" fill="black">vOffice</text>
+  <text x="750" y="150" font-family="system-ui, -apple-system, sans-serif" font-size="40" font-weight="600" fill="#666">by 360 CORP</text>
+  <defs>
+    <clipPath id="clip0_voffice">
+      <rect width="240" height="240" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>
