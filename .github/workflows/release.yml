@@ -87,7 +87,7 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
   build_mac_x64:
-    name: 1. macOS Intel (x64)
+    name: 1. macOS Intel
     needs: version_and_sync
     runs-on: macos-14
     steps:
