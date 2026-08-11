@@ -221,6 +221,7 @@ const config = {
   ],
   npmRebuild: false,
   mac: {
+    artifactName: 'VuaOffice-${version}-${arch}.${ext}',
     // Two separate arch packages (NOT universal): arm64 keeps the exact
     // artifact names and update-feed entries it always had, x64 (opt-in via
     // GENOFFICE_MAC_X64=1, see includeMacX64 above) adds Intel support with
@@ -246,6 +247,7 @@ const config = {
     ],
   },
   win: {
+    artifactName: 'VuaOffice-Setup-${version}-${arch}.${ext}',
     target: [
       {
         target: 'nsis',
