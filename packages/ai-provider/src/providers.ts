@@ -115,12 +115,21 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
     keyPlaceholder: 'sk-or-...',
     needsBaseUrl: true,
   },
+  {
+    id: 'hermes',
+    label: 'Hermes Agent',
+    models: ['hermes-3-llama-3.1-8b', 'hermes-3-llama-3.1-70b', 'custom-hermes-model'],
+    defaultModel: 'hermes-3-llama-3.1-8b',
+    keyPlaceholder: 'sk-hermes-...',
+    needsBaseUrl: true,
+  },
 ]
 
 /** preset endpoints for providers whose baseUrl has a known default */
 const DEFAULT_BASE_URLS: Partial<Record<AiProviderId, string>> = {
   omirouter: 'https://api.omirouter.com/v1',
   ninerouter: 'https://api.9router.com/v1',
+  hermes: 'https://hermes.vuahethong.com/v1',
 }
 
 /**

@@ -68,6 +68,8 @@ const LOCAL_STRINGS: Record<string, Record<string, string>> = {
     customModelPlaceholder: 'Enter custom model name',
     show: 'Show',
     hide: 'Hide',
+    devMode: 'Developer Mode (Multi-Endpoint)',
+    normalModeHint: 'Normal mode: Connects directly via 360 CORP Gateway (vuahethong.net / OmiRouter). Enable Developer Mode to configure custom API endpoints & models.',
   },
 }
 
@@ -83,6 +85,8 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
   const [isCustomModelActive, setIsCustomModelActive] = useState<Record<AiProviderId, boolean>>({} as Record<AiProviderId, boolean>)
   const [showPassword, setShowPassword] = useState(false)
 
+  const [isDeveloperMode, setIsDeveloperMode] = useState(false)
+
   const loc = LOCAL_STRINGS[lang] || LOCAL_STRINGS.en
 
   useEffect(() => {
@@ -90,6 +94,7 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
       .getAiSettings()
       .then((res) => {
         setSettings(res)
+        setIsDeveloperMode(!!res.developerMode)
         if (res.provider) {
           setActiveTab(res.provider)
         }
@@ -178,8 +183,9 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
     }
 
     const nextSettings: AiSettings = {
-      provider: activeTab,
+      provider: isDeveloperMode ? activeTab : 'omirouter',
       providers: finalizedProviders,
+      developerMode: isDeveloperMode,
     }
 
     window.aiOffice
@@ -226,21 +232,45 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
         </div>
 
         <form className="ai-settings-form" onSubmit={handleSave}>
-          <div className="ai-settings-group">
-            <label htmlFor="ai-provider-select">{loc.aiProvider}</label>
-            <select
-              id="ai-provider-select"
-              className="ai-settings-select"
-              value={activeTab}
-              onChange={handleProviderChange}
-            >
-              {AI_PROVIDERS.map((provider) => (
-                <option key={provider.id} value={provider.id}>
-                  {provider.label}
-                </option>
-              ))}
-            </select>
+          <div className="ai-settings-group" style={{ marginBottom: '16px', background: 'var(--surface-subtle)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', margin: 0 }}>
+              <input
+                type="checkbox"
+                checked={isDeveloperMode}
+                onChange={(e) => {
+                  const enabled = e.target.checked
+                  setIsDeveloperMode(enabled)
+                  if (!enabled) {
+                    setActiveTab('omirouter')
+                  }
+                }}
+              />
+              {loc.devMode}
+            </label>
+            {!isDeveloperMode && (
+              <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                {loc.normalModeHint}
+              </p>
+            )}
           </div>
+
+          {isDeveloperMode && (
+            <div className="ai-settings-group">
+              <label htmlFor="ai-provider-select">{loc.aiProvider}</label>
+              <select
+                id="ai-provider-select"
+                className="ai-settings-select"
+                value={activeTab}
+                onChange={handleProviderChange}
+              >
+                {AI_PROVIDERS.map((provider) => (
+                  <option key={provider.id} value={provider.id}>
+                    {provider.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {currentMeta.needsBaseUrl && (
             <div className="ai-settings-group">

@@ -10,6 +10,7 @@ export type AiProviderId =
   | 'custom'
   | 'omirouter'
   | 'ninerouter'
+  | 'hermes'
 
 /** Genspark account status (gsk login state; the sole auth source for AI features) */
 export interface GenSparkAccountStatus {
@@ -36,6 +37,7 @@ export interface AiProviderMeta {
 export interface AiSettings {
   provider: AiProviderId
   providers: Record<AiProviderId, AiProviderConfig>
+  developerMode?: boolean
 }
 
 /** pre-provider settings shape (single OpenAI-compatible endpoint); migrated into "custom" */

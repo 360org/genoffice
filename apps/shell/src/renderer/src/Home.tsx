@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactElement } from 'react'
-import logoLockup from './assets/genoffice-logo.svg'
+import logoIcon from './assets/vuaoffice-icon.svg'
 import iconDocx from './assets/file-docx.svg'
 import iconXlsx from './assets/file-xlsx.svg'
 import iconPptx from './assets/file-pptx.svg'
@@ -739,7 +739,7 @@ function AccountEntry({
                 onClick={startLogin}
                 title={waiting ? t('waitingLogin') : undefined}
               >
-                {waiting ? t('waitingShort') : t('loginGenspark')}
+                {waiting ? t('waitingShort') : t('login')}
               </button>
               {waiting && authUrl && (
                 <>
@@ -1333,7 +1333,7 @@ function CloudProjectsView() {
         <p className="empty proj-empty">
           <span className="empty-hint">{t('cloudLoginHint')}</span>
           <button className="btn btn-secondary" disabled={loginWaiting} onClick={startLogin}>
-            {loginWaiting ? t('waitingShort') : t('loginGenspark')}
+            {loginWaiting ? t('waitingShort') : t('login')}
           </button>
         </p>
       )
@@ -2395,7 +2395,8 @@ export function Home() {
     <div className="home">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img className="logo-lockup" src={logoLockup} alt="VuaOffice" />
+          <img className="logo-icon" src={logoIcon} alt="VuaOffice" width="28" height="28" />
+          <span className="logo-text">VuaOffice</span>
         </div>
 
         <nav className="sidebar-nav">

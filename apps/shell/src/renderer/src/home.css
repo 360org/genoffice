@@ -185,16 +185,23 @@ body.vib .home {
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   padding: 0 8px;
   margin-bottom: 20px;
 }
 
-.logo-lockup {
+.logo-icon {
   display: block;
+  width: 28px;
   height: 28px;
-  width: auto;
-  filter: invert(var(--logo-invert));
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
 .sidebar-nav {
@@ -255,6 +262,65 @@ body.vib .home {
   margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid var(--border-subtle);
+}
+
+.account-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 220px;
+  z-index: 50;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.account-menu-info {
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.account-menu-item:hover {
+  background: var(--bg-hover);
+}
+
+.account-menu-item.danger {
+  color: var(--danger);
+}
+
+.account-menu-item.danger:hover {
+  background: var(--danger-bg);
+}
+
+.account-menu-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border-subtle);
 }
 
 .account-btn {
