@@ -47,17 +47,20 @@ system mode).
   dependency array. Store the key and translate at render time.
 ## Release & Whitelabel Rules (mandatory)
 
-1. **Release artifact naming**: File names must clearly specify platform and architecture so users are never confused:
+1. **Commit to main does NOT trigger release build**: Normal commits pushed to `main` branch are for source code history only and do NOT trigger release artifact builds or published releases.
+2. **Release Workflow**: Release builds are strictly triggered on demand via release tags or tag push:
+   - Workflow: Bump version in `package.json` & `apps/shell/package.json` ➔ Commit ➔ Create & push tag `v*` (e.g. `git tag v0.6.2 && git push github v0.6.2`) ➔ GitHub Actions executes Production Release & Publishes artifacts.
+3. **Release artifact naming**: File names must clearly specify platform and architecture so users are never confused:
    - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip`
    - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `.zip`
    - Windows x64: `VuaOffice-${version}-Windows-x64-Setup.exe`
    - Linux: `VuaOffice-${version}.AppImage` / `vuaoffice_${version}_amd64.deb`
-2. **Synchronized version bumping**: Always bump version in BOTH root `package.json` AND `apps/shell/package.json` before creating release tag. The GitHub Actions release workflow validates that tag version matches `apps/shell/package.json` exactly.
-3. **Dual-remote Git push**: Always push commits and tags to both `origin` (GitLab) and `github` (GitHub). Never use `--no-verify` to bypass `.git/hooks/pre-push` unless executing the authorized publish flow.
-4. **Branding & Whitelabel integrity**:
+4. **Synchronized version bumping**: Always bump version in BOTH root `package.json` AND `apps/shell/package.json` before creating release tag. The GitHub Actions release workflow validates that tag version matches `apps/shell/package.json` exactly.
+5. **Dual-remote Git push**: Always push commits and tags to both `origin` (GitLab) and `github` (GitHub). Never use `--no-verify` to bypass `.git/hooks/pre-push` unless executing the authorized publish flow.
+6. **Branding & Whitelabel integrity**:
    - Sidebar logo: Use standalone icon `/whitelabel/logo/VuaOffice_Icon.svg` (28x28px) next to crisp brand text "VuaOffice", not co-axial stretched logo lockups.
    - AI Panel & Ribbon titles: Must use "VuaOffice AI" title and badge, not legacy "Genspark" text or sparkle icons.
    - Run `npm run whitelabel:apply` before every release build to ensure whitelabel transformation rules are clean.
-5. **AI Settings & Provider Modes**:
+7. **AI Settings & Provider Modes**:
    - Normal Mode: Connects directly via 360 CORP Gateway (`vuahethong.net` / `OmiRouter`).
    - Developer Mode: Supports multi-endpoint selection including Hermes Agent (`https://hermes.vuahethong.com/v1`).
