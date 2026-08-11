@@ -14,9 +14,15 @@
         "apps/shell/src/renderer/update.html",
         "apps/shell/src/renderer/src/Home.tsx",
         "apps/shell/src/main/tab-manager.ts",
-        "apps/shell/src/main/index.ts"
+        "apps/shell/src/main/index.ts",
+        "apps/docs/src/renderer/components/Ribbon.tsx",
+        "apps/slides/src/renderer/components/RibbonHomeTab.tsx",
+        "apps/slides/src/renderer/App.tsx",
+        "apps/markdown/src/renderer/components/Ribbon.tsx",
+        "apps/sheets/src/renderer/ExcelShell.tsx"
       ],
       "rules": [
+        { "regex": "Genspark AI", "to": "VuaOffice AI" },
         { "regex": "\\bGenOffice\\b", "to": "VuaOffice" },
         { "regex": "\\bGenspark\\b", "to": "360 CORP" }
       ]
