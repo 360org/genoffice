@@ -415,6 +415,8 @@ export const TextStyleMark = Mark.create({
       color: { default: null as string | null },
       sizeHalfPoints: { default: null as number | null },
       font: { default: null as string | null },
+      // the EA face backfills an empty theme slot (line metrics follow the Latin face like LO)
+      eaSlotEmpty: { default: null as boolean | null },
       // Latin slot (w:ascii/w:hAnsi) when it differs from the primary/eastAsia font
       fontAscii: { default: null as string | null },
       charSpacingTwips: { default: null as number | null },

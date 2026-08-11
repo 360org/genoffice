@@ -153,7 +153,7 @@ export function LayoutList({
             key={lay.path}
             className="rb-layout-item"
             onClick={() => onPick(lay.path)}
-            title={name}
+            data-tip={name}
           >
             <div className="rb-layout-preview">
               {lay.placeholders.map((ph, i) => (
@@ -240,7 +240,7 @@ export function Group({
           <div className="rb-drop-wrap">
             <button
               className={`rb-big ${collapse.open ? 'active' : ''}`}
-              title={label}
+              data-tip={label}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={collapse.onToggle}
             >
@@ -487,7 +487,7 @@ export interface Props {
   onToggleScreenRecord: () => void
   // ── Contextual tabs: table design / chart design / picture format ────────────────
   /** Current single-selection element type (undefined = none/multi-select; 'table'|'chart'|'picture' shows the contextual tab) */
-  contextElementType?: 'table' | 'chart' | 'picture' | null
+  contextElementType?: 'table' | 'chart' | 'picture' | 'shape' | null
   /** Currently selected element sourceId (for contextual tab operation callbacks) */
   contextElementId?: string
   /** Current page index (for contextual tab operations) */
