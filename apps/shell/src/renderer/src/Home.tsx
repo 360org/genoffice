@@ -1020,18 +1020,14 @@ function AccountEntry({
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path
-                d="M8 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"
+                d="M6.5 1.5h3l.4 1.6a5.5 5.5 0 0 1 1.3.8l1.6-.6 1.5 2.6-1.2 1.1a5.7 5.7 0 0 1 0 1.6l1.2 1.1-1.5 2.6-1.6-.6a5.5 5.5 0 0 1-1.3.8l-.4 1.6h-3l-.4-1.6a5.5 5.5 0 0 1-1.3-.8l-1.6.6-1.5-2.6 1.2-1.1a5.7 5.7 0 0 1 0-1.6l-1.2-1.1 1.5-2.6 1.6.6a5.5 5.5 0 0 1 1.3-.8l.4-1.6z"
                 stroke="currentColor"
                 strokeWidth="1.2"
+                strokeLinejoin="round"
               />
-              <path
-                d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"
-                stroke="currentColor"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-              />
+              <circle cx="8" cy="8" r="2.2" stroke="currentColor" strokeWidth="1.2" />
             </svg>
-            <span className="lang-row-label">{t('aiSettingsTitle')}</span>
+            <span className="lang-row-label">{t('settingsTitle')}</span>
           </button>
           {appVersion && (
             <button
