@@ -1,0 +1,29 @@
+# .githubignore
+# File cấu hình chứa danh sách các file/thư mục CHỈ LƯU TRÊN GITLAB.
+# Khi đồng bộ sang GitHub, script sẽ tự động xóa sạch các file này.
+
+# Môi trường và cấu hình bảo mật
+.env
+.env.*
+*.local
+credentials/
+secrets/
+private_keys/
+*.pem
+*.key
+
+# File dữ liệu, database backup và logs phát sinh
+db_backup/
+backups/
+dumps/
+logs/
+*.sql
+*.tar.gz
+*.zip
+*.bak
+
+# Các file rác tạm thời của hệ thống dev
+.DS_Store
+tmp/
+temp/
+audit-work/
