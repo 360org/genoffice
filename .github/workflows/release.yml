@@ -164,8 +164,8 @@ jobs:
             apps/shell/release/*.zip
             apps/shell/release/latest-mac.yml
 
-  build_windows:
-    name: 3. Windows 10/11 (x64)
+  build_windows_x64:
+    name: 3. Windows (x64)
     needs: version_and_sync
     runs-on: windows-latest
     steps:
@@ -185,11 +185,11 @@ jobs:
         run: |
           npm run notices
           npm run build:all
-          npm run dist:win -w @genoffice/shell
+          npm run dist:win:x64 -w @genoffice/shell
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GENOFFICE_UPDATE_URL: https://github.com/360org/vuaoffice/releases/latest/download
-      - name: Upload Windows Assets
+      - name: Upload Windows x64 Assets
         uses: actions/upload-artifact@v4
         with:
           name: windows-x64
@@ -197,8 +197,40 @@ jobs:
             apps/shell/release/*.exe
             apps/shell/release/latest.yml
 
+  build_windows_x86:
+    name: 4. Windows (x86)
+    needs: version_and_sync
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: i686-pc-windows-msvc
+      - name: Install dependencies & Apply Whitelabel
+        run: |
+          npm ci
+          node scripts/whitelabel.js apply
+      - name: Build Windows (x86)
+        run: |
+          npm run notices
+          npm run build:all
+          npm run dist:win:ia32 -w @genoffice/shell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GENOFFICE_UPDATE_URL: https://github.com/360org/vuaoffice/releases/latest/download
+      - name: Upload Windows x86 Assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x86
+          path: |
+            apps/shell/release/*.exe
+
   build_linux:
-    name: 4. Linux 22.04/24.04 (AppImage & deb)
+    name: 5. Linux 22.04/24.04 (AppImage & deb)
     needs: version_and_sync
     runs-on: ubuntu-22.04
     steps:
@@ -230,8 +262,8 @@ jobs:
             apps/shell/release/latest-linux.yml
 
   publish_release:
-    name: 5. Publish Official Release
-    needs: [version_and_sync, build_mac_x64, build_mac_arm64, build_windows, build_linux]
+    name: 6. Publish Official Release
+    needs: [version_and_sync, build_mac_x64, build_mac_arm64, build_windows_x64, build_windows_x86, build_linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

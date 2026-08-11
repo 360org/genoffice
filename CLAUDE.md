@@ -52,8 +52,9 @@ system mode).
    - Workflow: Bump version in `package.json` & `apps/shell/package.json` ➔ Commit ➔ Create & push tag `v*` (e.g. `git tag v0.6.2 && git push github v0.6.2`) ➔ GitHub Actions executes Production Release & Publishes artifacts.
 3. **Release artifact naming**: File names must clearly specify platform and architecture so users are never confused:
    - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip`
-   - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `.zip`
+   - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `.zip` (không thêm x64 vào tên macOS)
    - Windows x64: `VuaOffice-${version}-Windows-x64-Setup.exe`
+   - Windows x86: `VuaOffice-${version}-Windows-x86-Setup.exe`
    - Linux: `VuaOffice-${version}.AppImage` / `vuaoffice_${version}_amd64.deb`
 4. **Synchronized version bumping**: Always bump version in BOTH root `package.json` AND `apps/shell/package.json` before creating release tag. The GitHub Actions release workflow validates that tag version matches `apps/shell/package.json` exactly.
 5. **Dual-remote Git push**: Always push commits and tags to both `origin` (GitLab) and `github` (GitHub). Never use `--no-verify` to bypass `.git/hooks/pre-push` unless executing the authorized publish flow.

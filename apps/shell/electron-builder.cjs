@@ -247,11 +247,11 @@ const config = {
     ],
   },
   win: {
-    artifactName: 'VuaOffice-${version}-Windows-x64-Setup.${ext}',
+    artifactName: 'VuaOffice-${version}-Windows-${arch === \'ia32\' ? \'x86\' : \'x64\'}-Setup.${ext}',
     target: [
       {
         target: 'nsis',
-        arch: ['x64'],
+        arch: ['x64', 'ia32'],
       },
     ],
     extraResources: [
