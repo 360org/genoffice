@@ -47,9 +47,12 @@ system mode).
   dependency array. Store the key and translate at render time.
 ## Release & Whitelabel Rules (mandatory)
 
-1. **Commit to main does NOT trigger release build**: Normal commits pushed to `main` branch are for source code history only and do NOT trigger release artifact builds or published releases.
-2. **Release Workflow**: Release builds are strictly triggered on demand via release tags or tag push:
-   - Workflow: Bump version in `package.json` & `apps/shell/package.json` ➔ Commit ➔ Create & push tag `v*` (e.g. `git tag v0.6.2 && git push github v0.6.2`) ➔ GitHub Actions executes Production Release & Publishes artifacts.
+1. **Tuyệt đối KHÔNG tự động build khi commit/push lên `main`**: Mọi commit đẩy lên `main` chỉ để lưu lịch sử mã nguồn. CI/Build runner tuyệt đối KHÔNG được phép tự động chạy trừ khi Sếp yêu cầu trực tiếp.
+2. **Quy trình Release CHỈ thực hiện khi Sếp yêu cầu rõ ràng**: Chỉ khi Sếp gõ lệnh/yêu cầu trực tiếp (VD: *"release cho anh version 0.6.2"*, *"tạo release v0.6.2"*), em mới tiến hành các bước:
+   - Bump version ở `package.json` & `apps/shell/package.json`.
+   - Commit code thay đổi version.
+   - Tạo release tag `v*` và push tag lên remote (`git tag v0.6.2 && git push github v0.6.2`).
+   - GitHub Actions mới được kích hoạt để build release artifacts đóng gói sản phẩm.
 3. **Release artifact naming**: File names must clearly specify platform and architecture so users are never confused:
    - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip`
    - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `.zip` (không thêm x64 vào tên macOS)
