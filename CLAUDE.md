@@ -45,3 +45,8 @@ system mode).
   launch.
 - `useI18n()`'s `t` is not referentially stable; never put it in a hook
   dependency array. Store the key and translate at render time.
+- **Release artifact naming rules (mandatory)**: Artifact names must explicitly state OS and CPU architecture in a human-friendly format so users aren't confused:
+  - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `VuaOffice-${version}-macOS-Apple-Silicon-mac.zip`
+  - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `VuaOffice-${version}-macOS-Intel-mac.zip`
+  - Windows x64: `VuaOffice-${version}-Windows-x64-Setup.exe`
+  - Always keep `apps/shell/package.json` version in sync with root `package.json` before tagging release.
