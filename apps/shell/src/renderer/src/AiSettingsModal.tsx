@@ -232,28 +232,6 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
         </div>
 
         <form className="ai-settings-form" onSubmit={handleSave}>
-          <div className="ai-settings-group" style={{ marginBottom: '16px', background: 'var(--surface-subtle)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13px', margin: 0 }}>
-              <input
-                type="checkbox"
-                checked={isDeveloperMode}
-                onChange={(e) => {
-                  const enabled = e.target.checked
-                  setIsDeveloperMode(enabled)
-                  if (!enabled) {
-                    setActiveTab('omirouter')
-                  }
-                }}
-              />
-              {loc.devMode}
-            </label>
-            {!isDeveloperMode && (
-              <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                {loc.normalModeHint}
-              </p>
-            )}
-          </div>
-
           {isDeveloperMode && (
             <div className="ai-settings-group">
               <label htmlFor="ai-provider-select">{loc.aiProvider}</label>
