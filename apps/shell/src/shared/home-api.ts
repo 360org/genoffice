@@ -127,6 +127,12 @@ export interface HomeApi {
   cloudProjectsSync(): Promise<CloudProjectsSnapshot | null>
   /** open a cloud project (relative '/agents?id=...' URL) in the default browser */
   openCloudProject(projectUrl: string): Promise<void>
+  /** default save location for new documents (undefined when using default OS Documents folder) */
+  getDefaultSaveDir(): Promise<string | undefined>
+  /** open a directory picker dialog to select default save folder */
+  pickDefaultSaveDir(): Promise<string | undefined>
+  /** open the 360 CORP credit usage page in the browser */
+  openCreditUsage(): Promise<void>
   /** get AI settings containing API keys, models, etc. */
   getAiSettings(): Promise<AiSettings>
   /** save AI settings */
@@ -253,6 +259,11 @@ export const HOME_CHANNELS = {
   cloudProjects: 'home:cloud-projects',
   cloudProjectsCached: 'home:cloud-projects-cached',
   openCloudProject: 'home:open-cloud-project',
+  getDefaultSaveDir: 'home:get-default-save-dir',
+  pickDefaultSaveDir: 'home:pick-default-save-dir',
+  openCreditUsage: 'home:open-credit-usage',
+  getAiSettings: 'home:get-ai-settings',
+  setAiSettings: 'home:set-ai-settings',
 } as const
 
 export const PROJECT_CHANNELS = {

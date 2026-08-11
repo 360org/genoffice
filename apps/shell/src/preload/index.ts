@@ -188,6 +188,17 @@ const homeApi: HomeApi = {
     if (typeof projectUrl !== 'string' || !projectUrl) throw new Error('Invalid project URL.')
     await ipcRenderer.invoke(HOME_CHANNELS.openCloudProject, projectUrl)
   },
+  async getDefaultSaveDir() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getDefaultSaveDir)
+    return typeof result === 'string' ? result : undefined
+  },
+  async pickDefaultSaveDir() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.pickDefaultSaveDir)
+    return typeof result === 'string' ? result : undefined
+  },
+  async openCreditUsage() {
+    await ipcRenderer.invoke(HOME_CHANNELS.openCreditUsage)
+  },
   async getAiSettings() {
     return (await ipcRenderer.invoke('ai:get-settings')) as AiSettings
   },
@@ -268,6 +279,9 @@ const tabsApi: TabsApi = {
     const listener = (_event: IpcRendererEvent, tabs: TabSummary[]) => handler(tabs)
     ipcRenderer.on(TABS_CHANNELS.changed, listener)
     return () => ipcRenderer.removeListener(TABS_CHANNELS.changed, listener)
+  },
+  async notifyChromePressed() {
+    await ipcRenderer.invoke(TABS_CHANNELS.chromePressed)
   },
 }
 

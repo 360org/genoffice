@@ -163,8 +163,7 @@ export const strings = {
     onbBody3: '无授权费用，无广告，无水印。',
     onbNote3: 'AI 功能可能消耗 360 CORP 积分。',
     onbBack: '上一步',
-    aiSettingsTitle: '设置',
-    settingsTitle: '设置',
+    aiSettingsTitle: 'AI 设置',
   },
   en: {
     navRecent: 'Recent',
@@ -324,8 +323,7 @@ export const strings = {
     onbBody3: 'No license fees. No ads. No watermarks.',
     onbNote3: 'AI features may consume 360 CORP credits.',
     onbBack: 'Back',
-    aiSettingsTitle: 'Settings',
-    settingsTitle: 'Settings',
+    aiSettingsTitle: 'AI Settings',
   },
   ja: {
     // Sidebar navigation

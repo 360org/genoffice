@@ -202,11 +202,11 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
         className="modal ai-settings-modal"
         role="dialog"
         aria-modal="true"
-        aria-label={t('settingsTitle')}
+        aria-label={t('aiSettingsTitle')}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ margin: 0 }}>{t('settingsTitle')}</h3>
+          <h3 style={{ margin: 0 }}>{t('aiSettingsTitle')}</h3>
           <button
             type="button"
             onClick={onClose}

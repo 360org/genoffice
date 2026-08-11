@@ -1027,7 +1027,7 @@ function AccountEntry({
               />
               <circle cx="8" cy="8" r="2.2" stroke="currentColor" strokeWidth="1.2" />
             </svg>
-            <span className="lang-row-label">{t('settingsTitle')}</span>
+            <span className="lang-row-label">{t('aiSettingsTitle')}</span>
           </button>
           {appVersion && (
             <button

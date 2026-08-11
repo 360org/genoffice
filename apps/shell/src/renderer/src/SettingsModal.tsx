@@ -235,11 +235,7 @@ export function SettingsModal({
                 {loggedIn && (
                   <Field
                     label={t('credits')}
-                    value={
-                      status?.creditBalance === undefined
-                        ? '—'
-                        : Math.floor(status.creditBalance).toLocaleString('en-US')
-                    }
+                    value="—"
                     action={
                       <button
                         className="set-btn"
