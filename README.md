@@ -7,13 +7,14 @@
 
 ## 🚀 Giới thiệu VuaOffice
 
-VuaOffice bao gồm 5 ứng dụng làm việc cốt lõi trên nền tảng Electron với kiến trúc chia sẻ chung tầng Engine:
+VuaOffice bao gồm các ứng dụng làm việc cốt lõi trên nền tảng Electron với kiến trúc chia sẻ chung tầng Engine:
 
 1. **VuaOffice Docs**: Trình soạn thảo văn bản `.docx` hỗ trợ AI patch theo đoạn, giữ nguyên bố cục ban đầu của tệp Word.
 2. **VuaOffice Sheets**: Trình quản lý bảng tính `.xlsx` mở rộng trên nhân Univer, tích hợp engine Rust sidecar (calamine + IronCalc), biểu đồ Konva, Pivot Table và Slicer.
 3. **VuaOffice Slides**: Trình trình chiếu `.pptx` hỗ trợ thiết kế slide, HarfBuzz text shaping và công cụ AI tạo nội dung.
 4. **VuaOffice PDF**: Trình xem & chỉnh sửa tệp `.pdf` hỗ trợ chú thích, biểu mẫu, chữ ký số và phân tích nội dung qua AI.
 5. **VuaOffice Shell**: Khung ứng dụng trung tâm quản lý tab, cài đặt tài khoản 360 CORP, AI Router và tự động cập nhật (Auto-Update).
+6. **VuaOffice Mail**: Trình quản lý Email & Lịch tích hợp AI (thay thế Microsoft Office 365 Outlook, đang được lên kế hoạch phát triển ở các phiên bản tiếp theo).
 
 ---
 
