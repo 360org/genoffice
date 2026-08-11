@@ -6,10 +6,6 @@ name: CI
 # by separate release automation — this workflow never builds installers.
 
 on:
-  push:
-    branches: [main, 'dev_*', 'release_*']
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
