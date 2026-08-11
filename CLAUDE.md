@@ -45,8 +45,19 @@ system mode).
   launch.
 - `useI18n()`'s `t` is not referentially stable; never put it in a hook
   dependency array. Store the key and translate at render time.
-- **Release artifact naming rules (mandatory)**: Artifact names must explicitly state OS and CPU architecture in a human-friendly format so users aren't confused:
-  - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `VuaOffice-${version}-macOS-Apple-Silicon-mac.zip`
-  - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `VuaOffice-${version}-macOS-Intel-mac.zip`
-  - Windows x64: `VuaOffice-${version}-Windows-x64-Setup.exe`
-  - Always keep `apps/shell/package.json` version in sync with root `package.json` before tagging release.
+## Release & Whitelabel Rules (mandatory)
+
+1. **Release artifact naming**: File names must clearly specify platform and architecture so users are never confused:
+   - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip`
+   - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `.zip`
+   - Windows x64: `VuaOffice-${version}-Windows-x64-Setup.exe`
+   - Linux: `VuaOffice-${version}.AppImage` / `vuaoffice_${version}_amd64.deb`
+2. **Synchronized version bumping**: Always bump version in BOTH root `package.json` AND `apps/shell/package.json` before creating release tag. The GitHub Actions release workflow validates that tag version matches `apps/shell/package.json` exactly.
+3. **Dual-remote Git push**: Always push commits and tags to both `origin` (GitLab) and `github` (GitHub). Never use `--no-verify` to bypass `.git/hooks/pre-push` unless executing the authorized publish flow.
+4. **Branding & Whitelabel integrity**:
+   - Sidebar logo: Use standalone icon `/whitelabel/logo/VuaOffice_Icon.svg` (28x28px) next to crisp brand text "VuaOffice", not co-axial stretched logo lockups.
+   - AI Panel & Ribbon titles: Must use "VuaOffice AI" title and badge, not legacy "Genspark" text or sparkle icons.
+   - Run `npm run whitelabel:apply` before every release build to ensure whitelabel transformation rules are clean.
+5. **AI Settings & Provider Modes**:
+   - Normal Mode: Connects directly via 360 CORP Gateway (`vuahethong.net` / `OmiRouter`).
+   - Developer Mode: Supports multi-endpoint selection including Hermes Agent (`https://hermes.vuahethong.com/v1`).
