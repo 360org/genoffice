@@ -281,8 +281,8 @@ const config = {
     // so apt sees the new packages as the same lineage. Homepage comes from
     // package.json "homepage"; the Package field is pinned in the deb block
     // below (packageName is a per-target option, rejected here by the schema).
-    maintainer: 'Mainfunc, Inc. <team@genspark.ai>',
-    vendor: 'Mainfunc, Inc. <team@genspark.ai>',
+    maintainer: '360 CORP',
+    vendor: '360 CORP',
     category: 'Office',
     icon: 'build/icon.png',
     // mac and win name the binary from productName; linux instead derives it
@@ -315,8 +315,8 @@ const config = {
   // install, breaking upgrades. Without it, fpm receives productName
   // "GenOffice" and only happens to downcase it to the right value.
   deb: {
-    artifactName: 'genoffice_${version}_${arch}.deb',
-    packageName: 'genoffice',
+    artifactName: 'vuaoffice_${version}_${arch}.deb',
+    packageName: 'vuaoffice',
   },
   // Same "@genoffice/shell" naming problem as deb: spell the artifact name
   // out (${arch} expands to the rpm arch string, x86_64) and pin the rpm
@@ -331,7 +331,7 @@ const config = {
   // (AppImage + deb) and the promote workflow needs no rpm alias.
   rpm: {
     artifactName: 'genoffice-${version}.${arch}.rpm',
-    packageName: 'genoffice',
+    packageName: 'vuaoffice',
     publish: null,
   },
   nsis: {

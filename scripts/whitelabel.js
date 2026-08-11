@@ -37,6 +37,22 @@ function applyWhitelabel() {
       /executableName:\s*'genoffice'/g,
       `executableName: '${config.executableName}'`,
     )
+    builderContent = builderContent.replace(
+      /artifactName:\s*'genoffice_\$\{version\}_\$\{arch\}\.deb'/g,
+      `artifactName: '${config.executableName}_\${version}_\${arch}.deb'`,
+    )
+    builderContent = builderContent.replace(
+      /packageName:\s*'genoffice'/g,
+      `packageName: '${config.executableName}'`,
+    )
+    builderContent = builderContent.replace(
+      /maintainer:\s*'Mainfunc, Inc\. <team@genspark\.ai>'/g,
+      `maintainer: '${config.author}'`,
+    )
+    builderContent = builderContent.replace(
+      /vendor:\s*'Mainfunc, Inc\. <team@genspark\.ai>'/g,
+      `vendor: '${config.author}'`,
+    )
     fs.writeFileSync(builderPath, builderContent, 'utf8')
     log('Patched electron-builder.cjs')
   }
