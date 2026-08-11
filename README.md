@@ -24,11 +24,11 @@ Tất cả các bản build phát hành được đóng gói và kiểm tra tự
 
 | Nền tảng                          | Yêu cầu hệ thống    | Tệp cài đặt                                                                                                         |
 | :-------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
-| **macOS** (Apple Silicon `arm64`) | macOS 11+           | [VuaOffice-0.6.0-arm64.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.0-arm64.dmg) |
-| **macOS** (Intel `x64`)           | macOS 11+           | [VuaOffice-0.6.0.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.0.dmg)             |
-| **Windows** (x64)                 | Windows 10 / 11     | [VuaOffice.Setup.0.6.0.exe](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice.Setup.0.6.0.exe) |
-| **Linux** (Debian / Ubuntu)       | x86_64, glibc 2.34+ | [vuaoffice_0.6.0_amd64.deb](https://github.com/360org/vuaoffice/releases/latest/download/vuaoffice_0.6.0_amd64.deb) |
-| **Linux** (AppImage)              | x86_64, FUSE 2      | [VuaOffice-0.6.0.AppImage](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.0.AppImage)   |
+| **macOS** (Apple Silicon `arm64`) | macOS 11+           | [VuaOffice-0.6.1-arm64.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.1-arm64.dmg) |
+| **macOS** (Intel `x64`)           | macOS 11+           | [VuaOffice-0.6.1.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.1.dmg)             |
+| **Windows** (x64)                 | Windows 10 / 11     | [VuaOffice.Setup.0.6.1.exe](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice.Setup.0.6.1.exe) |
+| **Linux** (Debian / Ubuntu)       | x86_64, glibc 2.34+ | [vuaoffice_0.6.1_amd64.deb](https://github.com/360org/vuaoffice/releases/latest/download/vuaoffice_0.6.1_amd64.deb) |
+| **Linux** (AppImage)              | x86_64, FUSE 2      | [VuaOffice-0.6.1.AppImage](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.1.AppImage)   |
 
 ---
 

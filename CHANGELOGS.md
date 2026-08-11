@@ -3,6 +3,13 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-08-11
+
+### Fixed
+- Sửa lỗi khởi động app (IPC handler exception) do thiếu channel `HOME_CHANNELS`.
+- Cập nhật chứng chỉ Apple Codesign & Notarization chính thức cho bản build macOS.
+- Đổi tên mục Cài đặt AI thành **Settings** với icon bánh răng.
+
 ## [0.6.0] - 2026-08-11
 
 ### Changed
