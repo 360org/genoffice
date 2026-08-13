@@ -659,6 +659,10 @@ export function App() {
   useEffect(() => {
     void window.desktop.getRecentFiles().then(setRecent)
     void window.desktop.getAiSettings().then(setSettings)
+    const unsub = window.desktop.onAiSettingsChanged?.(() => {
+      void window.desktop.getAiSettings().then(setSettings)
+    })
+    return () => unsub?.()
   }, [])
 
   useEffect(() => {

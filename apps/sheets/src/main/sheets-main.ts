@@ -2140,6 +2140,11 @@ export function registerSheetsAiIpc(): void {
     sessionFor(event)
     const settings = aiSettingsInputSchema.parse(input)
     writeJson(SETTINGS_PATH(), settings)
+    for (const wc of webContents.getAllWebContents()) {
+      if (!wc.isDestroyed()) {
+        wc.send('ai:settings-changed')
+      }
+    }
   })
 
   ipcMain.handle(IPC_CHANNELS.aiChat, async (event, input: unknown) => {

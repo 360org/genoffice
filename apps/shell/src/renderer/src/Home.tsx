@@ -1027,7 +1027,7 @@ function AccountEntry({
               />
               <circle cx="8" cy="8" r="2.2" stroke="currentColor" strokeWidth="1.2" />
             </svg>
-            <span className="lang-row-label">{t('aiSettingsTitle')}</span>
+            <span className="lang-row-label">{t('settings')}</span>
           </button>
           {appVersion && (
             <button
@@ -2279,7 +2279,9 @@ export function Home() {
           <div className="home-hero">
             <h1 className="hero-title">
               {greeting}
-              <span className="hero-ask">{t(greetAskKey)}</span>
+              <span className="hero-ask" style={{ fontSize: '15px', color: 'var(--text-muted)', display: 'block', marginTop: '6px', fontWeight: 'normal' }}>
+                The 100% Free Office Suite with Native AI & Agentic Workflows
+              </span>
             </h1>
           </div>
           {renderQuickCards()}

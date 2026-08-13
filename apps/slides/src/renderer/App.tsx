@@ -879,6 +879,10 @@ export function App() {
 
   useEffect(() => {
     void window.slidesApi.getAiSettings().then(setAiSettings)
+    const unsub = window.slidesApi.onAiSettingsChanged?.(() => {
+      void window.slidesApi.getAiSettings().then(setAiSettings)
+    })
+    return () => unsub?.()
   }, [])
 
   // Recent files for the start screen

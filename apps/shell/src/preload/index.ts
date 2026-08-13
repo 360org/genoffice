@@ -205,6 +205,11 @@ const homeApi: HomeApi = {
   async setAiSettings(settings) {
     await ipcRenderer.invoke('ai:set-settings', settings)
   },
+  onDeveloperModeChanged(handler) {
+    const listener = (_event: IpcRendererEvent, isDevMode: boolean) => handler(isDevMode)
+    ipcRenderer.on('app:developer-mode-changed', listener)
+    return () => ipcRenderer.removeListener('app:developer-mode-changed', listener)
+  },
 }
 
 function asCloudProjectsSnapshot(result: unknown): CloudProjectsSnapshot | null {

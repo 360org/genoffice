@@ -1735,6 +1735,7 @@ export const aiSettingsInputSchema = z
   .object({
     provider: z.string().min(1),
     providers: z.record(z.string(), aiProviderConfigSchema),
+    developerMode: z.boolean().optional(),
   })
   .strict()
 

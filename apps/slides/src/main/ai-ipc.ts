@@ -79,6 +79,11 @@ export function registerAiIpc(): void {
 
   ipcMain.handle('ai:set-settings', (_event, settings: AiSettings) => {
     writeJson(AI_SETTINGS_PATH(), settings)
+    for (const wc of webContents.getAllWebContents()) {
+      if (!wc.isDestroyed()) {
+        wc.send('ai:settings-changed')
+      }
+    }
   })
 
   ipcMain.handle('ai:stream', async (event, request: AiStreamRequest) => {

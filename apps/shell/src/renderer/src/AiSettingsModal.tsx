@@ -90,6 +90,10 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
   const loc = LOCAL_STRINGS[lang] || LOCAL_STRINGS.en
 
   useEffect(() => {
+    const unsub = window.aiOffice.onDeveloperModeChanged?.((isDevMode) => {
+      setIsDeveloperMode(isDevMode)
+    })
+
     window.aiOffice
       .getAiSettings()
       .then((res) => {
@@ -128,6 +132,10 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
       .catch((err) => {
         console.error('Failed to load AI settings', err)
       })
+
+    return () => {
+      unsub?.()
+    }
   }, [])
 
   if (!settings) {
@@ -191,10 +199,11 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
     window.aiOffice
       .setAiSettings(nextSettings)
       .then(() => {
-        onClose()
+        onClose() // Close the modal on successful save
       })
       .catch((err) => {
         console.error('Failed to save AI settings', err)
+        // Optionally, show an error message to the user here
       })
   }
 

@@ -1119,6 +1119,10 @@ export function App(): React.JSX.Element {
 
   useEffect(() => {
     void window.desktopApi.getAiSettings().then(setAiSettingsState)
+    const unsub = window.desktopApi.onAiSettingsChanged?.(() => {
+      void window.desktopApi.getAiSettings().then(setAiSettingsState)
+    })
+    return () => unsub?.()
   }, [])
 
   useEffect(() => {

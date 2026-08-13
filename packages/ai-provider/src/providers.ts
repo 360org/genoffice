@@ -175,5 +175,6 @@ export function resolveAiSettings(
   return {
     provider: stored.provider ?? defaults.provider,
     providers: { ...defaults.providers, ...stored.providers },
+    developerMode: stored.developerMode ?? defaults.developerMode,
   }
 }

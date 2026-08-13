@@ -37,12 +37,24 @@ files.forEach(rel => {
     c = c.replace(/aria-label="Genspark"/g, 'aria-label="VuaOffice AI"');
     changed = true;
   }
+  if (c.includes('aria-label="Genspark AI"')) {
+    c = c.replace(/aria-label="Genspark AI"/g, 'aria-label="VuaOffice AI"');
+    changed = true;
+  }
   if (c.includes('>Genspark<')) {
     c = c.replace(/>Genspark</g, '>VuaOffice AI<');
     changed = true;
   }
+  if (c.includes("aiPanelTitle: 'Genspark'")) {
+    c = c.replace(/aiPanelTitle:\s*'Genspark'/g, "aiPanelTitle: 'VuaOffice AI'");
+    changed = true;
+  }
+  if (c.includes('aiPanelTitle: "Genspark"')) {
+    c = c.replace(/aiPanelTitle:\s*"Genspark"/g, 'aiPanelTitle: "VuaOffice AI"');
+    changed = true;
+  }
   if (c.includes("ribbonAiAssistant: 'Genspark'")) {
-    c = c.replace(/ribbonAiAssistant:s*'Genspark'/g, "ribbonAiAssistant: 'VuaOffice AI'");
+    c = c.replace(/ribbonAiAssistant:\s*'Genspark'/g, "ribbonAiAssistant: 'VuaOffice AI'");
     changed = true;
   }
 

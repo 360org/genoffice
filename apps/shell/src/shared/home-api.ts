@@ -137,6 +137,8 @@ export interface HomeApi {
   getAiSettings(): Promise<AiSettings>
   /** save AI settings */
   setAiSettings(settings: AiSettings): Promise<void>
+  /** subscribe to developer mode changes from application menu */
+  onDeveloperModeChanged?(handler: (isDevMode: boolean) => void): () => void
 }
 
 export type CloudProjectKind = 'docs' | 'sheets' | 'slides'

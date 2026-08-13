@@ -328,6 +328,8 @@ const tMain = createI18n({
     errUnsupportedExt: '暂不支持 .{ext} 类型',
     copySuffix: '副本',
     menuHelp: '帮助',
+    menuTroubleshooting: '故障排除',
+    menuDeveloperMode: '启用开发者模式',
     thirdPartyNotices: '第三方软件声明',
     menuExportDocx: '导出为 Word…',
     pdfDocxLoginMsg: '导出为 Word 需要登录 360 CORP 账号。',
@@ -381,6 +383,8 @@ const tMain = createI18n({
     errUnsupportedExt: '.{ext} files are not supported',
     copySuffix: 'copy',
     menuHelp: 'Help',
+    menuTroubleshooting: 'Troubleshooting',
+    menuDeveloperMode: 'Enable Developer Mode',
     thirdPartyNotices: 'Third-Party Notices',
     menuExportDocx: 'Export as Word…',
     pdfDocxLoginMsg: 'Exporting as Word requires signing in to 360 CORP.',
@@ -438,6 +442,8 @@ const tMain = createI18n({
     errUnsupportedExt: '.{ext} 形式には対応していません',
     copySuffix: 'コピー',
     menuHelp: 'ヘルプ',
+    menuTroubleshooting: 'トラブルシューティング',
+    menuDeveloperMode: '開発者モードを有効にする',
     thirdPartyNotices: 'サードパーティソフトウェアに関する通知',
     menuExportDocx: 'Word として書き出す…',
     pdfDocxLoginMsg: 'Word への書き出しには 360 CORP へのログインが必要です。',
@@ -495,6 +501,8 @@ const tMain = createI18n({
     errUnsupportedExt: '.{ext} 형식은 지원되지 않습니다',
     copySuffix: '복사본',
     menuHelp: '도움말',
+    menuTroubleshooting: '문제 해결',
+    menuDeveloperMode: '개발자 모드 활성화',
     thirdPartyNotices: '타사 소프트웨어 고지',
     menuExportDocx: 'Word로 내보내기…',
     pdfDocxLoginMsg: 'Word로 내보내려면 360 CORP 로그인이 필요합니다.',
@@ -551,6 +559,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'les fichiers .{ext} ne sont pas pris en charge',
     copySuffix: 'copie',
     menuHelp: 'Aide',
+    menuTroubleshooting: 'Dépannage',
+    menuDeveloperMode: 'Activer le mode développeur',
     thirdPartyNotices: 'Mentions relatives aux logiciels tiers',
     menuExportDocx: 'Exporter en Word…',
     pdfDocxLoginMsg: "L'export en Word nécessite une connexion à 360 CORP.",
@@ -608,6 +618,8 @@ const tMain = createI18n({
     errUnsupportedExt: '.{ext}-Dateien werden nicht unterstützt',
     copySuffix: 'Kopie',
     menuHelp: 'Hilfe',
+    menuTroubleshooting: 'Fehlerbehebung',
+    menuDeveloperMode: 'Entwicklermodus aktivieren',
     thirdPartyNotices: 'Hinweise zu Drittanbietersoftware',
     menuExportDocx: 'Als Word exportieren…',
     pdfDocxLoginMsg: 'Für den Word-Export ist eine Anmeldung bei 360 CORP erforderlich.',
@@ -665,6 +677,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'los archivos .{ext} no son compatibles',
     copySuffix: 'copia',
     menuHelp: 'Ayuda',
+    menuTroubleshooting: 'Solución de problemas',
+    menuDeveloperMode: 'Habilitar modo desarrollador',
     thirdPartyNotices: 'Avisos de software de terceros',
     menuExportDocx: 'Exportar como Word…',
     pdfDocxLoginMsg: 'Para exportar como Word es necesario iniciar sesión en 360 CORP.',
@@ -722,6 +736,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'ไม่รองรับไฟล์ .{ext}',
     copySuffix: 'สำเนา',
     menuHelp: 'วิธีใช้',
+    menuTroubleshooting: 'การแก้ไขปัญหา',
+    menuDeveloperMode: 'เปิดใช้งานโหมดนักพัฒนา',
     thirdPartyNotices: 'ประกาศเกี่ยวกับซอฟต์แวร์ของบุคคลที่สาม',
     menuExportDocx: 'ส่งออกเป็น Word…',
     pdfDocxLoginMsg: 'การส่งออกเป็น Word ต้องเข้าสู่ระบบ 360 CORP',
@@ -777,6 +793,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'file .{ext} tidak didukung',
     copySuffix: 'salinan',
     menuHelp: 'Bantuan',
+    menuTroubleshooting: 'Pemecahan Masalah',
+    menuDeveloperMode: 'Aktifkan Mode Pengembang',
     thirdPartyNotices: 'Pemberitahuan Perangkat Lunak Pihak Ketiga',
     menuExportDocx: 'Ekspor sebagai Word…',
     pdfDocxLoginMsg: 'Ekspor sebagai Word memerlukan login ke 360 CORP.',
@@ -834,6 +852,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'файлы .{ext} не поддерживаются',
     copySuffix: 'копия',
     menuHelp: 'Справка',
+    menuTroubleshooting: 'Устранение неполадок',
+    menuDeveloperMode: 'Включить режим разработчика',
     thirdPartyNotices: 'Уведомления о стороннем ПО',
     menuExportDocx: 'Экспортировать в Word…',
     pdfDocxLoginMsg: 'Для экспорта в Word требуется вход в 360 CORP.',
@@ -891,6 +911,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'ملفات .{ext} غير مدعومة',
     copySuffix: 'نسخة',
     menuHelp: 'تعليمات',
+    menuTroubleshooting: 'استكشاف الأخطاء وإصلاحها',
+    menuDeveloperMode: 'تمكين وضع المطور',
     thirdPartyNotices: 'إشعارات برامج الجهات الخارجية',
     menuExportDocx: 'تصدير كملف Word…',
     pdfDocxLoginMsg: 'يتطلب التصدير كملف Word تسجيل الدخول إلى 360 CORP.',
@@ -946,6 +968,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'arquivos .{ext} não são suportados',
     copySuffix: 'cópia',
     menuHelp: 'Ajuda',
+    menuTroubleshooting: 'Solução de problemas',
+    menuDeveloperMode: 'Habilitar modo desenvolvedor',
     thirdPartyNotices: 'Avisos de software de terceiros',
     menuExportDocx: 'Exportar como Word…',
     pdfDocxLoginMsg: 'Exportar como Word requer login no 360 CORP.',
@@ -1003,6 +1027,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'i file .{ext} non sono supportati',
     copySuffix: 'copia',
     menuHelp: 'Aiuto',
+    menuTroubleshooting: 'Risoluzione dei problemi',
+    menuDeveloperMode: 'Abilita modalità sviluppatore',
     thirdPartyNotices: 'Note sul software di terze parti',
     menuExportDocx: 'Esporta come Word…',
     pdfDocxLoginMsg: 'Per esportare come Word è necessario accedere a 360 CORP.',
@@ -1060,6 +1086,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'pliki .{ext} nie są obsługiwane',
     copySuffix: 'kopia',
     menuHelp: 'Pomoc',
+    menuTroubleshooting: 'Rozwiązywanie problemów',
+    menuDeveloperMode: 'Włącz tryb dewelopera',
     thirdPartyNotices: 'Informacje o oprogramowaniu innych firm',
     menuExportDocx: 'Eksportuj jako Word…',
     pdfDocxLoginMsg: 'Eksport do formatu Word wymaga zalogowania do 360 CORP.',
@@ -1117,6 +1145,8 @@ const tMain = createI18n({
     errUnsupportedExt: '.{ext}-bestanden worden niet ondersteund',
     copySuffix: 'kopie',
     menuHelp: 'Help',
+    menuTroubleshooting: 'Probleemoplossing',
+    menuDeveloperMode: 'Ontwikkelaarsmodus inschakelen',
     thirdPartyNotices: 'Kennisgevingen over software van derden',
     menuExportDocx: 'Exporteren als Word…',
     pdfDocxLoginMsg: 'Exporteren als Word vereist inloggen bij 360 CORP.',
@@ -1174,6 +1204,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'fail .{ext} tidak disokong',
     copySuffix: 'salinan',
     menuHelp: 'Bantuan',
+    menuTroubleshooting: 'Penyelesaian Masalah',
+    menuDeveloperMode: 'Pilih Mod Pembangun',
     thirdPartyNotices: 'Notis Perisian Pihak Ketiga',
     menuExportDocx: 'Eksport sebagai Word…',
     pdfDocxLoginMsg: 'Eksport sebagai Word memerlukan log masuk ke 360 CORP.',
@@ -1231,6 +1263,8 @@ const tMain = createI18n({
     errUnsupportedExt: 'קובצי .{ext} אינם נתמכים',
     copySuffix: 'עותק',
     menuHelp: 'עזרה',
+    menuTroubleshooting: 'פתרון בעיות',
+    menuDeveloperMode: 'הפעלת מצב מפתח',
     thirdPartyNotices: 'הודעות על תוכנות צד שלישי',
     menuExportDocx: 'ייצוא כ-Word…',
     pdfDocxLoginMsg: 'ייצוא כ-Word דורש התחברות ל-360 CORP.',
@@ -1285,6 +1319,8 @@ const tMain = createI18n({
     errUnsupportedExt: '.{ext} फ़ाइलें समर्थित नहीं हैं',
     copySuffix: 'प्रतिलिपि',
     menuHelp: 'सहायता',
+    menuTroubleshooting: 'त्रुटि निवारण',
+    menuDeveloperMode: 'डेवलपर मोड सक्षम करें',
     thirdPartyNotices: 'तृतीय-पक्ष सॉफ़्टवेयर सूचनाएँ',
     menuExportDocx: 'Word के रूप में निर्यात करें…',
     pdfDocxLoginMsg: 'Word के रूप में निर्यात करने के लिए 360 CORP में लॉगिन आवश्यक है।',
@@ -1342,6 +1378,8 @@ const tMain = createI18n({
     errUnsupportedExt: '暫不支援 .{ext} 類型',
     copySuffix: '副本',
     menuHelp: '說明',
+    menuTroubleshooting: '疑難排解',
+    menuDeveloperMode: '啟用開發者模式',
     thirdPartyNotices: '第三方軟體聲明',
     menuExportDocx: '匯出為 Word…',
     pdfDocxLoginMsg: '匯出為 Word 需要登入 360 CORP 帳號。',
@@ -2175,6 +2213,39 @@ function registerTabsIpc(): void {
 
 // ---- home menu ----
 
+function helpMenuSubmenu(extraItems: MenuItemConstructorOptions[] = []): MenuItemConstructorOptions[] {
+  const savedSettings = readAppSettings(APP_SETTINGS_PATH())
+  const isDevMode = savedSettings.developerMode === true
+
+  return [
+    ...extraItems,
+    {
+      label: tm('menuTroubleshooting'),
+      submenu: [
+        {
+          label: tm('menuDeveloperMode'),
+          type: 'checkbox',
+          checked: isDevMode,
+          click: (menuItem) => {
+            const enabled = menuItem.checked
+            writeAppSetting(APP_SETTINGS_PATH(), 'developerMode', enabled)
+            for (const wc of webContents.getAllWebContents()) {
+              if (!wc.isDestroyed()) {
+                wc.send('ai:settings-changed')
+                wc.send('app:developer-mode-changed', enabled)
+              }
+            }
+            if (tabManager) {
+              const active = tabManager.activeTab()
+              if (active) applyMenuFor(active.kind)
+            }
+          },
+        },
+      ],
+    },
+  ]
+}
+
 async function openFileViaDialog(): Promise<void> {
   const win = shellWindow ?? BrowserWindow.getFocusedWindow()
   if (!win) return
@@ -2219,7 +2290,9 @@ function buildHomeMenu(): void {
     {
       role: 'help',
       label: tm('menuHelp'),
-      submenu: [{ label: tm('thirdPartyNotices'), click: () => void openThirdPartyNotices() }],
+      submenu: helpMenuSubmenu([
+        { label: tm('thirdPartyNotices'), click: () => void openThirdPartyNotices() },
+      ]),
     },
   ]
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
@@ -2277,7 +2350,9 @@ function buildPdfMenu(): void {
     {
       role: 'help',
       label: tm('menuHelp'),
-      submenu: [{ label: tm('thirdPartyNotices'), click: () => void openThirdPartyNotices() }],
+      submenu: helpMenuSubmenu([
+        { label: tm('thirdPartyNotices'), click: () => void openThirdPartyNotices() },
+      ]),
     },
   ]
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
@@ -2355,7 +2430,9 @@ function buildMarkdownMenu(): void {
     {
       role: 'help',
       label: tm('menuHelp'),
-      submenu: [{ label: tm('thirdPartyNotices'), click: () => void openThirdPartyNotices() }],
+      submenu: helpMenuSubmenu([
+        { label: tm('thirdPartyNotices'), click: () => void openThirdPartyNotices() },
+      ]),
     },
   ]
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))

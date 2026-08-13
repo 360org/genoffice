@@ -403,4 +403,8 @@ export class TabManager {
       ? { id: tab.id, webContents: tab.view.webContents, filePath: tab.filePath }
       : undefined
   }
+
+  activeTab(): { id: string; kind: TabKind; filePath?: string } | undefined {
+    return this.tabs.find((t) => t.id === this.activeId)
+  }
 }
