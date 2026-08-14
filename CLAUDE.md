@@ -48,10 +48,10 @@ system mode).
 ## Release & Whitelabel Rules (mandatory)
 
 1. **Tuyệt đối KHÔNG tự động build khi commit/push lên `main`**: Mọi commit đẩy lên `main` chỉ để lưu lịch sử mã nguồn. CI/Build runner tuyệt đối KHÔNG được phép tự động chạy trừ khi Sếp yêu cầu trực tiếp.
-2. **Quy trình Release CHỈ thực hiện khi Sếp yêu cầu rõ ràng**: Chỉ khi Sếp gõ lệnh/yêu cầu trực tiếp (VD: *"release cho anh version 0.6.2"*, *"tạo release v0.6.2"*), em mới tiến hành các bước:
+2. **Quy trình Release CHỈ thực hiện khi Sếp yêu cầu rõ ràng**: Chỉ khi Sếp gõ lệnh/yêu cầu trực tiếp (VD: *"tag & release"*, *"release cho anh version 0.6.4"*, *"tạo release v0.6.4"*), em mới tiến hành các bước:
    - Bump version ở `package.json` & `apps/shell/package.json`.
    - Commit code thay đổi version.
-   - Tạo release tag `v*` và push tag lên remote (`git tag v0.6.2 && git push github v0.6.2`).
+   - Tạo release tag `v*` và push tag lên remote (`git tag v0.6.4 && git push github v0.6.4`).
    - GitHub Actions mới được kích hoạt để build release artifacts đóng gói sản phẩm.
 3. **Release artifact naming**: File names must clearly specify platform and architecture so users are never confused:
    - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip`
