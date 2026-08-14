@@ -3,6 +3,17 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.14] - 2026-08-14
+
+### Changed
+- Sửa slogan welcome màn hình chính thành "The 100% Free Office Suite with Native AI & Agentic Workflows".
+- Di chuyển nút "Enable Developer Mode" sang menu Help > Troubleshooting.
+- Cập nhật quy chuẩn đồng bộ git-sync: Tự động hoá việc tạo Publish Release và push tag lên GitHub.
+
+### Fixed
+- Sửa lỗi không lưu được cài đặt AI do thiếu thuộc tính `developerMode` trong Zod validation schema của backend.
+- Sửa lỗi Settings modal không tự động đóng sau khi bấm Save.
+
 ## [0.6.4] - 2026-08-13
 
 ### Changed
