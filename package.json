@@ -43,6 +43,7 @@
     "dist:linux": "npm run notices && npm run build:all && npm run dist:linux -w @genoffice/shell"
   },
   "dependencies": {
+    "glob": "^13.0.6",
     "ws": "^8.21.1"
   },
   "devDependencies": {
