@@ -50,6 +50,7 @@ jobs:
         shell: bash
         run: |
           echo "=== 2. Verifying Whitelabel engine application ==="
+          npm ci
           node scripts/whitelabel.js apply
 
           # Verify key files are customized properly without being overwritten
