@@ -36,6 +36,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: '打开本地文件',
     greetMorning: '早上好',
     greetAfternoon: '下午好',
@@ -164,6 +165,7 @@ export const strings = {
     onbNote3: 'AI 功能可能消耗 360 CORP 积分。',
     onbBack: '上一步',
     aiSettingsTitle: 'AI 设置',
+    checkForUpdates: '检查更新…',
   },
   en: {
     navRecent: 'Recent',
@@ -200,6 +202,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Open Local File',
     greetMorning: 'Good morning',
     greetAfternoon: 'Good afternoon',
@@ -324,6 +327,7 @@ export const strings = {
     onbNote3: 'AI features may consume 360 CORP credits.',
     onbBack: 'Back',
     aiSettingsTitle: 'AI Settings',
+    checkForUpdates: 'Check for Updates…',
   },
   ja: {
     // Sidebar navigation
@@ -364,6 +368,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'ローカルファイルを開く',
     greetMorning: 'おはようございます',
     greetAfternoon: 'こんにちは',
@@ -500,6 +505,7 @@ export const strings = {
     onbNote3: 'AI 機能は 360 CORP クレジットを消費する場合があります。',
     onbBack: '戻る',
     aiSettingsTitle: 'AI 設定',
+    checkForUpdates: 'アップデートを確認…',
   },
   ko: {
     // Sidebar navigation
@@ -539,6 +545,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: '로컬 파일 열기',
     greetMorning: '좋은 아침이에요',
     greetAfternoon: '안녕하세요',
@@ -671,6 +678,7 @@ export const strings = {
     onbNote3: 'AI 기능은 360 CORP 크레딧을 소모할 수 있습니다.',
     onbBack: '이전',
     aiSettingsTitle: 'AI 설정',
+    checkForUpdates: '업데이트 확인…',
   },
   fr: {
     // Sidebar navigation
@@ -712,6 +720,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Ouvrir un fichier local',
     greetMorning: 'Bonjour',
     greetAfternoon: 'Bonjour',
@@ -847,6 +856,7 @@ export const strings = {
     onbNote3: 'Les fonctions IA peuvent consommer des crédits 360 CORP.',
     onbBack: 'Retour',
     aiSettingsTitle: 'Paramètres IA',
+    checkForUpdates: 'Rechercher des mises à jour…',
   },
   de: {
     // Sidebar navigation
@@ -888,6 +898,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Lokale Datei öffnen',
     greetMorning: 'Guten Morgen',
     greetAfternoon: 'Guten Tag',
@@ -1025,6 +1036,7 @@ export const strings = {
     onbNote3: 'KI-Funktionen können 360 CORP-Credits verbrauchen.',
     onbBack: 'Zurück',
     aiSettingsTitle: 'KI-Einstellungen',
+    checkForUpdates: 'Nach Updates suchen…',
   },
   es: {
     // Sidebar navigation
@@ -1066,6 +1078,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Abrir archivo local',
     greetMorning: 'Buenos días',
     greetAfternoon: 'Buenas tardes',
@@ -1202,6 +1215,7 @@ export const strings = {
     onbNote3: 'Las funciones de IA pueden consumir créditos de 360 CORP.',
     onbBack: 'Atrás',
     aiSettingsTitle: 'Configuración de IA',
+    checkForUpdates: 'Buscar actualizaciones…',
   },
   th: {
     // Sidebar navigation
@@ -1241,6 +1255,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'เปิดไฟล์ในเครื่อง',
     greetMorning: 'สวัสดีตอนเช้า',
     greetAfternoon: 'สวัสดีตอนบ่าย',
@@ -1372,6 +1387,7 @@ export const strings = {
     onbNote3: 'ฟีเจอร์ AI อาจใช้เครดิต 360 CORP',
     onbBack: 'ย้อนกลับ',
     aiSettingsTitle: 'การตั้งค่า AI',
+    checkForUpdates: 'ตรวจหาการอัปเดต…',
   },
   id: {
     // Sidebar navigation
@@ -1412,6 +1428,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Buka File Lokal',
     greetMorning: 'Selamat pagi',
     greetAfternoon: 'Selamat siang',
@@ -1545,6 +1562,7 @@ export const strings = {
     onbNote3: 'Fitur AI dapat menggunakan kredit 360 CORP.',
     onbBack: 'Kembali',
     aiSettingsTitle: 'Pengaturan AI',
+    checkForUpdates: 'Periksa Pembaruan…',
   },
   ru: {
     // Sidebar navigation
@@ -1584,6 +1602,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Открыть локальный файл',
     greetMorning: 'Доброе утро',
     greetAfternoon: 'Добрый день',
@@ -1718,6 +1737,7 @@ export const strings = {
     onbNote3: 'Функции ИИ могут расходовать кредиты 360 CORP.',
     onbBack: 'Назад',
     aiSettingsTitle: 'Параметры ИИ',
+    checkForUpdates: 'Проверить обновления…',
   },
   ar: {
     // Sidebar navigation
@@ -1757,6 +1777,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'فتح ملف محلي',
     greetMorning: 'صباح الخير',
     greetAfternoon: 'مساء الخير',
@@ -1889,6 +1910,7 @@ export const strings = {
     onbNote3: 'قد تستهلك ميزات الذكاء الاصطناعي أرصدة 360 CORP.',
     onbBack: 'رجوع',
     aiSettingsTitle: 'إعدادات الذكاء الاصطناعي',
+    checkForUpdates: 'التحقق من وجود تحديثات…',
   },
   pt: {
     navRecent: 'Recentes',
@@ -1926,6 +1948,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Abrir arquivo local',
     greetMorning: 'Bom dia',
     greetAfternoon: 'Boa tarde',
@@ -2053,6 +2076,7 @@ export const strings = {
     onbNote3: 'Os recursos de IA podem consumir créditos 360 CORP.',
     onbBack: 'Voltar',
     aiSettingsTitle: 'Configurações de IA',
+    checkForUpdates: 'Verificar atualizações…',
   },
   it: {
     navRecent: 'Recenti',
@@ -2090,6 +2114,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Apri file locale',
     greetMorning: 'Buongiorno',
     greetAfternoon: 'Buon pomeriggio',
@@ -2217,6 +2242,7 @@ export const strings = {
     onbNote3: 'Le funzioni IA possono consumare crediti 360 CORP.',
     onbBack: 'Indietro',
     aiSettingsTitle: 'Impostazioni IA',
+    checkForUpdates: 'Controlla aggiornamenti…',
   },
   pl: {
     navRecent: 'Ostatnie',
@@ -2253,6 +2279,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Otwórz plik lokalny',
     greetMorning: 'Dzień dobry',
     greetAfternoon: 'Dzień dobry',
@@ -2380,6 +2407,7 @@ export const strings = {
     onbNote3: 'Funkcje AI mogą zużywać kredyty 360 CORP.',
     onbBack: 'Wstecz',
     aiSettingsTitle: 'Ustawienia AI',
+    checkForUpdates: 'Sprawdź aktualizacje…',
   },
   nl: {
     navRecent: 'Recent',
@@ -2418,6 +2446,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Lokaal bestand openen',
     greetMorning: 'Goedemorgen',
     greetAfternoon: 'Goedemiddag',
@@ -2544,6 +2573,7 @@ export const strings = {
     onbNote3: 'AI-functies kunnen 360 CORP-credits verbruiken.',
     onbBack: 'Terug',
     aiSettingsTitle: 'AI-instellingen',
+    checkForUpdates: 'Controleren op updates…',
   },
   ms: {
     navRecent: 'Terkini',
@@ -2581,6 +2611,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'Buka Fail Setempat',
     greetMorning: 'Selamat pagi',
     greetAfternoon: 'Selamat tengah hari',
@@ -2707,6 +2738,7 @@ export const strings = {
     onbNote3: 'Ciri AI mungkin menggunakan kredit 360 CORP.',
     onbBack: 'Kembali',
     aiSettingsTitle: 'Tetapan AI',
+    checkForUpdates: 'Check for Updates…',
   },
   he: {
     navRecent: 'אחרונים',
@@ -2743,6 +2775,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'פתיחת קובץ מקומי',
     greetMorning: 'בוקר טוב',
     greetAfternoon: 'צהריים טובים',
@@ -2866,6 +2899,7 @@ export const strings = {
     onbNote3: 'תכונות AI עשויות לצרוך קרדיטים של 360 CORP.',
     onbBack: 'חזרה',
     aiSettingsTitle: 'הגדרות AI',
+    checkForUpdates: 'Check for Updates…',
   },
   hi: {
     navRecent: 'हाल के',
@@ -2902,6 +2936,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: 'स्थानीय फ़ाइल खोलें',
     greetMorning: 'सुप्रभात',
     greetAfternoon: 'नमस्ते',
@@ -3030,6 +3065,7 @@ export const strings = {
     onbNote3: 'AI सुविधाएँ 360 CORP क्रेडिट खर्च कर सकती हैं।',
     onbBack: 'वापस',
     aiSettingsTitle: 'AI सेटिंग्स',
+    checkForUpdates: 'अपडेट के लिए जाँचें…',
   },
   'zh-TW': {
     navRecent: '最近',
@@ -3065,6 +3101,7 @@ export const strings = {
     newSheet: 'AI Sheets',
     newSlide: 'AI Slides',
     newMarkdown: 'AI Markdown',
+    newMail: 'VuaMail',
     openLocal: '開啟本機檔案',
     greetMorning: '早安',
     greetAfternoon: '午安',
@@ -3186,5 +3223,6 @@ export const strings = {
     onbNote3: 'AI 功能可能消耗 360 CORP 點數。',
     onbBack: '上一步',
     aiSettingsTitle: 'AI 設定',
+    checkForUpdates: '檢查更新…',
   },
 } as const

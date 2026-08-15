@@ -3,14 +3,28 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-08-15
+## [0.6.7] - 2026-08-15
 
 ### Added
-- Thêm tính năng kiểm tra cập nhật thủ công `checkForUpdatesManual()` trong `apps/shell/src/main/updater.ts` hiển thị thông báo trạng thái cập nhật trực tiếp cho người dùng.
+- **Kiểm tra Cập nhật Thủ công (Manual Check for Updates)**:
+  - Bổ sung hàm `checkForUpdatesManual()` trong `apps/shell/src/main/updater.ts` với hộp thoại phản hồi trực quan (phân biệt bản dev và production release, thông báo khi đã ở bản mới nhất hoặc lỗi mạng).
+  - Tích hợp mục "Check for Updates…" vào Menu hệ thống: macOS Application Menu (ngay dưới `About VuaOffice`) và menu `Help` trên Windows/Linux.
+  - Tích hợp nút "Check for Updates…" vào Account dropdown menu tại màn hình chính `Home.tsx`.
+- **Hỗ trợ Nhà cung cấp AI Hermes Agent**:
+  - Bổ sung provider `hermes` với endpoint mặc định `https://hermes.vuahethong.com/v1` trong `@genoffice/ai-provider`.
+
+### Changed
+- **Đồng bộ Tài nguyên Icon & Logo Thương hiệu VuaOffice**:
+  - Chuẩn hoá toàn bộ icon ứng dụng từ `whitelabel/Logo/vuaoffice-icon.svg` và `whitelabel/Logo/Vua Office Icon.png`.
+  - Tạo lại bộ icon native macOS đa độ phân giải (`whitelabel/assets/icon.icns`), Windows (`whitelabel/assets/icon.ico`) và PNG assets (`whitelabel/assets/icon.png`, `whitelabel/assets/app-icon.png`).
+  - Đồng bộ icon vector và raster sang toàn bộ các app con (`apps/docs`, `apps/sheets`, `apps/slides`, `apps/pdf`, `apps/markdown`, `apps/shell`).
+- **Tối ưu Cấu hình Developer Mode**:
+  - Di chuyển tuỳ chọn "Enable Developer Mode" sang menu `Help > Troubleshooting > Enable Developer Mode` dạng checkbox.
+  - Đồng bộ trạng thái developer mode theo thời gian thực giữa Main process và Renderer qua IPC (`app:developer-mode-changed`).
 
 ### Fixed
 - Sửa lỗi thiếu import biến toàn cục `webContents` trong `apps/docs/src/main/docs-main.ts`, `apps/sheets/src/main/sheets-main.ts` và `apps/slides/src/main/ai-ipc.ts`.
-- Bổ sung tài nguyên logo thương hiệu và icon vector VuaOffice (`packages/ui/src/VuaOfficeIcon.tsx`, `whitelabel/Logo/vuaoffice-icon.svg`).
+- Sửa URL auto-update fallback download từ `genspark-ai/genoffice` sang `360org/vuaoffice`.
 
 ## [0.6.6] - 2026-08-15
 

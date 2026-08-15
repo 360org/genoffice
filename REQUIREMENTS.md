@@ -50,6 +50,13 @@
   - Tích hợp tính năng AI: tóm tắt chuỗi thư (Thread Summary), soạn thư thông minh (AI Compose Draft) và trả lời nhanh (Smart Reply).
   - Tương thích 100% Theme Semantic Tokens (Light/Dark mode) của VuaOffice.
 
+### 2.4 Tính năng Kiểm tra Cập nhật Thủ công (Manual Check for Updates)
+- **Mô tả:** Cho phép người dùng chủ động kiểm tra phiên bản mới từ UI hoặc menu hệ thống.
+- **Tiêu chí nghiệm thu:**
+  - Tích hợp menu `Check for Updates…` trên macOS Application Menu và Windows/Linux Help menu.
+  - Tích hợp nút kiểm tra trong Account dropdown menu tại màn hình chính `Home.tsx`.
+  - Phản hồi trực quan bằng Native Dialog khi đã ở bản mới nhất hoặc có lỗi kết nối; giữ im lặng đối với kiểm tra ngầm định kỳ.
+
 ## 3. Yêu cầu phi chức năng (Non-Functional Requirements)
 
 ### 3.1 Hiệu năng

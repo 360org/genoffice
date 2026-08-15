@@ -51,6 +51,21 @@ const FILE_ICONS: Record<string, string> = {
 }
 
 function FileBadge({ ext, size }: { ext: string; size: number }) {
+  if (ext === 'eml') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 240 240" aria-hidden="true">
+        <rect width="240" height="240" rx="48" fill="#0078D4" />
+        <path
+          d="M52 76L120 128L188 76"
+          stroke="#ffffff"
+          strokeWidth="14"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <rect x="52" y="76" width="136" height="88" rx="8" stroke="#ffffff" strokeWidth="14" fill="none" />
+      </svg>
+    )
+  }
   const icon = FILE_ICONS[ext]
   if (icon) {
     return <img src={icon} width={size} height={size} alt="" aria-hidden="true" />
@@ -1029,6 +1044,37 @@ function AccountEntry({
             </svg>
             <span className="lang-row-label">{t('settings')}</span>
           </button>
+          <button
+            className="account-menu-item lang-row"
+            role="menuitem"
+            onClick={() => {
+              closeMenu()
+              void window.aiOffice.checkForUpdates()
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M8 2.5a5.5 5.5 0 1 0 5.2 7.3"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M13.5 2.5v3.5h-3.5"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M13.2 6A5.5 5.5 0 0 0 3.8 4.2"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="lang-row-label">{t('checkForUpdates')}</span>
+          </button>
           {appVersion && (
             <button
               className="account-menu-item lang-row"
@@ -1881,11 +1927,16 @@ export function Home() {
     )
   }
 
+  const handleNewMail = () => {
+    void window.aiOffice.newMail()
+  }
+
   const NEW_ITEMS = [
     { ext: 'docx', title: t('newDoc'), sub: '.docx', action: handleNewDoc },
     { ext: 'xlsx', title: t('newSheet'), sub: '.xlsx', action: handleNewSheet },
     { ext: 'pptx', title: t('newSlide'), sub: '.pptx', action: handleNewSlide },
     { ext: 'md', title: t('newMarkdown'), sub: '.md', action: handleNewMarkdown },
+    { ext: 'eml', title: t('newMail'), sub: 'Outlook UI', action: handleNewMail },
   ]
 
   function renderQuickCards() {

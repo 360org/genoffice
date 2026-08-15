@@ -87,6 +87,9 @@ const homeApi: HomeApi = {
   async newMarkdown(opts) {
     await ipcRenderer.invoke(HOME_CHANNELS.newMarkdown, opts)
   },
+  async newMail() {
+    await ipcRenderer.invoke(HOME_CHANNELS.newMail)
+  },
   async removeRecent(paths) {
     await ipcRenderer.invoke(HOME_CHANNELS.removeRecent, paths)
   },
@@ -204,6 +207,9 @@ const homeApi: HomeApi = {
   },
   async setAiSettings(settings) {
     await ipcRenderer.invoke('ai:set-settings', settings)
+  },
+  async checkForUpdates() {
+    await ipcRenderer.invoke(HOME_CHANNELS.checkForUpdates)
   },
   onDeveloperModeChanged(handler) {
     const listener = (_event: IpcRendererEvent, isDevMode: boolean) => handler(isDevMode)

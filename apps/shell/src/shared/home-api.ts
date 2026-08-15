@@ -79,6 +79,8 @@ export interface HomeApi {
   newSlide(opts?: { projectId?: string }): Promise<void>
   /** open a blank markdown editor tab */
   newMarkdown(opts?: { projectId?: string }): Promise<void>
+  /** open VuaOffice Mail tab */
+  newMail(): Promise<void>
   /** drop entries from the recent list (does not touch the files) */
   removeRecent(paths: string[]): Promise<void>
   /** reveal the file in Finder / Explorer */
@@ -137,6 +139,8 @@ export interface HomeApi {
   getAiSettings(): Promise<AiSettings>
   /** save AI settings */
   setAiSettings(settings: AiSettings): Promise<void>
+  /** check for software updates manually */
+  checkForUpdates(): Promise<void>
   /** subscribe to developer mode changes from application menu */
   onDeveloperModeChanged?(handler: (isDevMode: boolean) => void): () => void
 }
@@ -237,6 +241,7 @@ export const HOME_CHANNELS = {
   newSheet: 'home:new-sheet',
   newSlide: 'home:new-slide',
   newMarkdown: 'home:new-markdown',
+  newMail: 'home:new-mail',
   removeRecent: 'home:remove-recent',
   revealPath: 'home:reveal-path',
   renameFile: 'home:rename-file',
@@ -266,6 +271,7 @@ export const HOME_CHANNELS = {
   openCreditUsage: 'home:open-credit-usage',
   getAiSettings: 'home:get-ai-settings',
   setAiSettings: 'home:set-ai-settings',
+  checkForUpdates: 'home:check-for-updates',
 } as const
 
 export const PROJECT_CHANNELS = {

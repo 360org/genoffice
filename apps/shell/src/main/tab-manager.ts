@@ -29,6 +29,7 @@ import {
   setActiveSlidesWebContents,
   slidesIsDirty,
 } from '../../../slides/src/main/slides-main'
+import { createMailView } from '../../../mail/src/main/mail-main'
 import type { TabKind, TabSummary } from '../shared/tabs-api'
 
 interface TabRecord {
@@ -205,6 +206,27 @@ export class TabManager {
       view,
       title: openPath ? basename(openPath) : this.untitled('markdown', 'AI Markdown'),
       filePath: openPath,
+    })
+    this.activateTab(id)
+    return id
+  }
+
+  openMailTab(): string {
+    const existing = this.tabs.find((t) => t.kind === 'mail')
+    if (existing) {
+      this.activateTab(existing.id)
+      return existing.id
+    }
+    const view = createMailView()
+    const id = `t${this.nextId++}`
+    this.shellWindow.contentView.addChildView(view)
+    view.setVisible(false)
+    this.trackHtmlFullScreen(id, view)
+    this.tabs.push({
+      id,
+      kind: 'mail',
+      view,
+      title: 'VuaOffice Mail',
     })
     this.activateTab(id)
     return id

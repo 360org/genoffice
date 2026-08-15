@@ -1,0 +1,396 @@
+/* VuaMail Outlook UI theme styling — complies with VuaOffice tokens.css */
+
+.vuamail-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--surface);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Outlook Top Header */
+.vuamail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  background-color: #0078d4;
+  color: #ffffff;
+  padding: 0 16px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.vuamail-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.vuamail-search {
+  flex: 1;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 12px;
+  gap: 8px;
+}
+
+.vuamail-search input {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  width: 100%;
+  outline: none;
+  font-size: 13px;
+}
+
+.vuamail-search input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Outlook Ribbon Toolbar */
+.vuamail-ribbon {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  background-color: var(--surface-subtle);
+  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ribbon-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ribbon-btn:hover {
+  background-color: var(--hover);
+  border-color: var(--border);
+}
+
+.ribbon-btn.primary {
+  background-color: #0078d4;
+  color: #ffffff;
+}
+
+.ribbon-btn.primary:hover {
+  background-color: #106ebe;
+}
+
+.ribbon-divider {
+  width: 1px;
+  height: 20px;
+  background-color: var(--border);
+  margin: 0 4px;
+}
+
+/* 3-Column Outlook Main Body */
+.vuamail-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Column 0: App Rail */
+.vuamail-apprail {
+  width: 48px;
+  background-color: var(--surface-subtle);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.apprail-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.apprail-btn:hover {
+  background-color: var(--hover);
+  color: var(--text-primary);
+}
+
+.apprail-btn.active {
+  background-color: var(--hover);
+  color: #0078d4;
+  position: relative;
+}
+
+.apprail-btn.active::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background-color: #0078d4;
+  border-radius: 2px;
+}
+
+/* Column 1: Folder Tree */
+.vuamail-folders {
+  width: 220px;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 8px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.folder-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 10px;
+  margin-top: 6px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.folder-item:hover {
+  background-color: var(--hover);
+}
+
+.folder-item.active {
+  background-color: var(--hover);
+  font-weight: 600;
+  color: #0078d4;
+}
+
+.folder-unread {
+  background-color: #0078d4;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* Column 2: Message List */
+.vuamail-msglist {
+  width: 340px;
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.msglist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.msglist-tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.msg-tab {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding-bottom: 4px;
+}
+
+.msg-tab.active {
+  color: var(--text-primary);
+  border-bottom: 2px solid #0078d4;
+}
+
+.msglist-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.msg-card {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.1s;
+  position: relative;
+}
+
+.msg-card:hover {
+  background-color: var(--hover);
+}
+
+.msg-card.active {
+  background-color: var(--hover);
+  border-left: 3px solid #0078d4;
+}
+
+.msg-card.unread .msg-sender,
+.msg-card.unread .msg-subject {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.msg-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.msg-sender {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.msg-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.msg-subject {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.msg-snippet {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Column 3: Reading Pane */
+.vuamail-reading {
+  flex: 1;
+  background-color: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.reading-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.reading-subject {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.reading-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reading-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #0078d4;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.reading-sender-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.reading-sender-email {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.reading-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.ai-summary-card {
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0078d4;
+}
+
+.ai-summary-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}

@@ -152,7 +152,7 @@ import { TABS_CHANNELS } from '../shared/tabs-api'
 import { showErrorDialog } from './error-dialog'
 import { normalizeRecentQuery, pageRecentPaths, statExistingPaths } from './recent-files'
 import { TabManager } from './tab-manager'
-import { applyUpdateChannel, initAutoUpdater } from './updater'
+import { applyUpdateChannel, checkForUpdatesManual, initAutoUpdater } from './updater'
 import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
 
 /**
@@ -330,6 +330,7 @@ const tMain = createI18n({
     menuHelp: '帮助',
     menuTroubleshooting: '故障排除',
     menuDeveloperMode: '启用开发者模式',
+    menuCheckForUpdates: '检查更新…',
     thirdPartyNotices: '第三方软件声明',
     menuExportDocx: '导出为 Word…',
     pdfDocxLoginMsg: '导出为 Word 需要登录 360 CORP 账号。',
@@ -385,6 +386,7 @@ const tMain = createI18n({
     menuHelp: 'Help',
     menuTroubleshooting: 'Troubleshooting',
     menuDeveloperMode: 'Enable Developer Mode',
+    menuCheckForUpdates: 'Check for Updates…',
     thirdPartyNotices: 'Third-Party Notices',
     menuExportDocx: 'Export as Word…',
     pdfDocxLoginMsg: 'Exporting as Word requires signing in to 360 CORP.',
@@ -444,6 +446,7 @@ const tMain = createI18n({
     menuHelp: 'ヘルプ',
     menuTroubleshooting: 'トラブルシューティング',
     menuDeveloperMode: '開発者モードを有効にする',
+    menuCheckForUpdates: 'アップデートを確認…',
     thirdPartyNotices: 'サードパーティソフトウェアに関する通知',
     menuExportDocx: 'Word として書き出す…',
     pdfDocxLoginMsg: 'Word への書き出しには 360 CORP へのログインが必要です。',
@@ -503,6 +506,7 @@ const tMain = createI18n({
     menuHelp: '도움말',
     menuTroubleshooting: '문제 해결',
     menuDeveloperMode: '개발자 모드 활성화',
+    menuCheckForUpdates: '업데이트 확인…',
     thirdPartyNotices: '타사 소프트웨어 고지',
     menuExportDocx: 'Word로 내보내기…',
     pdfDocxLoginMsg: 'Word로 내보내려면 360 CORP 로그인이 필요합니다.',
@@ -561,6 +565,7 @@ const tMain = createI18n({
     menuHelp: 'Aide',
     menuTroubleshooting: 'Dépannage',
     menuDeveloperMode: 'Activer le mode développeur',
+    menuCheckForUpdates: 'Rechercher les mises à jour…',
     thirdPartyNotices: 'Mentions relatives aux logiciels tiers',
     menuExportDocx: 'Exporter en Word…',
     pdfDocxLoginMsg: "L'export en Word nécessite une connexion à 360 CORP.",
@@ -620,6 +625,7 @@ const tMain = createI18n({
     menuHelp: 'Hilfe',
     menuTroubleshooting: 'Fehlerbehebung',
     menuDeveloperMode: 'Entwicklermodus aktivieren',
+    menuCheckForUpdates: 'Nach Updates suchen…',
     thirdPartyNotices: 'Hinweise zu Drittanbietersoftware',
     menuExportDocx: 'Als Word exportieren…',
     pdfDocxLoginMsg: 'Für den Word-Export ist eine Anmeldung bei 360 CORP erforderlich.',
@@ -679,6 +685,7 @@ const tMain = createI18n({
     menuHelp: 'Ayuda',
     menuTroubleshooting: 'Solución de problemas',
     menuDeveloperMode: 'Habilitar modo desarrollador',
+    menuCheckForUpdates: 'Buscar actualizaciones…',
     thirdPartyNotices: 'Avisos de software de terceros',
     menuExportDocx: 'Exportar como Word…',
     pdfDocxLoginMsg: 'Para exportar como Word es necesario iniciar sesión en 360 CORP.',
@@ -738,6 +745,7 @@ const tMain = createI18n({
     menuHelp: 'วิธีใช้',
     menuTroubleshooting: 'การแก้ไขปัญหา',
     menuDeveloperMode: 'เปิดใช้งานโหมดนักพัฒนา',
+    menuCheckForUpdates: 'ตรวจสอบการอัปเดต…',
     thirdPartyNotices: 'ประกาศเกี่ยวกับซอฟต์แวร์ของบุคคลที่สาม',
     menuExportDocx: 'ส่งออกเป็น Word…',
     pdfDocxLoginMsg: 'การส่งออกเป็น Word ต้องเข้าสู่ระบบ 360 CORP',
@@ -795,6 +803,7 @@ const tMain = createI18n({
     menuHelp: 'Bantuan',
     menuTroubleshooting: 'Pemecahan Masalah',
     menuDeveloperMode: 'Aktifkan Mode Pengembang',
+    menuCheckForUpdates: 'Periksa Pembaruan…',
     thirdPartyNotices: 'Pemberitahuan Perangkat Lunak Pihak Ketiga',
     menuExportDocx: 'Ekspor sebagai Word…',
     pdfDocxLoginMsg: 'Ekspor sebagai Word memerlukan login ke 360 CORP.',
@@ -854,6 +863,7 @@ const tMain = createI18n({
     menuHelp: 'Справка',
     menuTroubleshooting: 'Устранение неполадок',
     menuDeveloperMode: 'Включить режим разработчика',
+    menuCheckForUpdates: 'Проверить обновления…',
     thirdPartyNotices: 'Уведомления о стороннем ПО',
     menuExportDocx: 'Экспортировать в Word…',
     pdfDocxLoginMsg: 'Для экспорта в Word требуется вход в 360 CORP.',
@@ -913,6 +923,7 @@ const tMain = createI18n({
     menuHelp: 'تعليمات',
     menuTroubleshooting: 'استكشاف الأخطاء وإصلاحها',
     menuDeveloperMode: 'تمكين وضع المطور',
+    menuCheckForUpdates: 'التحقق من وجود تحديثات…',
     thirdPartyNotices: 'إشعارات برامج الجهات الخارجية',
     menuExportDocx: 'تصدير كملف Word…',
     pdfDocxLoginMsg: 'يتطلب التصدير كملف Word تسجيل الدخول إلى 360 CORP.',
@@ -970,6 +981,7 @@ const tMain = createI18n({
     menuHelp: 'Ajuda',
     menuTroubleshooting: 'Solução de problemas',
     menuDeveloperMode: 'Habilitar modo desenvolvedor',
+    menuCheckForUpdates: 'Verificar atualizações…',
     thirdPartyNotices: 'Avisos de software de terceiros',
     menuExportDocx: 'Exportar como Word…',
     pdfDocxLoginMsg: 'Exportar como Word requer login no 360 CORP.',
@@ -1029,6 +1041,7 @@ const tMain = createI18n({
     menuHelp: 'Aiuto',
     menuTroubleshooting: 'Risoluzione dei problemi',
     menuDeveloperMode: 'Abilita modalità sviluppatore',
+    menuCheckForUpdates: 'Controlla aggiornamenti…',
     thirdPartyNotices: 'Note sul software di terze parti',
     menuExportDocx: 'Esporta come Word…',
     pdfDocxLoginMsg: 'Per esportare come Word è necessario accedere a 360 CORP.',
@@ -1088,6 +1101,7 @@ const tMain = createI18n({
     menuHelp: 'Pomoc',
     menuTroubleshooting: 'Rozwiązywanie problemów',
     menuDeveloperMode: 'Włącz tryb dewelopera',
+    menuCheckForUpdates: 'Sprawdź dostępność aktualizacji…',
     thirdPartyNotices: 'Informacje o oprogramowaniu innych firm',
     menuExportDocx: 'Eksportuj jako Word…',
     pdfDocxLoginMsg: 'Eksport do formatu Word wymaga zalogowania do 360 CORP.',
@@ -1147,6 +1161,7 @@ const tMain = createI18n({
     menuHelp: 'Help',
     menuTroubleshooting: 'Probleemoplossing',
     menuDeveloperMode: 'Ontwikkelaarsmodus inschakelen',
+    menuCheckForUpdates: 'Controleren op updates…',
     thirdPartyNotices: 'Kennisgevingen over software van derden',
     menuExportDocx: 'Exporteren als Word…',
     pdfDocxLoginMsg: 'Exporteren als Word vereist inloggen bij 360 CORP.',
@@ -1206,6 +1221,7 @@ const tMain = createI18n({
     menuHelp: 'Bantuan',
     menuTroubleshooting: 'Penyelesaian Masalah',
     menuDeveloperMode: 'Pilih Mod Pembangun',
+    menuCheckForUpdates: 'Semak Kemas Kini…',
     thirdPartyNotices: 'Notis Perisian Pihak Ketiga',
     menuExportDocx: 'Eksport sebagai Word…',
     pdfDocxLoginMsg: 'Eksport sebagai Word memerlukan log masuk ke 360 CORP.',
@@ -1265,6 +1281,7 @@ const tMain = createI18n({
     menuHelp: 'עזרה',
     menuTroubleshooting: 'פתרון בעיות',
     menuDeveloperMode: 'הפעלת מצב מפתח',
+    menuCheckForUpdates: 'בדוק אם יש עדכונים…',
     thirdPartyNotices: 'הודעות על תוכנות צד שלישי',
     menuExportDocx: 'ייצוא כ-Word…',
     pdfDocxLoginMsg: 'ייצוא כ-Word דורש התחברות ל-360 CORP.',
@@ -1321,6 +1338,7 @@ const tMain = createI18n({
     menuHelp: 'सहायता',
     menuTroubleshooting: 'त्रुटि निवारण',
     menuDeveloperMode: 'डेवलपर मोड सक्षम करें',
+    menuCheckForUpdates: 'अपडेट के लिए जांचें…',
     thirdPartyNotices: 'तृतीय-पक्ष सॉफ़्टवेयर सूचनाएँ',
     menuExportDocx: 'Word के रूप में निर्यात करें…',
     pdfDocxLoginMsg: 'Word के रूप में निर्यात करने के लिए 360 CORP में लॉगिन आवश्यक है।',
@@ -1380,6 +1398,7 @@ const tMain = createI18n({
     menuHelp: '說明',
     menuTroubleshooting: '疑難排解',
     menuDeveloperMode: '啟用開發者模式',
+    menuCheckForUpdates: '檢查更新…',
     thirdPartyNotices: '第三方軟體聲明',
     menuExportDocx: '匯出為 Word…',
     pdfDocxLoginMsg: '匯出為 Word 需要登入 360 CORP 帳號。',
@@ -1455,6 +1474,9 @@ function applyMenuFor(kind: TabKind): void {
       break
     case 'markdown':
       buildMarkdownMenu()
+      break
+    case 'mail':
+      buildHomeMenu()
       break
     default:
       buildHomeMenu()
@@ -1929,6 +1951,10 @@ function registerHomeIpc(): void {
     newMarkdownTab()
   })
 
+  ipcMain.handle(HOME_CHANNELS.newMail, () => {
+    tabManager?.openMailTab()
+  })
+
   ipcMain.handle(HOME_CHANNELS.removeRecent, (_event, paths: unknown) => {
     removeRecentFiles(stringPaths(paths))
   })
@@ -2081,6 +2107,10 @@ function registerHomeIpc(): void {
     })
   })
 
+  ipcMain.handle(HOME_CHANNELS.checkForUpdates, () => {
+    checkForUpdatesManual()
+  })
+
   const cloudProjectsStorePath = () => join(app.getPath('userData'), 'cloud-projects.json')
 
   ipcMain.handle(HOME_CHANNELS.cloudProjectsCached, () =>
@@ -2136,6 +2166,7 @@ const TAB_MENU_ICON: Record<TabKind, keyof MenuIconSet> = {
   slides: 'pptx',
   pdf: 'pdf',
   markdown: 'md',
+  mail: 'home',
 }
 
 // tab views see neither DOM events nor a focus change when the user clicks the
@@ -2211,6 +2242,32 @@ function registerTabsIpc(): void {
   })
 }
 
+// ---- macOS application menu (About, Check for Updates, Services, Hide, Quit) ----
+
+function macAppMenu(): MenuItemConstructorOptions[] {
+  if (process.platform !== 'darwin') return []
+  return [
+    {
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        {
+          label: tm('menuCheckForUpdates'),
+          click: () => checkForUpdatesManual(),
+        },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' },
+      ],
+    },
+  ]
+}
+
 // ---- home menu ----
 
 function helpMenuSubmenu(extraItems: MenuItemConstructorOptions[] = []): MenuItemConstructorOptions[] {
@@ -2218,6 +2275,15 @@ function helpMenuSubmenu(extraItems: MenuItemConstructorOptions[] = []): MenuIte
   const isDevMode = savedSettings.developerMode === true
 
   return [
+    ...(process.platform !== 'darwin'
+      ? [
+          {
+            label: tm('menuCheckForUpdates'),
+            click: () => checkForUpdatesManual(),
+          },
+          { type: 'separator' as const },
+        ]
+      : []),
     ...extraItems,
     {
       label: tm('menuTroubleshooting'),
@@ -2257,9 +2323,8 @@ async function openFileViaDialog(): Promise<void> {
 }
 
 function buildHomeMenu(): void {
-  const isMac = process.platform === 'darwin'
   const template: MenuItemConstructorOptions[] = [
-    ...(isMac ? [{ role: 'appMenu' as const }] : []),
+    ...macAppMenu(),
     {
       label: tm('menuFile'),
       submenu: [
@@ -2301,9 +2366,8 @@ function buildHomeMenu(): void {
 // ---- pdf menu (pdf-main has no menu of its own; the shell owns pdf tabs, so it builds one) ----
 
 function buildPdfMenu(): void {
-  const isMac = process.platform === 'darwin'
   const template: MenuItemConstructorOptions[] = [
-    ...(isMac ? [{ role: 'appMenu' as const }] : []),
+    ...macAppMenu(),
     {
       label: tm('menuFile'),
       submenu: [
@@ -2361,9 +2425,8 @@ function buildPdfMenu(): void {
 // ---- markdown menu (markdown-main has no menu of its own; the shell owns markdown tabs) ----
 
 function buildMarkdownMenu(): void {
-  const isMac = process.platform === 'darwin'
   const template: MenuItemConstructorOptions[] = [
-    ...(isMac ? [{ role: 'appMenu' as const }] : []),
+    ...macAppMenu(),
     {
       label: tm('menuFile'),
       submenu: [

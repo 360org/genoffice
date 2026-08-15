@@ -88,6 +88,26 @@ function MarkdownIcon() {
   )
 }
 
+function MailIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+      <rect width="240" height="240" rx="48" fill="#0078D4" />
+      <path
+        d="M48 72C48 65.3726 53.3726 60 60 60H180C186.627 60 192 65.3726 192 72V168C192 174.627 186.627 180 180 180H60C53.3726 180 48 174.627 48 168V72Z"
+        fill="#0078D4"
+      />
+      <path
+        d="M52 76L120 128L188 76"
+        stroke="#ffffff"
+        strokeWidth="14"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="52" y="76" width="136" height="88" rx="8" stroke="#ffffff" strokeWidth="14" fill="none" />
+    </svg>
+  )
+}
+
 const KIND_ICON: Record<TabSummary['kind'], ReactElement> = {
   home: <HomeIcon />,
   docs: <DocIcon />,
@@ -95,6 +115,7 @@ const KIND_ICON: Record<TabSummary['kind'], ReactElement> = {
   slides: <SlideIcon />,
   pdf: <PdfIcon />,
   markdown: <MarkdownIcon />,
+  mail: <MailIcon />,
 }
 
 export function TabBar() {

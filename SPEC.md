@@ -93,13 +93,25 @@ CLI Script được phát triển bằng NodeJS thuần (không dependency ngoà
 ### 4.1 Thêm AI Provider IDs
 Trong `packages/ai-provider/src/types.ts`:
 ```typescript
-export type AiProviderId = 'genspark' | 'anthropic' | 'gemini' | 'deepseek' | 'openai' | 'openrouter' | 'custom' | 'omirouter' | 'ninerouter'
+export type AiProviderId = 'genspark' | 'anthropic' | 'gemini' | 'deepseek' | 'openai' | 'openrouter' | 'custom' | 'omirouter' | 'ninerouter' | 'hermes'
 ```
 
 ### 4.2 Cấu hình AI Provider Metadata
 Trong `packages/ai-provider/src/providers.ts`:
+Bổ sung `hermes` với endpoint mặc định `https://hermes.vuahethong.com/v1`.
 
-## 5. Đặc tả Module VuaMail (`apps/mail`)
+## 5. Đặc tả Tính năng Kiểm tra Cập nhật Thủ công (Manual Check for Updates)
+
+### 5.1 Main Process (`apps/shell/src/main/updater.ts`)
+- Hàm `checkForUpdatesManual()`:
+  - **Dev Mode**: Hiển thị native dialog thông báo ứng dụng đang chạy ở môi trường phát triển (Development Mode).
+  - **Packaged Release**: Gọi `autoUpdater.checkForUpdates()`. Bật cờ `isManualCheck = true` để hiển thị hộp thoại native khi đã ở bản mới nhất (`updAlreadyLatest`) hoặc khi gặp lỗi kết nối (`updFailed`), đồng thời giữ im lặng khi kiểm tra ngầm định kỳ.
+- Menu Application macOS & Help Menu: Thêm mục `Check for Updates…` ngay dưới `About VuaOffice` trên macOS và trong menu `Help` trên Windows/Linux.
+
+### 5.2 Renderer Process (`apps/shell/src/renderer/src/Home.tsx`)
+- Tích hợp mục "Check for Updates…" vào Account dropdown menu tại màn hình chính, gọi `window.aiOffice.checkForUpdates()` qua IPC.
+
+## 6. Đặc tả Module VuaMail (`apps/mail`)
 
 ### 5.1 Kiến trúc Cơ sở dữ liệu SQLite
 - **`accounts`**: Quản lý tài khoản kết nối.
