@@ -77,8 +77,15 @@ sequenceDiagram
   - Tách biệt logic API endpoint khỏi các ứng dụng client.
   - Cung cấp cơ chế tự động điền URL mặc định cho omirouter/9router nhưng vẫn cho phép user thay đổi Base URL qua giao diện cấu hình.
 
+### 3.4 Module VuaMail (`apps/mail`)
+- **Nhiệm vụ**: Cung cấp ứng dụng email client phong cách Microsoft Outlook tích hợp Mail Engine và AI Assistant trong bộ VuaOffice.
+- **Đặc điểm**:
+  - **Data Engine**: Kế thừa SQLite storage, offline op-queue và sync engine từ GenMail.
+  - **UI Layer**: React 19 Fluent UI Ribbon 3 cột (AppRail/Folders, Message List, Reading/Compose Pane) chuẩn VuaOffice Theme Tokens.
+  - **AI Integration**: Hỗ trợ tóm tắt chuỗi thư, phản hồi nhanh và tạo bản nháp qua `@genoffice/ai-provider`.
+
 ---
 
 **Người viết:** Sếp (Product Owner) & Em (Architect)
 **Trạng thái:** Approved
-**Ngày duyệt:** 2026-08-10
+**Ngày duyệt:** 2026-08-15

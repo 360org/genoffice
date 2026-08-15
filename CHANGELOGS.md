@@ -3,6 +3,15 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2026-08-15
+
+### Added
+- Thêm tính năng kiểm tra cập nhật thủ công `checkForUpdatesManual()` trong `apps/shell/src/main/updater.ts` hiển thị thông báo trạng thái cập nhật trực tiếp cho người dùng.
+
+### Fixed
+- Sửa lỗi thiếu import biến toàn cục `webContents` trong `apps/docs/src/main/docs-main.ts`, `apps/sheets/src/main/sheets-main.ts` và `apps/slides/src/main/ai-ipc.ts`.
+- Bổ sung tài nguyên logo thương hiệu và icon vector VuaOffice (`packages/ui/src/VuaOfficeIcon.tsx`, `whitelabel/Logo/vuaoffice-icon.svg`).
+
 ## [0.6.6] - 2026-08-15
 
 ### Fixed

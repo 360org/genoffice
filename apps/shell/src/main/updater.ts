@@ -1,4 +1,4 @@
-import { app, shell } from 'electron'
+import { app, dialog, shell } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import type { UpdateInfo } from 'electron-updater'
@@ -324,6 +324,8 @@ const DOWNLOAD_PAGE_URL = 'https://github.com/360org/vuaoffice/releases/latest'
 let started = false
 // version the user declined this session — don't nag again until next launch
 let dismissedVersion: string | null = null
+let isManualCheck = false
+let getActiveWindowRef: (() => BrowserWindow | null) | null = null
 
 // electron-updater feed name per user-facing channel (latest.yml / beta.yml)
 const CHANNEL_FEED: Record<UpdateChannel, string> = { stable: 'latest', beta: 'beta' }
@@ -443,14 +445,43 @@ export function initAutoUpdater(
     },
   }
 
+  getActiveWindowRef = getWindow
+
   autoUpdater.on('error', (err) => {
     // network failures during background checks are expected; only surface
-    // when the user is watching a download
+    // when the user is watching a download or initiated a manual check
     log('error:', err?.message ?? err)
+    if (isManualCheck) {
+      isManualCheck = false
+      const win = getActiveWindowRef?.() ?? null
+      dialog.showMessageBox(win as any, {
+        type: 'error',
+        title: tUpd(getUiLang(), 'updTitle'),
+        message: tUpd(getUiLang(), 'updFailed'),
+        detail: err?.message ?? String(err),
+        buttons: ['OK'],
+      }).catch(() => {})
+    }
     failDownload()
   })
 
+  autoUpdater.on('update-not-available', (info) => {
+    log('update not available, current version is latest:', info?.version)
+    if (isManualCheck) {
+      isManualCheck = false
+      const win = getActiveWindowRef?.() ?? null
+      dialog.showMessageBox(win as any, {
+        type: 'info',
+        title: tUpd(getUiLang(), 'updTitle'),
+        message: 'VuaOffice is up to date',
+        detail: `You are using the latest version (v${app.getVersion()}).`,
+        buttons: ['OK'],
+      }).catch(() => {})
+    }
+  })
+
   autoUpdater.on('update-available', (info: UpdateInfo) => {
+    isManualCheck = false
     if (info.version === dismissedVersion) return
     const sameVersionRecheck = info.version === latestSeenVersion
     if (!sameVersionRecheck) failedAttempts = 0
@@ -480,6 +511,38 @@ export function initAutoUpdater(
   }
   setTimeout(check, FIRST_CHECK_DELAY_MS)
   setInterval(check, RECHECK_INTERVAL_MS)
+}
+
+/** manual check for updates triggered by user menu or settings button */
+export function checkForUpdatesManual(): void {
+  log('manual check triggered by user')
+  if (!app.isPackaged) {
+    const win = getActiveWindowRef?.() ?? null
+    dialog.showMessageBox(win as any, {
+      type: 'info',
+      title: tUpd(getUiLang(), 'updTitle'),
+      message: 'VuaOffice (Development Mode)',
+      detail: `You are running in development mode (v${app.getVersion()}). Auto-update is only available in packaged release builds.`,
+      buttons: ['OK'],
+    }).catch(() => {})
+    return
+  }
+
+  isManualCheck = true
+  autoUpdater.checkForUpdates().catch((err) => {
+    log('manual check error:', err?.message ?? err)
+    if (isManualCheck) {
+      isManualCheck = false
+      const win = getActiveWindowRef?.() ?? null
+      dialog.showMessageBox(win as any, {
+        type: 'error',
+        title: tUpd(getUiLang(), 'updTitle'),
+        message: tUpd(getUiLang(), 'updFailed'),
+        detail: err?.message ?? String(err),
+        buttons: ['OK'],
+      }).catch(() => {})
+    }
+  })
 }
 
 /** unpacked-run simulation: real window + IPC, fake download that completes */

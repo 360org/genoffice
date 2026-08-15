@@ -10,7 +10,7 @@ import {
 } from 'node:fs'
 import { copyFile, mkdir, readFile, readdir, stat, unlink } from 'node:fs/promises'
 import { basename, join } from 'node:path'
-import { BrowserWindow, Menu, WebContentsView, app, dialog, ipcMain, shell } from 'electron'
+import { BrowserWindow, Menu, WebContentsView, app, dialog, ipcMain, shell, webContents } from 'electron'
 import {
   appMenuLabels,
   configuredDefaultSaveDir,

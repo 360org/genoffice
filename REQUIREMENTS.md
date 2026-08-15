@@ -42,6 +42,14 @@
   - Luồng stream AI tương thích chuẩn OpenAI (`streamOpenAiCompatible`).
 - **Nguồn:** IDEA §Bài toán cần giải quyết, §Vision
 
+### 2.3 Tích hợp Module VuaMail (`apps/mail`)
+- **Mô tả:** Tích hợp ứng dụng email client VuaMail vào thanh công cụ và launcher của VuaOffice Suite.
+- **Tiêu chí nghiệm thu:**
+  - Kế thừa engine lưu trữ SQLite cục bộ và hàng đợi offline OpQueue từ GenMail.
+  - Giao diện Outlook Ribbon 3 cột (AppRail, Folder Tree, Message List, Reading/Compose Pane) chuẩn Fluent UI trên React 19.
+  - Tích hợp tính năng AI: tóm tắt chuỗi thư (Thread Summary), soạn thư thông minh (AI Compose Draft) và trả lời nhanh (Smart Reply).
+  - Tương thích 100% Theme Semantic Tokens (Light/Dark mode) của VuaOffice.
+
 ## 3. Yêu cầu phi chức năng (Non-Functional Requirements)
 
 ### 3.1 Hiệu năng

@@ -23,6 +23,7 @@ import {
   screen,
   session as electronSession,
   shell,
+  webContents,
   systemPreferences,
   WebContentsView,
 } from 'electron'
