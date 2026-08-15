@@ -3,6 +3,13 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.6] - 2026-08-15
+
+### Fixed
+- Sửa URL auto-update fallback download từ `genspark-ai/genoffice` sang `360org/vuaoffice` — app cũ đang tải bản cập nhật từ repo sai.
+- Sửa URL repository trong root `package.json` về đúng `360org/vuaoffice`.
+- Thêm rule whitelabel tự động vá URL updater và repository khi chạy `whitelabel apply`.
+
 ## [0.6.5] - 2026-08-14
 
 ### Changed
