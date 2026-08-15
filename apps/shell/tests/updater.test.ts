@@ -10,6 +10,7 @@ import type { UpdateUiState } from '../src/shared/update-api'
 const appState = { isPackaged: true }
 
 const openExternal = vi.hoisted(() => vi.fn())
+const existsSyncMock = vi.hoisted(() => vi.fn<(...args: unknown[]) => boolean>(() => true))
 const readFileSyncMock = vi.hoisted(() => vi.fn<(...args: unknown[]) => string>())
 
 vi.mock('electron', () => ({
@@ -25,6 +26,7 @@ vi.mock('electron', () => ({
 }))
 
 vi.mock('node:fs', () => ({
+  existsSync: (...args: unknown[]) => existsSyncMock(...args),
   readFileSync: (...args: unknown[]) => readFileSyncMock(...args),
 }))
 
@@ -38,6 +40,7 @@ const updaterState = {
   channel: null as string | null,
   allowDowngrade: false,
 }
+const setFeedURL = vi.fn()
 const checkForUpdates = vi.fn(() => Promise.resolve(null))
 const downloadUpdate = vi.fn<() => Promise<unknown>>(() => Promise.resolve([]))
 const quitAndInstall = vi.fn()
@@ -47,6 +50,7 @@ vi.mock('electron-updater', () => ({
     on: (event: string, listener: Listener) => {
       updaterState.listeners.set(event, listener)
     },
+    setFeedURL: (...args: unknown[]) => setFeedURL(...args),
     checkForUpdates: () => checkForUpdates(),
     downloadUpdate: () => downloadUpdate(),
     quitAndInstall: (...args: unknown[]) => quitAndInstall(...(args as [boolean, boolean])),
@@ -409,7 +413,7 @@ describe('manual download fallback', () => {
     const actions = await failTwiceIntoManual(macFiles)
     actions.onOpenDownload()
     expect(openExternal).toHaveBeenCalledWith(
-      'https://github.com/genspark-ai/genoffice/releases/latest',
+      'https://github.com/360org/vuaoffice/releases/latest',
     )
   })
 
@@ -420,7 +424,7 @@ describe('manual download fallback', () => {
     ])
     actions.onOpenDownload()
     expect(openExternal).toHaveBeenCalledWith(
-      'https://github.com/genspark-ai/genoffice/releases/latest',
+      'https://github.com/360org/vuaoffice/releases/latest',
     )
   })
 })

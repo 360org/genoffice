@@ -34,6 +34,13 @@ async function makePdf(sizes: [number, number][]): Promise<Uint8Array> {
   return doc.save({ useObjectStreams: false })
 }
 
+/** applySaveRequest with the skipped-text-edit channel unwrapped (none expected here) */
+async function apply(bytes: Uint8Array, req: SavePdfRequest): Promise<Uint8Array> {
+  const result = await applySaveRequest(bytes, req)
+  expect(result.skippedTextEdits).toEqual([])
+  return result.bytes
+}
+
 const request = (over: Partial<SavePdfRequest> = {}): SavePdfRequest => ({
   path: '/tmp/test.pdf',
   markups: [],
@@ -475,17 +482,14 @@ describe('savePdfToPath', () => {
 describe('applySaveRequest', () => {
   it('applies page rotation deltas on top of the existing rotation', async () => {
     const bytes = await makePdf([[100, 100]])
-    const saved = await applySaveRequest(
-      bytes,
-      request({ rotations: [{ pageIndex: 0, delta: 90 }] }),
-    )
+    const saved = await apply(bytes, request({ rotations: [{ pageIndex: 0, delta: 90 }] }))
     const out = await PDFDocument.load(saved)
     expect(out.getPage(0).getRotation().angle).toBe(90)
   })
 
   it('writes markup annotations with an appearance stream', async () => {
     const bytes = await makePdf([[612, 792]])
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({
         markups: [
@@ -515,7 +519,7 @@ describe('applySaveRequest', () => {
 
   it('writes note and shape drawing annotations', async () => {
     const bytes = await makePdf([[612, 792]])
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({
         drawings: [
@@ -545,7 +549,7 @@ describe('applySaveRequest', () => {
 
   it('ignores markups and drawings addressing missing pages', async () => {
     const bytes = await makePdf([[612, 792]])
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({
         markups: [
@@ -559,7 +563,7 @@ describe('applySaveRequest', () => {
 
   it('writes an image drawing as a Stamp annotation with an image appearance', async () => {
     const bytes = await makePdf([[612, 792]])
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({
         drawings: [{ kind: 'image', pageIndex: 0, image: TINY_PNG, rect: [100, 500, 300, 600] }],
@@ -623,7 +627,7 @@ describe('applySaveRequest', () => {
 
   it('counter-rotates the image appearance on rotated pages', async () => {
     const bytes = await makePdf([[612, 792]])
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({
         rotations: [{ pageIndex: 0, delta: 90 }],
@@ -636,7 +640,7 @@ describe('applySaveRequest', () => {
 
   it('embeds PNG stamps without failing', async () => {
     const bytes = await makePdf([[612, 792]])
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({
         stamps: [{ pageIndex: 0, image: TINY_PNG, rect: [0, 0, 612, 792], opacity: 0.2 }],
@@ -647,7 +651,7 @@ describe('applySaveRequest', () => {
 
   it('applies metadata and splits keywords on mixed separators', async () => {
     const bytes = await makePdf([[100, 100]])
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({ metadata: { title: 'My Title', author: 'Me', keywords: 'a, b；c，d' } }),
     )
@@ -664,12 +668,12 @@ describe('applySaveRequest', () => {
       [200, 200],
       [300, 300],
     ])
-    const saved = await applySaveRequest(bytes, request({ deletedPages: [0, 2] }))
+    const saved = await apply(bytes, request({ deletedPages: [0, 2] }))
     const out = await PDFDocument.load(saved)
     expect(out.getPageCount()).toBe(1)
     expect(out.getPage(0).getWidth()).toBe(200)
 
-    const savedAll = await applySaveRequest(bytes, request({ deletedPages: [0, 1, 2] }))
+    const savedAll = await apply(bytes, request({ deletedPages: [0, 1, 2] }))
     expect((await PDFDocument.load(savedAll)).getPageCount()).toBe(1)
   })
 
@@ -679,7 +683,7 @@ describe('applySaveRequest', () => {
       [200, 200],
       [300, 300],
     ])
-    const saved = await applySaveRequest(bytes, request({ pageOrder: [2, 0, 1] }))
+    const saved = await apply(bytes, request({ pageOrder: [2, 0, 1] }))
     const out = await PDFDocument.load(saved)
     expect(out.getPages().map((p) => p.getWidth())).toEqual([300, 100, 200])
   })
@@ -694,7 +698,7 @@ describe('applySaveRequest', () => {
       [200, 200],
       [300, 300],
     ])
-    const saved = await applySaveRequest(bytes, request({ deletedPages: [1], pageOrder: [2, 0] }))
+    const saved = await apply(bytes, request({ deletedPages: [1], pageOrder: [2, 0] }))
     const out = await PDFDocument.load(saved)
     expect(out.getPageCount()).toBe(2)
     expect(out.getPages().map((p) => p.getWidth())).toEqual([300, 100])
@@ -707,10 +711,7 @@ describe('applySaveRequest', () => {
       [100, 100],
       [200, 200],
     ])
-    const saved = await applySaveRequest(
-      bytes,
-      request({ deletedPages: [0, 1], pageOrder: [1, 0] }),
-    )
+    const saved = await apply(bytes, request({ deletedPages: [0, 1], pageOrder: [1, 0] }))
     const out = await PDFDocument.load(saved)
     expect(out.getPageCount()).toBe(1)
   })
@@ -723,7 +724,7 @@ describe('applySaveRequest', () => {
     form.createCheckBox('user.agree').addToPage(page, { x: 20, y: 150, width: 16, height: 16 })
     const bytes = await doc.save({ useObjectStreams: false })
 
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({
         formValues: [
@@ -770,7 +771,7 @@ describe('applySaveRequest', () => {
     doc.getForm().createTextField('cjk').addToPage(page, { x: 20, y: 200, width: 200, height: 20 })
     const bytes = await doc.save({ useObjectStreams: false })
 
-    const saved = await applySaveRequest(
+    const saved = await apply(
       bytes,
       request({ formValues: [{ name: 'cjk', kind: 'text', value: '中文测试' }] }),
     )

@@ -15,6 +15,7 @@ import type {
   DesktopApi,
   ScreenCaptureResult,
   ScreenSourcesResult,
+  UiTheme,
   WorkbookCellStyle,
   WorkbookConditionalRule,
   WorkbookFile,
@@ -45,6 +46,17 @@ const desktopApi: DesktopApi = {
     ) => handler(lang)
     ipcRenderer.on('app:language-changed', listener)
     return () => ipcRenderer.removeListener('app:language-changed', listener)
+  },
+  getTheme: () => ipcRenderer.invoke('app:get-theme'),
+  onThemeChanged(handler) {
+    const listener = (_event: Electron.IpcRendererEvent, theme: UiTheme) => handler(theme)
+    ipcRenderer.on('app:theme-changed', listener)
+    return () => ipcRenderer.removeListener('app:theme-changed', listener)
+  },
+  onChromePressed(handler) {
+    const listener = () => handler()
+    ipcRenderer.on('app:chrome-pressed', listener)
+    return () => ipcRenderer.removeListener('app:chrome-pressed', listener)
   },
   async selectWorkbook() {
     const result: unknown = await ipcRenderer.invoke(IPC_CHANNELS.selectWorkbook)
@@ -250,11 +262,6 @@ const desktopApi: DesktopApi = {
   },
   async setAiSettings(settings) {
     await ipcRenderer.invoke(IPC_CHANNELS.aiSetSettings, settings)
-  },
-  onAiSettingsChanged(handler) {
-    const listener = () => handler()
-    ipcRenderer.on('ai:settings-changed', listener)
-    return () => ipcRenderer.removeListener('ai:settings-changed', listener)
   },
   async aiChat(request) {
     const result: unknown = await ipcRenderer.invoke(IPC_CHANNELS.aiChat, request)

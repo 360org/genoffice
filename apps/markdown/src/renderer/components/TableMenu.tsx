@@ -33,11 +33,14 @@ function Btn({
   onClick: () => void
   children: ReactNode
 }) {
+  // data-tip drives the fast custom tooltip (the native title is too slow to
+  // explain icon-only buttons)
   return (
     <button
       type="button"
       className={`tm-btn${danger ? ' danger' : ''}`}
-      title={title}
+      aria-label={title}
+      data-tip={title}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
     >
@@ -109,7 +112,7 @@ export function TableMenu({ editor, scrollRef, zoom }: Props) {
       <Btn title={t('tableRowBelow')} onClick={() => run((c) => c.addRowAfter())}>
         <IconRowInsertBelow size={ICON} />
       </Btn>
-      <Btn title={t('tableDeleteRow')} onClick={() => run((c) => c.deleteRow())}>
+      <Btn title={t('tableDeleteRow')} danger onClick={() => run((c) => c.deleteRow())}>
         <IconRowDelete size={ICON} />
       </Btn>
       <span className="tm-sep" />
@@ -119,7 +122,7 @@ export function TableMenu({ editor, scrollRef, zoom }: Props) {
       <Btn title={t('tableColRight')} onClick={() => run((c) => c.addColumnAfter())}>
         <IconColInsertRight size={ICON} />
       </Btn>
-      <Btn title={t('tableDeleteCol')} onClick={() => run((c) => c.deleteColumn())}>
+      <Btn title={t('tableDeleteCol')} danger onClick={() => run((c) => c.deleteColumn())}>
         <IconColDelete size={ICON} />
       </Btn>
       <span className="tm-sep" />

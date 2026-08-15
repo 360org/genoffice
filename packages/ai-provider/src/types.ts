@@ -37,7 +37,7 @@ export interface AiProviderMeta {
 export interface AiSettings {
   provider: AiProviderId
   providers: Record<AiProviderId, AiProviderConfig>
-  developerMode?: boolean
+  developerMode?: boolean | undefined
 }
 
 /** pre-provider settings shape (single OpenAI-compatible endpoint); migrated into "custom" */

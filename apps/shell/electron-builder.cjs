@@ -18,7 +18,7 @@ const { execFileSync } = require('node:child_process')
 const { existsSync } = require('node:fs')
 const { join } = require('node:path')
 
-const updateUrl = process.env.GENOFFICE_UPDATE_URL
+const updateUrl = process.env.GENOFFICE_UPDATE_URL || 'https://github.com/360org/vuaoffice/releases/latest/download'
 
 // GENOFFICE_MAC_X64=1 — opt into packaging the Intel (x64) dmg/zip alongside
 // arm64. Off by default: Intel packages must only ever ship signed with the

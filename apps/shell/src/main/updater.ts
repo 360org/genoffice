@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { app, dialog, shell } from 'electron'
 import type { BrowserWindow } from 'electron'
@@ -321,6 +321,7 @@ const RECHECK_INTERVAL_MS = 4 * 60 * 60 * 1000
 // code-signing identity (Apple Team ID) change, which Squirrel.Mac rejects
 // on every retry while the error looks like a download failure to the user.
 const MANUAL_FALLBACK_AFTER = 2
+const DEFAULT_UPDATE_URL = 'https://github.com/360org/vuaoffice/releases/latest/download'
 const DOWNLOAD_PAGE_URL = 'https://github.com/360org/vuaoffice/releases/latest'
 
 /// Trusted HTTPS base URL baked into resources/app-update.yml. Manual download
@@ -328,18 +329,25 @@ const DOWNLOAD_PAGE_URL = 'https://github.com/360org/vuaoffice/releases/latest'
 /// by remotely fetched update metadata.
 function updateFeedBaseUrl(): string | null {
   try {
-    const yml = readFileSync(path.join(process.resourcesPath, 'app-update.yml'), 'utf8')
-    const value = /^url:\s*['"]?([^'"\s]+)/m.exec(yml)?.[1]
-    if (!value) return null
-    const url = new URL(value)
-    if (url.protocol !== 'https:' || url.username || url.password) return null
-    url.pathname = `${url.pathname.replace(/\/+$/, '')}/`
-    url.search = ''
-    url.hash = ''
-    return url.toString()
+    if (!process.resourcesPath) return null
+    const updateYmlPath = path.join(process.resourcesPath, 'app-update.yml')
+    if (existsSync(updateYmlPath)) {
+      const yml = readFileSync(updateYmlPath, 'utf8')
+      const value = /^url:\s*['"]?([^'"\s]+)/m.exec(yml)?.[1]
+      if (value) {
+        const url = new URL(value)
+        if (url.protocol === 'https:' && !url.username && !url.password) {
+          url.pathname = `${url.pathname.replace(/\/+$/, '')}/`
+          url.search = ''
+          url.hash = ''
+          return url.toString()
+        }
+      }
+    }
   } catch {
     return null
   }
+  return null
 }
 
 /// Picks the manual-install artifact for this platform/arch from the update
@@ -452,6 +460,17 @@ export function initAutoUpdater(
 
   updaterActive = true
   autoUpdater.channel = CHANNEL_FEED[initialChannel]
+  // Programmatically guarantee default feed URL if app-update.yml was omitted in packaging
+  const updateYmlPath = process.resourcesPath ? path.join(process.resourcesPath, 'app-update.yml') : null
+  if (!updateYmlPath || !existsSync(updateYmlPath)) {
+    if (typeof autoUpdater.setFeedURL === 'function') {
+      autoUpdater.setFeedURL({
+        provider: 'generic',
+        url: DEFAULT_UPDATE_URL,
+        channel: CHANNEL_FEED[initialChannel],
+      })
+    }
+  }
   // the channel setter unconditionally flips allowDowngrade to true; force it
   // back off since a beta user switching to stable must not downgrade
   autoUpdater.allowDowngrade = false

@@ -134,6 +134,8 @@ export type MenuCommand =
   | 'export-pdf'
   | 'word-count'
 
+export type UiTheme = 'light' | 'dark' | 'system'
+
 export interface DesktopApi {
   /** current UI language (persisted by the shell in app-settings.json) */
   getLanguage(): Promise<'zh' | 'en' | 'ja' | 'ko' | 'fr' | 'de' | 'es' | 'th' | 'id' | 'ru' | 'ar'>
@@ -143,6 +145,10 @@ export interface DesktopApi {
       lang: 'zh' | 'en' | 'ja' | 'ko' | 'fr' | 'de' | 'es' | 'th' | 'id' | 'ru' | 'ar',
     ) => void,
   ): () => void
+  /** current UI theme preference (persisted by the shell in app-settings.json) */
+  getTheme(): Promise<UiTheme>
+  /** theme switched from the shell home page */
+  onThemeChanged(handler: (theme: UiTheme) => void): () => void
   openDocx(): Promise<OpenFileResult | null>
   openDocxPath(path: string): Promise<OpenFileResult | null>
   /** mark the renderer ready and consume a file passed by Finder/Explorer at launch */
@@ -264,4 +270,6 @@ export interface DesktopApi {
   /** Close guard chose "Save": main process asks the renderer to run the full save flow */
   onCloseSaveRequest(handler: () => void): () => void
   reportCloseSaveResult(ok: boolean): void
+  /** keep the native View menu's checkbox items in sync with renderer state */
+  reportViewMenuState(state: { aiSidebar: boolean; darkCanvas: boolean }): void
 }

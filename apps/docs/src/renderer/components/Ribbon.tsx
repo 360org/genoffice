@@ -2,6 +2,7 @@ import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import type { ChainedCommands, Editor } from '@tiptap/core'
 import type { Command } from '@tiptap/pm/state'
+import type { Node as PMNode } from '@tiptap/pm/model'
 import {
   addColumnAfter,
   addColumnBefore,
@@ -289,6 +290,11 @@ const NOOP_CHAIN = new Proxy(
 const FONT_SIZES = [
   5, 5.5, 6.5, 7.5, 8, 9, 10, 10.5, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72,
 ]
+
+// A+/A- clicks closer together than this coalesce into one trailing apply;
+// must sit above burst-click spacing (~100-200ms) yet stay short enough that
+// the deferred re-layout still feels attached to the click.
+const FONT_STEP_COALESCE_MS = 300
 
 const THEME_COLORS: Array<{ nameKey: StringKey; hex: string }> = [
   { nameKey: 'ribbonColorWhite', hex: 'FFFFFF' },
@@ -678,6 +684,15 @@ function RibbonInner({
   const [penHighlight, setPenHighlight] = useState('yellow')
   const [painter, setPainter] = useState<PainterState | null>(null)
   const ribbonRef = useRef<HTMLDivElement>(null)
+  const fontStepRef = useRef<{
+    pending: number | null
+    applied: number | null
+    timer: number | null
+    // editor snapshot the deferred apply validates against (stale-apply guard)
+    anchor: number
+    head: number
+    doc: PMNode | null
+  }>({ pending: null, applied: null, timer: null, anchor: -1, head: -1, doc: null })
   const lastRegularTab = useRef<(typeof TABS)[number]>('home')
   const wasInTable = useRef(false)
   const wasInImage = useRef(false)
@@ -1256,18 +1271,59 @@ function RibbonInner({
   }
 
   const stepFontSize = (dir: 1 | -1) => {
-    const idx = FONT_SIZES.findIndex((s) => s >= currentSize)
-    let next: number
-    if (dir === 1)
-      next =
-        FONT_SIZES[
+    const step = (base: number): number => {
+      const idx = FONT_SIZES.findIndex((s) => s >= base)
+      if (dir === 1)
+        return FONT_SIZES[
           Math.min(
-            idx === -1 ? FONT_SIZES.length : idx + (FONT_SIZES[idx] === currentSize ? 1 : 0),
+            idx === -1 ? FONT_SIZES.length : idx + (FONT_SIZES[idx] === base ? 1 : 0),
             FONT_SIZES.length - 1,
           )
         ]
-    else next = FONT_SIZES[Math.max(idx === -1 ? FONT_SIZES.length - 1 : idx - 1, 0)]
-    setTextStyle({ sizeHalfPoints: Math.round(next * 2) })
+      return FONT_SIZES[Math.max(idx === -1 ? FONT_SIZES.length - 1 : idx - 1, 0)]
+    }
+    // Every applied size change re-paginates the whole document synchronously —
+    // ~700ms per click on table-heavy documents — so clicking A+/A- in a burst
+    // froze the UI for seconds. Apply the first click immediately (a single
+    // click keeps instant feedback); clicks landing inside the coalesce window
+    // only advance the pending size, and one trailing apply lays out the final
+    // size. `pending` also covers fs.fontSizePt lagging the last apply within
+    // the window.
+    const st = fontStepRef.current
+    const next = step(st.pending ?? currentSize)
+    st.pending = next
+    if (st.timer === null) {
+      st.applied = next
+      setTextStyle({ sizeHalfPoints: Math.round(next * 2) })
+    } else {
+      window.clearTimeout(st.timer)
+    }
+    // Snapshot after the (possible) leading apply: the deferred apply is only
+    // valid while nothing else has touched the editor. A selection move, an
+    // undo, or a size set another way each shows up as a selection or document
+    // change and must invalidate the pending step instead of being overwritten.
+    const target = ed
+    st.anchor = target.state.selection.anchor
+    st.head = target.state.selection.head
+    st.doc = target.state.doc
+    st.timer = window.setTimeout(() => {
+      st.timer = null
+      const pending = st.pending
+      st.pending = null
+      if (pending === null || pending === st.applied || !canEdit) return
+      if (
+        target.state.selection.anchor !== st.anchor ||
+        target.state.selection.head !== st.head ||
+        target.state.doc !== st.doc
+      )
+        return
+      st.applied = pending
+      // deliberately no focus(): a deferred apply must never pull focus back
+      target
+        .chain()
+        .setMark('docTextStyle', { sizeHalfPoints: Math.round(pending * 2) })
+        .run()
+    }, FONT_STEP_COALESCE_MS)
   }
 
   const toggleVertAlign = (kind: 'superscript' | 'subscript') => {
@@ -2056,7 +2112,7 @@ function RibbonInner({
           </div>
         ) : tab === 'home' ? (
           <>
-            {/* ---- VuaOffice AI (first slot: entry + one-click AI actions) ---- */}
+            {/* ---- Genspark AI (first slot: entry + one-click AI actions) ---- */}
             <div className="ribbon-group">
               <div className="ribbon-group-items">
                 <button
@@ -2067,7 +2123,7 @@ function RibbonInner({
                   <span className="rb-big-icon">
                     <GensparkMark size={26} />
                   </span>
-                  <span>VuaOffice AI</span>
+                  <span>Genspark AI</span>
                 </button>
                 <button
                   className="rb-big ai-entry"
@@ -2161,7 +2217,7 @@ function RibbonInner({
                   <span>{t('aiTidyBtn')}</span>
                 </button>
               </div>
-              <div className="ribbon-group-label">VuaOffice AI</div>
+              <div className="ribbon-group-label">Genspark AI</div>
             </div>
 
             <div className="ribbon-sep" />
