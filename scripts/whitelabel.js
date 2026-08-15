@@ -65,3 +65,26 @@ files.forEach(rel => {
 });
 
 console.log('[Whitelabel] Done!');
+
+// Patch updater download page URL (main process)
+const updaterPath = path.join(__dirname, '../apps/shell/src/main/updater.ts');
+if (fs.existsSync(updaterPath)) {
+  let u = fs.readFileSync(updaterPath, 'utf8');
+  const oldUrl = 'https://github.com/genspark-ai/genoffice/releases/latest';
+  if (u.includes(oldUrl)) {
+    u = u.replace(oldUrl, 'https://github.com/360org/vuaoffice/releases/latest');
+    fs.writeFileSync(updaterPath, u, 'utf8');
+    console.log('[Whitelabel] Patched: updater download URL');
+  }
+}
+
+// Patch repository URL in root package.json
+const rootPkgPath = path.join(__dirname, '../package.json');
+if (fs.existsSync(rootPkgPath)) {
+  let rp = fs.readFileSync(rootPkgPath, 'utf8');
+  if (rp.includes('genspark-ai/genoffice')) {
+    rp = rp.replace(/genspark-ai\/genoffice/g, '360org/vuaoffice');
+    fs.writeFileSync(rootPkgPath, rp, 'utf8');
+    console.log('[Whitelabel] Patched: repository URL');
+  }
+}
