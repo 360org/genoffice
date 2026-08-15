@@ -24,11 +24,11 @@ Tất cả các bản build phát hành được đóng gói và kiểm tra tự
 
 | Nền tảng                          | Yêu cầu hệ thống    | Tệp cài đặt                                                                                                         |
 | :-------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
-| **macOS** (Apple Silicon `arm64`) | macOS 11+           | [VuaOffice-0.6.1-arm64.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.1-arm64.dmg) |
-| **macOS** (Intel `x64`)           | macOS 11+           | [VuaOffice-0.6.1.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.1.dmg)             |
-| **Windows** (x64)                 | Windows 10 / 11     | [VuaOffice.Setup.0.6.1.exe](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice.Setup.0.6.1.exe) |
-| **Linux** (Debian / Ubuntu)       | x86_64, glibc 2.34+ | [vuaoffice_0.6.1_amd64.deb](https://github.com/360org/vuaoffice/releases/latest/download/vuaoffice_0.6.1_amd64.deb) |
-| **Linux** (AppImage)              | x86_64, FUSE 2      | [VuaOffice-0.6.1.AppImage](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.1.AppImage)   |
+| **macOS** (Apple Silicon `arm64`) | macOS 11+           | [VuaOffice-0.6.7-arm64.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7-arm64.dmg) |
+| **macOS** (Intel `x64`)           | macOS 11+           | [VuaOffice-0.6.7-x64.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7-x64.dmg)     |
+| **Windows** (x64)                 | Windows 10 / 11     | [VuaOffice-0.6.7-Windows-x64-Setup.exe](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7-Windows-x64-Setup.exe) |
+| **Linux** (Debian / Ubuntu)       | x86_64, glibc 2.34+ | [vuaoffice_0.6.7_amd64.deb](https://github.com/360org/vuaoffice/releases/latest/download/vuaoffice_0.6.7_amd64.deb) |
+| **Linux** (AppImage)              | x86_64, FUSE 2      | [VuaOffice-0.6.7.AppImage](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7.AppImage)   |
 
 ---
 
@@ -73,12 +73,13 @@ git push origin main
 
 ---
 
-## 🧠 Cấu hình AI Provider (OmiRouter / 9Router / Custom)
+## 🧠 Cấu hình AI Provider (OmiRouter / 9Router / Hermes / Custom)
 
 VuaOffice hỗ trợ kết nối trực tiếp đến các AI Gateway của 360 CORP hoặc nhà cung cấp tùy chỉnh mà không phụ thuộc vào tài khoản Genspark mặc định:
 
 - **OmiRouter AI**: Cấu hình mặc định với Base URL `https://api.omirouter.com/v1`
 - **9Router AI**: Cấu hình với Base URL `https://api.9router.com/v1`
+- **Hermes Agent**: Cấu hình với Base URL `https://hermes.vuahethong.com/v1`
 - **Custom Provider**: Cho phép người dùng tự nhập OpenAI-compatible Endpoint & API Key tùy chọn ngay tại màn hình **AI Settings** trong menu tài khoản.
 
 ---

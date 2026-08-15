@@ -10,7 +10,7 @@ import {
 } from 'node:fs'
 import { copyFile, mkdir, readFile, readdir, stat, unlink } from 'node:fs/promises'
 import { basename, join } from 'node:path'
-import { BrowserWindow, Menu, WebContentsView, app, dialog, ipcMain, shell, webContents } from 'electron'
+import { BrowserWindow, Menu, WebContentsView, app, dialog, ipcMain, net, shell } from 'electron'
 import {
   appMenuLabels,
   configuredDefaultSaveDir,
@@ -24,6 +24,7 @@ import {
   toggleDevToolsItem,
   windowMenuTemplate,
 } from '@genoffice/electron-utils'
+import { configureMetricsCache, familyVerticalMetrics } from '@genoffice/font-metrics'
 import { createI18n, getUiLang, normalizeLang, setUiLang } from '@genoffice/i18n'
 import { ProjectStore } from '@genoffice/project-store'
 import type {
@@ -40,6 +41,7 @@ import {
   chatForProvider,
   defaultAiSettings,
   resolveAiSettings,
+  setRescueFetch,
   streamForProvider,
   type AiChatRequest,
   type AiSettings,
@@ -2156,7 +2158,13 @@ function allowPdfWrite(wcId: number, filePath: string): void {
   pdfWritablePaths.set(wcId, set)
 }
 
+// Fidelity-harness escape hatch: headless runs have no save dialog to authorize
+// paths, so an explicitly configured directory (set only by our test scripts)
+// is treated as pre-authorized for PDF export.
+const testExportDir = process.env.GENOFFICE_TEST_EXPORT_DIR || null
+
 function canPdfWrite(wcId: number, filePath: string): boolean {
+  if (testExportDir && filePath.startsWith(testExportDir + '/')) return true
   return pdfWritablePaths.get(wcId)?.has(filePath) === true
 }
 
@@ -2479,6 +2487,8 @@ export function registerAiIpc(): void {
   ipcMain.handle('ai:get-settings', (): AiSettings => {
     const stored = readJson<Partial<AiSettings> & LegacyAiSettings>(SETTINGS_PATH(), {})
     const settings = resolveAiSettings(stored, defaultAiSettings())
+    // AI features all go through Genspark (gsk login); legacy settings with another provider are reset
+    settings.provider = 'genspark'
     return settings
   })
 
@@ -2499,11 +2509,6 @@ export function registerAiIpc(): void {
 
   ipcMain.handle('ai:set-settings', (_event, settings: AiSettings) => {
     writeJson(SETTINGS_PATH(), settings)
-    for (const wc of webContents.getAllWebContents()) {
-      if (!wc.isDestroyed()) {
-        wc.send('ai:settings-changed')
-      }
-    }
   })
 
   ipcMain.handle('ai:stream', async (event, request: AiStreamRequest) => {
@@ -2831,9 +2836,17 @@ export function registerProjectIpc(): void {
 
 /** document/attachment/window IPC (everything except the AI proxy above) */
 export function registerDocsIpc(): void {
+  // Node fetch (undici) direct connections get reset under VPN/tun setups; retry over Chromium's stack
+  setRescueFetch((url, init) => net.fetch(url, init))
+
   // shared with the other editor modules — last (identical) registration wins
   ipcMain.removeHandler('app:get-language')
   ipcMain.handle('app:get-language', () => getUiLang())
+
+  configureMetricsCache(userDataPath('font-metrics'))
+  ipcMain.handle('docs:font-metrics', (_event, family: string) =>
+    typeof family === 'string' ? familyVerticalMetrics(family) : null,
+  )
 
   ipcMain.handle('docs:open', async (event) => {
     const result = await openDialog(event, {
@@ -3090,9 +3103,18 @@ export function registerDocsIpc(): void {
     },
   )
 
-  ipcMain.handle('docs:print', (event) => {
-    // print the calling tab's own content; zero margins — the docx page padding provides them
-    event.sender.print({ margins: { marginType: 'none' } })
+  ipcMain.handle('docs:print', async (event) => {
+    // print the calling tab's own content; zero margins — the docx page padding provides them.
+    // Resolves when the system dialog is dismissed; the print dialog stays open on cancel
+    // (ok=false without error) and surfaces real failures.
+    return new Promise<{ ok: boolean; error?: string }>((resolve) => {
+      event.sender.print({ margins: { marginType: 'none' } }, (success, failureReason) => {
+        resolve({
+          ok: success,
+          ...(failureReason && !/cancel/i.test(failureReason) ? { error: failureReason } : {}),
+        })
+      })
+    })
   })
 
   ipcMain.handle(
@@ -3243,6 +3265,26 @@ function sendCommand(command: MenuCommand, payload?: string): void {
   activeDocsWebContents()?.send('menu:command', command, payload)
 }
 
+/**
+ * Per-tab View-menu toggle state (AI Sidebar / Dark Mode), reported by each
+ * renderer whenever it changes. The template can't hardcode `checked` — the
+ * state lives in the renderer and differs per tab — so builds read the active
+ * tab's last report, and reports from the active tab patch the built menu in
+ * place (buildDocsMenu also re-runs on every tab focus switch).
+ * Defaults mirror the renderer's initial state: sidebar shown, light canvas.
+ */
+const viewMenuStateByWebContents = new Map<number, { aiSidebar: boolean; darkCanvas: boolean }>()
+
+function activeViewMenuState(): { aiSidebar: boolean; darkCanvas: boolean } {
+  const id = activeDocsWebContents()?.id
+  return (
+    (id !== undefined ? viewMenuStateByWebContents.get(id) : undefined) ?? {
+      aiSidebar: true,
+      darkCanvas: false,
+    }
+  )
+}
+
 /** shell-injected items appended to the File menu (e.g. Back to Home); persists
  * across the internal rebuilds pushRecent() triggers */
 let extraFileMenuItems: MenuItemConstructorOptions[] = []
@@ -3334,7 +3376,9 @@ export function buildDocsMenu(): void {
         {
           label: tm('menuPrint'),
           accelerator: 'CmdOrCtrl+P',
-          click: () => activeDocsWebContents()?.print({}),
+          // routed through the renderer: it opens the pagination preview first so each
+          // printed sheet is exactly one editor page (WYSIWYG), then invokes docs:print
+          click: () => sendCommand('print'),
         },
       ],
     },
@@ -3383,8 +3427,20 @@ export function buildDocsMenu(): void {
         { label: tm('menuPageWidth'), click: () => sendCommand('zoom-page-width') },
         { label: tm('menuWholePage'), click: () => sendCommand('zoom-whole-page') },
         { type: 'separator' },
-        { label: tm('menuAiSidebar'), click: () => sendCommand('toggle-ai') },
-        { label: tm('menuDarkMode'), click: () => sendCommand('toggle-dark') },
+        {
+          id: 'docs-menu-ai-sidebar',
+          type: 'checkbox',
+          checked: activeViewMenuState().aiSidebar,
+          label: tm('menuAiSidebar'),
+          click: () => sendCommand('toggle-ai'),
+        },
+        {
+          id: 'docs-menu-dark-mode',
+          type: 'checkbox',
+          checked: activeViewMenuState().darkCanvas,
+          label: tm('menuDarkMode'),
+          click: () => sendCommand('toggle-dark'),
+        },
         { type: 'separator' },
         { role: 'togglefullscreen', label: tm('menuFullscreen') },
         ...(isDev ? [toggleDevToolsItem(appMenuLabels(getUiLang()))] : []),
@@ -3549,6 +3605,24 @@ interface DocsCloseState {
 }
 const closeCheckWaiters = new Map<number, (state: DocsCloseState) => void>()
 const closeSaveWaiters = new Map<number, (ok: boolean) => void>()
+
+ipcMain.on('docs:view-menu-state', (event, state: unknown) => {
+  const s = state as { aiSidebar?: unknown; darkCanvas?: unknown } | null
+  const next = { aiSidebar: s?.aiSidebar === true, darkCanvas: s?.darkCanvas === true }
+  if (!viewMenuStateByWebContents.has(event.sender.id)) {
+    const id = event.sender.id
+    event.sender.once('destroyed', () => viewMenuStateByWebContents.delete(id))
+  }
+  viewMenuStateByWebContents.set(event.sender.id, next)
+  // patch the live menu only for the active tab; an inactive tab's state gets
+  // picked up by the buildDocsMenu run its next focus triggers
+  if (event.sender.id !== activeDocsWebContents()?.id) return
+  const menu = Menu.getApplicationMenu()
+  const ai = menu?.getMenuItemById('docs-menu-ai-sidebar')
+  if (ai) ai.checked = next.aiSidebar
+  const dark = menu?.getMenuItemById('docs-menu-dark-mode')
+  if (dark) dark.checked = next.darkCanvas
+})
 
 ipcMain.on('docs:close-check-result', (event, state: unknown) => {
   const waiter = closeCheckWaiters.get(event.sender.id)

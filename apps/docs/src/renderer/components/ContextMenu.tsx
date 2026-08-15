@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Editor } from '@tiptap/core'
 import { platformShortcuts } from '@genoffice/i18n'
+import { isSymbolFontFamily } from '@genoffice/ui'
 import { useI18n, type StringKey } from '../i18n/locale'
 import { fontFamiliesFor, isEastAsianFontName } from '../font-list'
+import { useSystemFontFamilies } from '../system-fonts'
 import { cssFontFamily } from '../line-metrics'
 import { setParaAttrs, activeParaAttrs } from './ribbon-tabs'
 import { setSelectionAlign } from '../editor/direction'
@@ -178,7 +180,7 @@ export function EditorContextMenu({
     <button
       className="ctx-item"
       disabled={opts.disabled}
-      title={opts.ai ? t('appAiBadgeTip') : undefined}
+      data-tip={opts.ai ? t('appAiBadgeTip') : undefined}
       onMouseEnter={() => setSubmenu(opts.submenuKey ?? null)}
       onClick={opts.submenuKey ? undefined : opts.onClick}
     >
@@ -328,6 +330,9 @@ export function FontDialog({ editor, onClose }: { editor: Editor; onClose: () =>
   const { t, lang } = useI18n()
   const modalKeys = useModalKeys(onClose)
   const fontFamilies = fontFamiliesFor(lang)
+  const { families: systemFontFamilies, load: loadSystemFonts } = useSystemFontFamilies()
+  // the dialog opens from a click, so activation is still live here
+  useEffect(() => loadSystemFonts(), [loadSystemFonts])
   const textAttrs = editor.getAttributes('docTextStyle')
   const initialStyle = editor.isActive('bold')
     ? editor.isActive('italic')
@@ -394,12 +399,30 @@ export function FontDialog({ editor, onClose }: { editor: Editor; onClose: () =>
             {t('appFontFamilyLabel')}
             <select value={font} onChange={(e) => setFont(e.target.value)}>
               <option value="">{t('appDefaultBodyFont')}</option>
-              {fontFamilies.map((f) => (
-                <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
-                  {f}
-                </option>
-              ))}
-              {font && !fontFamilies.includes(font) && <option value={font}>{font}</option>}
+              <optgroup label={t('ribbonFontsCommon')}>
+                {fontFamilies.map((f) => (
+                  <option key={f} value={f} style={{ fontFamily: cssFontFamily(f) }}>
+                    {f}
+                  </option>
+                ))}
+              </optgroup>
+              {systemFontFamilies.length > 0 && (
+                <optgroup label={t('ribbonFontsSystem')}>
+                  {systemFontFamilies.map((f) => (
+                    <option
+                      key={f}
+                      value={f}
+                      // symbol fonts would render their own name as pictographs
+                      style={{ fontFamily: isSymbolFontFamily(f) ? undefined : cssFontFamily(f) }}
+                    >
+                      {f}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {font && !fontFamilies.includes(font) && !systemFontFamilies.includes(font) && (
+                <option value={font}>{font}</option>
+              )}
             </select>
           </label>
           <label>

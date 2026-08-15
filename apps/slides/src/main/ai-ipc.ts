@@ -4,7 +4,7 @@
  * to avoid renderer CORS), search tools, and the slides-only ai:* channels
  * (image generation, media analysis, style templates).
  */
-import { app, ipcMain, shell, webContents } from 'electron'
+import { app, ipcMain, net, shell } from 'electron'
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import {
@@ -12,6 +12,7 @@ import {
   AiTimeoutError,
   defaultAiSettings,
   resolveAiSettings,
+  setRescueFetch,
   streamForProvider,
   type AiSettings,
   type AiStreamChunk,
@@ -30,10 +31,10 @@ import {
   gskLoginInfo,
   hasGskAuth,
 } from '@genoffice/ai-search'
-import { addPicture } from '@genoffice/pptx-engine'
+import { addPicture, replacePictureBytes } from '@genoffice/pptx-engine'
 import { EMU_PER_PX_96 } from '@genoffice/pptx-render'
 import { tm } from './i18n-main'
-import { pushHistory, rebuildSlide, sessions } from './session-state'
+import { pushHistory, rebuildSlide, scheduleHistoryNotify, sessions } from './session-state'
 
 // ---- AI settings + streaming proxy (the main process does the networking to avoid renderer CORS; implementation shared via @genoffice/ai-provider) ----
 
@@ -56,9 +57,14 @@ function writeJson(path: string, value: unknown): void {
 const activeAiStreams = new Map<string, AbortController>()
 
 export function registerAiIpc(): void {
+  // Node fetch (undici) direct connections get reset under VPN/tun setups; retry over Chromium's stack
+  setRescueFetch((url, init) => net.fetch(url, init))
+
   ipcMain.handle('ai:get-settings', (): AiSettings => {
     const stored = readJson<Partial<AiSettings> & LegacyAiSettings>(AI_SETTINGS_PATH(), {})
     const settings = resolveAiSettings(stored, defaultAiSettings())
+    // AI features all go through Genspark (gsk login); stored settings that chose another provider are normalized back
+    settings.provider = 'genspark'
     return settings
   })
 
@@ -79,11 +85,6 @@ export function registerAiIpc(): void {
 
   ipcMain.handle('ai:set-settings', (_event, settings: AiSettings) => {
     writeJson(AI_SETTINGS_PATH(), settings)
-    for (const wc of webContents.getAllWebContents()) {
-      if (!wc.isDestroyed()) {
-        wc.send('ai:settings-changed')
-      }
-    }
   })
 
   ipcMain.handle('ai:stream', async (event, request: AiStreamRequest) => {
@@ -271,11 +272,48 @@ export function registerSlidesOnlyAiIpc(): void {
         })
         if (!el) {
           session.undoStack.pop()
+          scheduleHistoryNotify(session)
           return null
         }
         session.fitWidthPx = op.fitWidthPx
         const rebuilt = rebuildSlide(session, op.slideIndex)
         return rebuilt ? { slide: rebuilt, sourceId: el.id } : null
+      } catch {
+        return null
+      }
+    },
+  )
+
+  // Download an image from a URL and swap it into an existing picture in place
+  // (frame/z-order/effects survive). Same URL hardening as ai:insert-image-url.
+  ipcMain.handle(
+    'ai:replace-picture-url',
+    async (e, op: { slideIndex: number; sourceId: string; url: string; keepSrcRect?: boolean }) => {
+      const session = sessions.get(e.sender.id)
+      if (!session) return null
+      const slide = session.opened.deck.slides[op.slideIndex]
+      if (!slide) return null
+      try {
+        const resp = await fetchRemoteImage(String(op.url))
+        if (!resp || !resp.ok) return null
+        const buf = Buffer.from(await resp.arrayBuffer())
+        const ct = resp.headers.get('content-type') ?? ''
+        const ext = ct.includes('png') ? 'png' : ct.includes('gif') ? 'gif' : 'jpg'
+        pushHistory(session)
+        const ok = replacePictureBytes(
+          session.opened,
+          slide,
+          String(op.sourceId),
+          new Uint8Array(buf),
+          ext,
+          op.keepSrcRect ? { keepSrcRect: true } : undefined,
+        )
+        if (!ok) {
+          session.undoStack.pop()
+          scheduleHistoryNotify(session)
+          return null
+        }
+        return rebuildSlide(session, op.slideIndex)
       } catch {
         return null
       }

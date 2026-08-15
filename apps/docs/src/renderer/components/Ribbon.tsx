@@ -28,6 +28,7 @@ import type {
   ThemeColors,
   ThemeFonts,
 } from '@genoffice/docx-engine'
+import { isSymbolFontFamily } from '@genoffice/ui'
 import { HIGHLIGHT_CSS } from '../editor/extensions'
 import { setParagraphDirection, setSelectionAlign } from '../editor/direction'
 import { stepParagraphIndent } from '../editor/indent'
@@ -37,6 +38,7 @@ import type { RibbonFormatState } from './ribbon-format-state'
 import { setSelectedColumnWidth } from '../editor/table-sizing'
 import { useI18n, type StringKey } from '../i18n/locale'
 import { fontFamiliesFor, isEastAsianFontName } from '../font-list'
+import { useSystemFontFamilies } from '../system-fonts'
 import { cssFontFamily } from '../line-metrics'
 import {
   DesignTab,
@@ -89,8 +91,12 @@ import {
   IconPalette,
   IconPaste,
   IconPilcrow,
+  IconFlipH,
+  IconFlipV,
   IconRemoveBg,
   IconReplacePicture,
+  IconRotateLeft,
+  IconRotateRight,
   IconRowDelete,
   IconRowInsertAbove,
   IconRowInsertBelow,
@@ -399,7 +405,8 @@ function ShapeColorPalette({
           <button
             key={c.hex}
             className={`color-swatch color-swatch-large ${current === c.hex ? 'selected' : ''}`}
-            title={t(c.nameKey)}
+            data-tip={t(c.nameKey)}
+            aria-label={t(c.nameKey)}
             style={{ background: `#${c.hex}` }}
             onClick={() => onPick(c.hex)}
           />
@@ -411,7 +418,8 @@ function ShapeColorPalette({
             <button
               key={`${rowIndex}-${columnIndex}-${hex}`}
               className={`color-swatch color-swatch-large ${current === hex ? 'selected' : ''}`}
-              title={t('ribbonThemeColorShadeTip', { r: rowIndex + 1, c: columnIndex + 1 })}
+              data-tip={t('ribbonThemeColorShadeTip', { r: rowIndex + 1, c: columnIndex + 1 })}
+              aria-label={t('ribbonThemeColorShadeTip', { r: rowIndex + 1, c: columnIndex + 1 })}
               style={{ background: `#${hex}` }}
               onClick={() => onPick(hex)}
             />
@@ -424,7 +432,8 @@ function ShapeColorPalette({
           <button
             key={c.hex}
             className={`color-swatch color-swatch-large ${current === c.hex ? 'selected' : ''}`}
-            title={t(c.nameKey)}
+            data-tip={t(c.nameKey)}
+            aria-label={t(c.nameKey)}
             style={{ background: `#${c.hex}` }}
             onClick={() => onPick(c.hex)}
           />
@@ -783,10 +792,9 @@ function RibbonInner({
 
   /**
    * Replace the selected image's bytes (shared by Replace Picture / remove background / crop).
-   * The original image's patch-save only supports size/alignment/wrap; swapping bytes must go
-   * through the genImage new-image embed branch, so docxIndex is cleared (on save the old
-   * block is treated as deleted, the new image is written at the same position, and
-   * alignment/wrap are inherited from attributes).
+   * Original images (docxIndex set) swap bytes in place via the imageReplace patch: the
+   * drawing XML survives, so wrap/position/docxIndex — and with them the Position gallery —
+   * keep working. Images not yet saved (genImage) just update their pending payload.
    * Display size keeps the current width; height adapts to the new image's aspect ratio.
    */
   const applyPictureBytes = async (dataUrl: string) => {
@@ -800,6 +808,7 @@ function RibbonInner({
       const currentW = Number(attrs.imageWidthPx) || Math.min(natural.width, 620)
       const w = Math.max(1, Math.round(currentW))
       const h = Math.max(1, Math.round((currentW * natural.height) / natural.width))
+      const isOriginal = attrs.docxIndex !== null && attrs.docxIndex !== undefined
       editor
         .chain()
         .focus()
@@ -807,8 +816,14 @@ function RibbonInner({
           imageDataUrl: dataUrl,
           imageWidthPx: w,
           imageHeightPx: h,
-          genImage: { base64: m[2], mime: m[1], widthPx: w, heightPx: h },
-          docxIndex: null,
+          // The new bytes are the full picture (crop/cutout bake destructively) and
+          // the replace pipeline strips a:srcRect on save — drop a Word-authored
+          // crop/fill window or it would keep clipping the new image until reload
+          imageCrop: null,
+          imageFillRect: null,
+          ...(isOriginal
+            ? { imageReplace: { base64: m[2], mime: m[1] } }
+            : { genImage: { base64: m[2], mime: m[1], widthPx: w, heightPx: h } }),
         })
         .run()
     } catch {
@@ -820,6 +835,30 @@ function RibbonInner({
     const picked = await window.desktop.pickImage()
     if (!picked) return
     await applyPictureBytes(`data:${picked.mime};base64,${picked.base64}`)
+  }
+
+  const rotatePicture = (deltaDeg: number) => {
+    if (!canEdit) return
+    const attrs = editor.getAttributes('docProtected')
+    if (attrs?.blockType !== 'image') return
+    const next = ((((Number(attrs.imageRotDeg) || 0) + deltaDeg) % 360) + 360) % 360
+    editor
+      .chain()
+      .focus()
+      .updateAttributes('docProtected', { imageRotDeg: next || null })
+      .run()
+  }
+
+  const flipPicture = (axis: 'h' | 'v') => {
+    if (!canEdit) return
+    const attrs = editor.getAttributes('docProtected')
+    if (attrs?.blockType !== 'image') return
+    const key = axis === 'h' ? 'imageFlipH' : 'imageFlipV'
+    editor
+      .chain()
+      .focus()
+      .updateAttributes('docProtected', { [key]: !attrs[key] })
+      .run()
   }
 
   /** Set the image display size proportionally (cm input; either side drives the other) */
@@ -1038,6 +1077,7 @@ function RibbonInner({
   // computed unconditionally (not inside the dropdown render): cheap, and the
   // render-isolation test uses fontFamiliesFor calls as its render probe
   const fontFamilies = fontFamiliesFor(lang)
+  const { families: systemFontFamilies, load: loadSystemFonts } = useSystemFontFamilies()
   // unset align follows the paragraph direction: start is left in LTR, right in RTL
   const activeAlign = fs.align ?? (fs.bidi ? 'right' : 'left')
   const activeSpacing = fs.lineSpacing
@@ -1174,7 +1214,7 @@ function RibbonInner({
             key={s.key}
             className={`style-card style-card-char ${activeStyleKey === s.key ? 'active' : ''}`}
             disabled={!canEdit}
-            title={s.label}
+            data-tip={s.label}
             onClick={() => apply(s.key)}
           >
             <span className="style-card-preview" style={s.previewStyle}>
@@ -1346,7 +1386,8 @@ function RibbonInner({
     <button
       className={`rb-icon ${active ? 'active' : ''}`}
       disabled={!canEdit}
-      title={title}
+      data-tip={title}
+      aria-label={title}
       onClick={() => chain().toggleMark(name).run()}
     >
       {label}
@@ -1466,7 +1507,7 @@ function RibbonInner({
                     <button
                       className="rb-big"
                       disabled={!canEdit}
-                      title={t('ribbonShapeFillTip')}
+                      data-tip={t('ribbonShapeFillTip')}
                       onClick={() => setDropdown((v) => (v === 'shapeFill' ? null : 'shapeFill'))}
                     >
                       <span className="rb-big-icon">
@@ -1494,7 +1535,7 @@ function RibbonInner({
                   <button
                     className="rb-big"
                     disabled={!canEdit}
-                    title={t('ribbonShapeOutlineTip')}
+                    data-tip={t('ribbonShapeOutlineTip')}
                     onClick={() =>
                       setDropdown((v) => (v === 'shapeOutline' ? null : 'shapeOutline'))
                     }
@@ -1535,7 +1576,7 @@ function RibbonInner({
                 <button
                   className="rb-big"
                   disabled={!canEdit}
-                  title={t('ribbonRemoveBgTip')}
+                  data-tip={t('ribbonRemoveBgTip')}
                   onClick={() => setPictureDialog('cutout')}
                 >
                   <span className="rb-big-icon">
@@ -1546,7 +1587,7 @@ function RibbonInner({
                 <button
                   className="rb-big"
                   disabled={!canEdit}
-                  title={t('ribbonCropTip')}
+                  data-tip={t('ribbonCropTip')}
                   onClick={() => setPictureDialog('crop')}
                 >
                   <span className="rb-big-icon">
@@ -1557,7 +1598,7 @@ function RibbonInner({
                 <button
                   className="rb-big"
                   disabled={!canEdit}
-                  title={t('ribbonReplacePictureTip')}
+                  data-tip={t('ribbonReplacePictureTip')}
                   onClick={() => void replacePicture()}
                 >
                   <span className="rb-big-icon">
@@ -1575,7 +1616,7 @@ function RibbonInner({
                 <select
                   className="rb-select"
                   disabled={!canEdit}
-                  title={t('ribbonWrapText')}
+                  data-tip={t('ribbonWrapText')}
                   value={fs.imageWrap ?? ''}
                   onChange={(e) => {
                     if (!canEdit) return
@@ -1609,7 +1650,8 @@ function RibbonInner({
                         : 'table-tool-button'
                     }
                     disabled={!canEdit}
-                    title={label}
+                    data-tip={label}
+                    aria-label={label}
                     onClick={() => {
                       if (!canEdit) return
                       editor
@@ -1624,6 +1666,44 @@ function RibbonInner({
                     {icon}
                   </button>
                 ))}
+              </div>
+              <div className="table-tool-row">
+                <button
+                  className="table-tool-button"
+                  disabled={!canEdit}
+                  data-tip={t('ribbonRotateRight')}
+                  aria-label={t('ribbonRotateRight')}
+                  onClick={() => rotatePicture(90)}
+                >
+                  <IconRotateRight />
+                </button>
+                <button
+                  className="table-tool-button"
+                  disabled={!canEdit}
+                  data-tip={t('ribbonRotateLeft')}
+                  aria-label={t('ribbonRotateLeft')}
+                  onClick={() => rotatePicture(-90)}
+                >
+                  <IconRotateLeft />
+                </button>
+                <button
+                  className={fs.imageFlipH ? 'table-tool-button active' : 'table-tool-button'}
+                  disabled={!canEdit}
+                  data-tip={t('ribbonFlipH')}
+                  aria-label={t('ribbonFlipH')}
+                  onClick={() => flipPicture('h')}
+                >
+                  <IconFlipH />
+                </button>
+                <button
+                  className={fs.imageFlipV ? 'table-tool-button active' : 'table-tool-button'}
+                  disabled={!canEdit}
+                  data-tip={t('ribbonFlipV')}
+                  aria-label={t('ribbonFlipV')}
+                  onClick={() => flipPicture('v')}
+                >
+                  <IconFlipV />
+                </button>
               </div>
               <div className="ribbon-group-label">{t('ribbonGroupArrange')}</div>
             </div>
@@ -1696,7 +1776,7 @@ function RibbonInner({
                 </label>
               </div>
               <div className="table-tool-row">
-                <button title={t('ribbonResetSizeTip')} onClick={() => void resetPictureSize()}>
+                <button data-tip={t('ribbonResetSizeTip')} onClick={() => void resetPictureSize()}>
                   {t('ribbonResetSize')}
                 </button>
               </div>
@@ -1709,7 +1789,7 @@ function RibbonInner({
               <div className="table-style-gallery">
                 <button
                   className="table-style-card"
-                  title={t('ribbonRemoveTableStyleTip')}
+                  data-tip={t('ribbonRemoveTableStyleTip')}
                   onClick={() => chain().updateAttributes('docTable', { tblStyleId: null }).run()}
                 >
                   <span className="table-style-card-grid plain" />
@@ -1722,7 +1802,7 @@ function RibbonInner({
                     <button
                       key={info.styleId}
                       className="table-style-card"
-                      title={t('ribbonApplyTableStyleTip', { name: info.name })}
+                      data-tip={t('ribbonApplyTableStyleTip', { name: info.name })}
                       onClick={() =>
                         chain().updateAttributes('docTable', { tblStyleId: info.styleId }).run()
                       }
@@ -1751,7 +1831,8 @@ function RibbonInner({
                   <button
                     key={hex}
                     className="table-style-swatch"
-                    title={t('ribbonCellShadingTip', { hex })}
+                    data-tip={t('ribbonCellShadingTip', { hex })}
+                    aria-label={t('ribbonCellShadingTip', { hex })}
                     style={{ background: `#${hex}` }}
                     onClick={() => runTableCommand(setCellAttr('fill', hex))}
                   />
@@ -1768,25 +1849,28 @@ function RibbonInner({
             <div className="ribbon-sep" />
             <div className="table-tool-group">
               <div className="table-tool-grid table-tool-grid-four">
-                <button title={t('ribbonAllBordersTip')} onClick={() => applyCellBorders('all')}>
+                <button data-tip={t('ribbonAllBordersTip')} onClick={() => applyCellBorders('all')}>
                   <IconBorderAll />
                   {t('ribbonAllBorders')}
                 </button>
                 <button
-                  title={t('ribbonOuterBordersTip')}
+                  data-tip={t('ribbonOuterBordersTip')}
                   onClick={() => applyCellBorders('outer')}
                 >
                   <IconBorderOuter />
                   {t('ribbonOuterBorders')}
                 </button>
                 <button
-                  title={t('ribbonInnerBordersTip')}
+                  data-tip={t('ribbonInnerBordersTip')}
                   onClick={() => applyCellBorders('inner')}
                 >
                   <IconBorderInner />
                   {t('ribbonInnerBorders')}
                 </button>
-                <button title={t('ribbonClearBordersTip')} onClick={() => applyCellBorders('none')}>
+                <button
+                  data-tip={t('ribbonClearBordersTip')}
+                  onClick={() => applyCellBorders('none')}
+                >
                   <IconBorderNone />
                   {t('ribbonNoBorders')}
                 </button>
@@ -1794,12 +1878,12 @@ function RibbonInner({
               <div className="table-tool-row table-border-opts">
                 <input
                   type="color"
-                  title={t('ribbonBorderColor')}
+                  data-tip={t('ribbonBorderColor')}
                   value={`#${borderColor}`}
                   onChange={(e) => setBorderColor(e.target.value.slice(1).toUpperCase())}
                 />
                 <select
-                  title={t('ribbonBorderWidth')}
+                  data-tip={t('ribbonBorderWidth')}
                   value={borderSz}
                   onChange={(e) => setBorderSz(Number(e.target.value))}
                 >
@@ -1977,7 +2061,7 @@ function RibbonInner({
               <div className="ribbon-group-items">
                 <button
                   className={`rb-big ai-entry ${showAi ? 'active' : ''}`}
-                  title={t('aiOpenAssistant')}
+                  data-tip={t('aiOpenAssistant')}
                   onClick={onToggleAi}
                 >
                   <span className="rb-big-icon">
@@ -1988,7 +2072,7 @@ function RibbonInner({
                 <button
                   className="rb-big ai-entry"
                   disabled={docEmpty}
-                  title={t('aiSummarizePrompt')}
+                  data-tip={t('aiSummarizeBtn')}
                   onClick={() => onAiPreset(t('aiSummarizePrompt'))}
                 >
                   <span className="rb-big-icon">
@@ -2020,7 +2104,7 @@ function RibbonInner({
                 <button
                   className="rb-big ai-entry"
                   disabled={docEmpty}
-                  title={t('aiPolishPrompt')}
+                  data-tip={t('aiPolishBtn')}
                   onClick={() => onAiPreset(t('aiPolishPrompt'))}
                 >
                   <span className="rb-big-icon">
@@ -2050,7 +2134,7 @@ function RibbonInner({
                 <button
                   className="rb-big ai-entry"
                   disabled={docEmpty}
-                  title={t('aiTidyPrompt')}
+                  data-tip={t('aiTidyBtn')}
                   onClick={() => onAiPreset(t('aiTidyPrompt'))}
                 >
                   <span className="rb-big-icon">
@@ -2099,7 +2183,8 @@ function RibbonInner({
                   <button
                     className="rb-small"
                     disabled={!canEdit}
-                    title={t('ribbonCutTip')}
+                    data-tip={t('ribbonCutTip')}
+                    aria-label={t('ribbonCutTip')}
                     onClick={() => void clipboard('cut')}
                   >
                     <IconCut />
@@ -2107,7 +2192,8 @@ function RibbonInner({
                   <button
                     className="rb-small"
                     disabled={!hasDoc}
-                    title={t('ribbonCopyTip')}
+                    data-tip={t('ribbonCopyTip')}
+                    aria-label={t('ribbonCopyTip')}
                     onClick={() => void clipboard('copy')}
                   >
                     <IconCopy />
@@ -2115,7 +2201,8 @@ function RibbonInner({
                   <button
                     className={`rb-small ${painter ? 'active' : ''}`}
                     disabled={!canEdit || !!sub}
-                    title={painter ? t('ribbonPainterActiveTip') : t('ribbonPainterTip')}
+                    data-tip={painter ? t('ribbonPainterActiveTip') : t('ribbonPainterTip')}
+                    aria-label={painter ? t('ribbonPainterActiveTip') : t('ribbonPainterTip')}
                     onClick={togglePainter}
                   >
                     <IconFormatPainter />
@@ -2141,7 +2228,7 @@ function RibbonInner({
                       key={`f:${currentFont}:${hasDoc}`}
                       defaultValue={currentFont}
                       placeholder={t('ribbonFontBodyNamed', { font: bodyFontName })}
-                      title={t('ribbonFontFamilyTip')}
+                      data-tip={t('ribbonFontFamilyTip')}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
                       }}
@@ -2153,8 +2240,12 @@ function RibbonInner({
                     <button
                       className="rb-caret rb-combo-caret"
                       disabled={!canEdit}
-                      title={t('ribbonFontFamilyTip')}
-                      onClick={() => setDropdown((v) => (v === 'fontFamily' ? null : 'fontFamily'))}
+                      data-tip={t('ribbonFontFamilyTip')}
+                      aria-label={t('ribbonFontFamilyTip')}
+                      onClick={() => {
+                        if (dropdown !== 'fontFamily') loadSystemFonts()
+                        setDropdown((v) => (v === 'fontFamily' ? null : 'fontFamily'))
+                      }}
                     >
                       <IconCaret />
                     </button>
@@ -2179,6 +2270,28 @@ function RibbonInner({
                               {f}
                             </button>
                           ))}
+                        {systemFontFamilies.length > 0 && (
+                          <>
+                            <div className="rb-menu-group-label">{t('ribbonFontsSystem')}</div>
+                            {systemFontFamilies
+                              .filter((f) => f !== bodyFontName)
+                              .map((f) => (
+                                <button
+                                  key={f}
+                                  className={f === currentFont ? 'active' : ''}
+                                  // symbol fonts would render their own name as pictographs
+                                  style={{
+                                    fontFamily: isSymbolFontFamily(f)
+                                      ? undefined
+                                      : cssFontFamily(f),
+                                  }}
+                                  onClick={() => setFont(f)}
+                                >
+                                  {f}
+                                </button>
+                              ))}
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2192,7 +2305,7 @@ function RibbonInner({
                       disabled={!canEdit}
                       key={`s:${currentSize}:${hasDoc}`}
                       defaultValue={currentSize}
-                      title={t('ribbonFontSizeTip')}
+                      data-tip={t('ribbonFontSizeTip')}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
                       }}
@@ -2207,7 +2320,8 @@ function RibbonInner({
                     <button
                       className="rb-caret rb-combo-caret"
                       disabled={!canEdit}
-                      title={t('ribbonFontSizeTip')}
+                      data-tip={t('ribbonFontSizeTip')}
+                      aria-label={t('ribbonFontSizeTip')}
                       onClick={() => setDropdown((v) => (v === 'fontSize' ? null : 'fontSize'))}
                     >
                       <IconCaret />
@@ -2231,7 +2345,8 @@ function RibbonInner({
                   <button
                     className="rb-icon"
                     disabled={!canEdit}
-                    title={t('ribbonGrowFont')}
+                    data-tip={t('ribbonGrowFont')}
+                    aria-label={t('ribbonGrowFont')}
                     onClick={() => stepFontSize(1)}
                   >
                     <IconGrowFont />
@@ -2239,7 +2354,8 @@ function RibbonInner({
                   <button
                     className="rb-icon"
                     disabled={!canEdit}
-                    title={t('ribbonShrinkFont')}
+                    data-tip={t('ribbonShrinkFont')}
+                    aria-label={t('ribbonShrinkFont')}
                     onClick={() => stepFontSize(-1)}
                   >
                     <IconShrinkFont />
@@ -2249,7 +2365,7 @@ function RibbonInner({
                     <button
                       className="rb-icon"
                       disabled={!canEdit}
-                      title={t('ribbonChangeCase')}
+                      data-tip={t('ribbonChangeCase')}
                       onClick={() => setDropdown((v) => (v === 'case' ? null : 'case'))}
                     >
                       Aa
@@ -2271,7 +2387,8 @@ function RibbonInner({
                   <button
                     className="rb-icon"
                     disabled={!canEdit}
-                    title={t('ribbonClearFormatting')}
+                    data-tip={t('ribbonClearFormatting')}
+                    aria-label={t('ribbonClearFormatting')}
                     onClick={() => chain().unsetAllMarks().run()}
                   >
                     <IconClearFormat />
@@ -2285,7 +2402,7 @@ function RibbonInner({
                   <button
                     className={`rb-icon rb-script ${fs.vertAlign === 'subscript' ? 'active' : ''}`}
                     disabled={!canEdit}
-                    title={t('ribbonSubscript')}
+                    data-tip={t('ribbonSubscript')}
                     onClick={() => toggleVertAlign('subscript')}
                   >
                     x<sub>2</sub>
@@ -2293,7 +2410,7 @@ function RibbonInner({
                   <button
                     className={`rb-icon rb-script ${fs.vertAlign === 'superscript' ? 'active' : ''}`}
                     disabled={!canEdit}
-                    title={t('ribbonSuperscript')}
+                    data-tip={t('ribbonSuperscript')}
                     onClick={() => toggleVertAlign('superscript')}
                   >
                     x<sup>2</sup>
@@ -2304,7 +2421,8 @@ function RibbonInner({
                     <button
                       className={`rb-icon rb-color-btn ${fs.highlight ? 'active' : ''}`}
                       disabled={!canEdit}
-                      title={t('ribbonTextHighlightColor')}
+                      data-tip={t('ribbonTextHighlightColor')}
+                      aria-label={t('ribbonTextHighlightColor')}
                       onClick={() =>
                         setTextStyle({
                           highlight: fs.highlight === penHighlight ? null : penHighlight,
@@ -2334,7 +2452,8 @@ function RibbonInner({
                             <button
                               key={h}
                               className={`color-swatch color-highlight-swatch ${fs.highlight === h ? 'selected' : ''}`}
-                              title={h}
+                              data-tip={h}
+                              aria-label={h}
                               style={{ background: HIGHLIGHT_CSS[h] }}
                               onClick={() => {
                                 setPenHighlight(h)
@@ -2357,7 +2476,7 @@ function RibbonInner({
                     <button
                       className="rb-icon rb-color-btn"
                       disabled={!canEdit}
-                      title={t('ribbonFontColor')}
+                      data-tip={t('ribbonFontColor')}
                       onClick={() =>
                         setTextStyle({ color: penColor === '000000' ? null : penColor })
                       }
@@ -2389,7 +2508,8 @@ function RibbonInner({
                             <button
                               key={c.hex}
                               className={`color-swatch color-swatch-large ${fs.textColor === c.hex ? 'selected' : ''}`}
-                              title={t(c.nameKey)}
+                              data-tip={t(c.nameKey)}
+                              aria-label={t(c.nameKey)}
                               style={{ background: `#${c.hex}` }}
                               onClick={() => {
                                 setPenColor(c.hex)
@@ -2404,7 +2524,11 @@ function RibbonInner({
                               <button
                                 key={`${rowIndex}-${columnIndex}-${hex}`}
                                 className={`color-swatch color-swatch-large ${fs.textColor === hex ? 'selected' : ''}`}
-                                title={t('ribbonThemeColorShadeTip', {
+                                data-tip={t('ribbonThemeColorShadeTip', {
+                                  r: rowIndex + 1,
+                                  c: columnIndex + 1,
+                                })}
+                                aria-label={t('ribbonThemeColorShadeTip', {
                                   r: rowIndex + 1,
                                   c: columnIndex + 1,
                                 })}
@@ -2425,7 +2549,8 @@ function RibbonInner({
                             <button
                               key={c.hex}
                               className={`color-swatch color-swatch-large ${fs.textColor === c.hex ? 'selected' : ''}`}
-                              title={t(c.nameKey)}
+                              data-tip={t(c.nameKey)}
+                              aria-label={t(c.nameKey)}
                               style={{ background: `#${c.hex}` }}
                               onClick={() => {
                                 setPenColor(c.hex)
@@ -2467,7 +2592,8 @@ function RibbonInner({
                     <button
                       className={`rb-icon ${fs.listBullet ? 'active' : ''}`}
                       disabled={!canEdit || !!sub}
-                      title={t('ribbonBullets')}
+                      data-tip={t('ribbonBullets')}
+                      aria-label={t('ribbonBullets')}
                       onClick={() => toggleList('bullet')}
                     >
                       <IconBullets />
@@ -2475,7 +2601,8 @@ function RibbonInner({
                     <button
                       className="rb-caret"
                       disabled={!canEdit || !!sub}
-                      title={t('ribbonBullets')}
+                      data-tip={t('ribbonBullets')}
+                      aria-label={t('ribbonBullets')}
                       onClick={() => setDropdown((v) => (v === 'bulletLib' ? null : 'bulletLib'))}
                     >
                       <IconCaret />
@@ -2501,7 +2628,8 @@ function RibbonInner({
                     <button
                       className={`rb-icon ${fs.listOrdered ? 'active' : ''}`}
                       disabled={!canEdit || !!sub}
-                      title={t('ribbonNumbering')}
+                      data-tip={t('ribbonNumbering')}
+                      aria-label={t('ribbonNumbering')}
                       onClick={() => toggleList('ordered')}
                     >
                       <IconNumbered />
@@ -2509,7 +2637,8 @@ function RibbonInner({
                     <button
                       className="rb-caret"
                       disabled={!canEdit || !!sub}
-                      title={t('ribbonNumbering')}
+                      data-tip={t('ribbonNumbering')}
+                      aria-label={t('ribbonNumbering')}
                       onClick={() => setDropdown((v) => (v === 'numberLib' ? null : 'numberLib'))}
                     >
                       <IconCaret />
@@ -2540,7 +2669,8 @@ function RibbonInner({
                     <button
                       className="rb-icon"
                       disabled={!canEdit || !!sub}
-                      title={t('ribbonMultilevelTip')}
+                      data-tip={t('ribbonMultilevelTip')}
+                      aria-label={t('ribbonMultilevelTip')}
                       onClick={() => setDropdown((v) => (v === 'multiLib' ? null : 'multiLib'))}
                     >
                       <IconMultilevel />
@@ -2579,7 +2709,8 @@ function RibbonInner({
                   <button
                     className="rb-icon"
                     disabled={!canEdit || !!sub}
-                    title={t('ribbonDecreaseIndent')}
+                    data-tip={t('ribbonDecreaseIndent')}
+                    aria-label={t('ribbonDecreaseIndent')}
                     onClick={() => changeIndent(-1)}
                   >
                     <IconIndentDec />
@@ -2587,7 +2718,8 @@ function RibbonInner({
                   <button
                     className="rb-icon"
                     disabled={!canEdit || !!sub}
-                    title={t('ribbonIncreaseIndent')}
+                    data-tip={t('ribbonIncreaseIndent')}
+                    aria-label={t('ribbonIncreaseIndent')}
                     onClick={() => changeIndent(1)}
                   >
                     <IconIndentInc />
@@ -2596,14 +2728,16 @@ function RibbonInner({
                   <button
                     className="rb-icon"
                     disabled
-                    title={t('ribbonNotSupportedSuffix', { label: t('ribbonSort') })}
+                    data-tip={t('ribbonNotSupportedSuffix', { label: t('ribbonSort') })}
+                    aria-label={t('ribbonNotSupportedSuffix', { label: t('ribbonSort') })}
                   >
                     <IconSort />
                   </button>
                   <button
                     className={`rb-icon ${showMarks ? 'active' : ''}`}
                     disabled={!hasDoc}
-                    title={t('ribbonShowMarks')}
+                    data-tip={t('ribbonShowMarks')}
+                    aria-label={t('ribbonShowMarks')}
                     onClick={() => onShowMarks(!showMarks)}
                   >
                     <IconPilcrow />
@@ -2613,7 +2747,8 @@ function RibbonInner({
                   <button
                     className={`rb-icon ${activeAlign === 'left' ? 'active' : ''}`}
                     disabled={!canEdit}
-                    title={t('ribbonAlignLeftTip')}
+                    data-tip={t('ribbonAlignLeftTip')}
+                    aria-label={t('ribbonAlignLeftTip')}
                     onClick={() => setSelectionAlign(ed, 'left')}
                   >
                     <IconAlignLeft />
@@ -2621,7 +2756,8 @@ function RibbonInner({
                   <button
                     className={`rb-icon ${activeAlign === 'center' ? 'active' : ''}`}
                     disabled={!canEdit}
-                    title={t('ribbonAlignCenterTip')}
+                    data-tip={t('ribbonAlignCenterTip')}
+                    aria-label={t('ribbonAlignCenterTip')}
                     onClick={() => setSelectionAlign(ed, 'center')}
                   >
                     <IconAlignCenter />
@@ -2629,7 +2765,8 @@ function RibbonInner({
                   <button
                     className={`rb-icon ${activeAlign === 'right' ? 'active' : ''}`}
                     disabled={!canEdit}
-                    title={t('ribbonAlignRightTip')}
+                    data-tip={t('ribbonAlignRightTip')}
+                    aria-label={t('ribbonAlignRightTip')}
                     onClick={() => setSelectionAlign(ed, 'right')}
                   >
                     <IconAlignRight />
@@ -2637,7 +2774,8 @@ function RibbonInner({
                   <button
                     className={`rb-icon ${activeAlign === 'justify' ? 'active' : ''}`}
                     disabled={!canEdit}
-                    title={t('ribbonJustifyTip')}
+                    data-tip={t('ribbonJustifyTip')}
+                    aria-label={t('ribbonJustifyTip')}
                     onClick={() => setSelectionAlign(ed, 'justify')}
                   >
                     <IconAlignJustify />
@@ -2646,7 +2784,8 @@ function RibbonInner({
                   <button
                     className={`rb-icon ${!fs.bidi ? 'active' : ''}`}
                     disabled={!canEdit || !!sub}
-                    title={t('ribbonDirLtrTip')}
+                    data-tip={t('ribbonDirLtrTip')}
+                    aria-label={t('ribbonDirLtrTip')}
                     onClick={() => setParagraphDirection(editor, 'ltr')}
                   >
                     <IconDirLtr />
@@ -2654,7 +2793,8 @@ function RibbonInner({
                   <button
                     className={`rb-icon ${fs.bidi ? 'active' : ''}`}
                     disabled={!canEdit || !!sub}
-                    title={t('ribbonDirRtlTip')}
+                    data-tip={t('ribbonDirRtlTip')}
+                    aria-label={t('ribbonDirRtlTip')}
                     onClick={() => setParagraphDirection(editor, 'rtl')}
                   >
                     <IconDirRtl />
@@ -2664,7 +2804,8 @@ function RibbonInner({
                     <button
                       className={`rb-icon ${activeSpacing ? 'active' : ''}`}
                       disabled={!canEdit}
-                      title={t('ribbonLineSpacing')}
+                      data-tip={t('ribbonLineSpacing')}
+                      aria-label={t('ribbonLineSpacing')}
                       onClick={() => setDropdown((v) => (v === 'spacing' ? null : 'spacing'))}
                     >
                       <IconLineSpacing />
@@ -2710,7 +2851,8 @@ function RibbonInner({
                     <button
                       className={`rb-icon ${fs.shadingFill ? 'active' : ''}`}
                       disabled={!canEdit}
-                      title={t('ribbonParagraphShading')}
+                      data-tip={t('ribbonParagraphShading')}
+                      aria-label={t('ribbonParagraphShading')}
                       onClick={() => setDropdown((v) => (v === 'shading' ? null : 'shading'))}
                     >
                       <IconShading />
@@ -2725,7 +2867,8 @@ function RibbonInner({
                             key={c.hex}
                             className="color-swatch"
                             style={{ background: `#${c.hex}` }}
-                            title={t(c.nameKey)}
+                            data-tip={t(c.nameKey)}
+                            aria-label={t(c.nameKey)}
                             onClick={() => setParaAttr({ shadingFill: c.hex })}
                           />
                         ))}
@@ -2742,7 +2885,8 @@ function RibbonInner({
                     <button
                       className={`rb-icon ${fs.paraBorders ? 'active' : ''}`}
                       disabled={!canEdit}
-                      title={t('ribbonParagraphBorders')}
+                      data-tip={t('ribbonParagraphBorders')}
+                      aria-label={t('ribbonParagraphBorders')}
                       onClick={() => setDropdown((v) => (v === 'borders' ? null : 'borders'))}
                     >
                       <IconBorderAll />
@@ -2790,7 +2934,7 @@ function RibbonInner({
                 {styleGalleryOverflow && (
                   <button
                     className="style-gallery-more"
-                    title={t('ribbonMoreStyles')}
+                    data-tip={t('ribbonMoreStyles')}
                     aria-label={t('ribbonMoreStyles')}
                     aria-expanded={dropdown === 'styleGallery'}
                     onClick={() =>

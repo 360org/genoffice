@@ -423,9 +423,13 @@ export const TextStyleMark = Mark.create({
       // letter spacing (em, negative = condensed) converted from w:w scaling; precomputed by convert per run text
       charScaleEm: { default: null as number | null },
       highlight: { default: null as string | null },
+      // run shading fill, hex without '#' (w:shd w:fill)
+      shading: { default: null as string | null },
       vertAlign: { default: null as 'superscript' | 'subscript' | null },
       // East Asian emphasis mark (w:em val); saving is kept faithful by rawRPr
       em: { default: null as string | null },
+      // w:caps ('all') / w:smallCaps ('small'); saving is kept faithful by rawRPr
+      caps: { default: null as 'all' | 'small' | null },
       styleId: { default: null as string | null },
       // raw rPr slice pass-through (not rendered; on save mergeRPrModel preserves unmodeled attributes)
       rawRPr: { default: null as string | null, rendered: false },
@@ -460,6 +464,8 @@ export const TextStyleMark = Mark.create({
     if (spacingPt && scaleEm) styles.push(`letter-spacing:calc(${spacingPt}pt + ${scaleEm}em)`)
     else if (spacingPt) styles.push(`letter-spacing:${spacingPt}pt`)
     else if (scaleEm) styles.push(`letter-spacing:${scaleEm}em`)
+    // shading first: when both are set the later highlight declaration wins (Word behavior)
+    if (mark.attrs.shading) styles.push(`background-color:#${mark.attrs.shading}`)
     if (mark.attrs.highlight) {
       styles.push(
         `background-color:${HIGHLIGHT_CSS[mark.attrs.highlight as string] ?? mark.attrs.highlight}`,
@@ -475,6 +481,8 @@ export const TextStyleMark = Mark.create({
       const pos = em === 'comma' || em === 'circle' ? 'over' : 'under'
       styles.push(`text-emphasis:${shape}`, `text-emphasis-position:${pos} right`)
     }
+    if (mark.attrs.caps === 'all') styles.push('text-transform:uppercase')
+    else if (mark.attrs.caps === 'small') styles.push('font-variant-caps:small-caps')
     const attrs: Record<string, string> = { 'data-doc-style': '1', style: styles.join(';') }
     if (mark.attrs.styleId) attrs['data-style'] = String(mark.attrs.styleId)
     return ['span', attrs, 0]

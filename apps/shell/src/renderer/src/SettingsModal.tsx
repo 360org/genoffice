@@ -6,7 +6,7 @@ import type { AccountStatus, UiTheme } from '../../shared/home-api'
 import './settings.css'
 
 // ── Settings modal (opened from the account menu) ─────────
-// Zoom-style two-pane dialog: section nav on the left, fields on the right.
+// Genspark-style two-pane dialog: section nav on the left, fields on the right.
 // All values go through the existing home IPC; nothing is stored locally.
 
 // sorted by ISO 639 language code — native-script labels have no natural
@@ -33,16 +33,25 @@ const LANG_OPTIONS = [
   { value: 'zh-TW', label: '繁體中文' },
 ] as const
 
+// GenMail's option order: follow-system first, then the manual picks
 const THEME_OPTIONS = [
+  { value: 'system', labelKey: 'themeSystem' },
   { value: 'light', labelKey: 'themeLight' },
   { value: 'dark', labelKey: 'themeDark' },
-  { value: 'system', labelKey: 'themeSystem' },
 ] as const satisfies readonly { value: UiTheme; labelKey: StringKey }[]
 
 const CHANNEL_OPTIONS = [
   { value: 'stable', labelKey: 'channelStable' },
   { value: 'beta', labelKey: 'channelBeta' },
 ] as const satisfies readonly { value: 'stable' | 'beta'; labelKey: StringKey }[]
+
+/** GitHub-style abbreviated stargazer count (2591 → "2.6k") — the number is
+ * social proof, not a metric; the cached/exact value would only look stale */
+function formatStars(n: number): string {
+  if (n < 1000) return String(n)
+  const k = n / 1000
+  return `${k >= 100 ? Math.round(k) : (Math.round(k * 10) / 10).toString().replace(/\.0$/, '')}k`
+}
 
 type SectionId = 'account' | 'general' | 'about'
 
@@ -148,6 +157,7 @@ export function SettingsModal({
   const [saveDir, setSaveDir] = useState('')
   const [channel, setChannel] = useState<'stable' | 'beta'>('stable')
   const [appVersion, setAppVersion] = useState('')
+  const [githubStars, setGithubStars] = useState<number | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -162,6 +172,9 @@ export function SettingsModal({
     })
     void window.aiOffice.getAppVersion?.().then((v) => {
       if (alive && v) setAppVersion(v)
+    })
+    void window.aiOffice.githubStars?.().then((n) => {
+      if (alive && n !== null) setGithubStars(n)
     })
     return () => {
       alive = false
@@ -281,18 +294,23 @@ export function SettingsModal({
                       {t('language')}
                     </label>
                   </div>
-                  <select
-                    id="set-lang"
-                    className="set-select"
-                    value={lang}
-                    onChange={(e) => setLang(e.target.value as typeof lang)}
-                  >
-                    {LANG_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                  <span className="set-select-wrap">
+                    <span className="set-select-text" aria-hidden="true">
+                      {LANG_OPTIONS.find((o) => o.value === lang)?.label ?? lang}
+                    </span>
+                    <select
+                      id="set-lang"
+                      className="set-select"
+                      value={lang}
+                      onChange={(e) => setLang(e.target.value as typeof lang)}
+                    >
+                      {LANG_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
                 </div>
                 <div className="set-field">
                   <div className="set-field-text">
@@ -300,18 +318,23 @@ export function SettingsModal({
                       {t('theme')}
                     </label>
                   </div>
-                  <select
-                    id="set-theme"
-                    className="set-select"
-                    value={theme}
-                    onChange={(e) => applyTheme(e.target.value as UiTheme)}
-                  >
-                    {THEME_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {t(opt.labelKey)}
-                      </option>
-                    ))}
-                  </select>
+                  <span className="set-select-wrap">
+                    <span className="set-select-text" aria-hidden="true">
+                      {t(THEME_OPTIONS.find((o) => o.value === theme)?.labelKey ?? 'themeSystem')}
+                    </span>
+                    <select
+                      id="set-theme"
+                      className="set-select"
+                      value={theme}
+                      onChange={(e) => applyTheme(e.target.value as UiTheme)}
+                    >
+                      {THEME_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {t(opt.labelKey)}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
                 </div>
                 <Field
                   label={t('saveLocation')}
@@ -335,23 +358,47 @@ export function SettingsModal({
                       {t('updateChannel')}
                     </label>
                   </div>
-                  <select
-                    id="set-channel"
-                    className="set-select"
-                    value={channel}
-                    onChange={(e) => {
-                      const next = e.target.value === 'beta' ? 'beta' : 'stable'
-                      setChannel(next)
-                      void window.aiOffice.setUpdateChannel(next)
-                    }}
-                  >
-                    {CHANNEL_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {t(opt.labelKey)}
-                      </option>
-                    ))}
-                  </select>
+                  <span className="set-select-wrap">
+                    <span className="set-select-text" aria-hidden="true">
+                      {t(
+                        CHANNEL_OPTIONS.find((o) => o.value === channel)?.labelKey ??
+                          'channelStable',
+                      )}
+                    </span>
+                    <select
+                      id="set-channel"
+                      className="set-select"
+                      value={channel}
+                      onChange={(e) => {
+                        const next = e.target.value === 'beta' ? 'beta' : 'stable'
+                        setChannel(next)
+                        void window.aiOffice.setUpdateChannel(next)
+                      }}
+                    >
+                      {CHANNEL_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {t(opt.labelKey)}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
                 </div>
+                <Field
+                  label={t('setGithub')}
+                  value={
+                    githubStars === null
+                      ? 'github.com/genspark-ai/genoffice'
+                      : `github.com/genspark-ai/genoffice · ★ ${formatStars(githubStars)}`
+                  }
+                  action={
+                    <button
+                      className="set-btn"
+                      onClick={() => void window.aiOffice.openGitHubRepo?.()}
+                    >
+                      {t('starOnGitHub')}
+                    </button>
+                  }
+                />
               </>
             )}
           </div>

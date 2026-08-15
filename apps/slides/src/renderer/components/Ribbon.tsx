@@ -31,6 +31,7 @@ import {
   IconNavPane,
   IconOutlineView,
   IconPageColor,
+  IconApplyAll,
   IconPageSize,
   IconPlayCurrent,
   IconPlayFromStart,
@@ -45,7 +46,7 @@ import {
   IconSetupShow,
   IconSparkle,
   IconUndo,
-  IconWholePage,
+  IconFitWindow,
   IconZoom100,
   IconZoomIn,
   IconZoomOut,
@@ -67,7 +68,7 @@ import {
   IconTransRandom,
   IconAnimStar,
   IconAnimNone,
-  IconCrop,
+  IconPageBorders,
   IconNoneX,
   IconPathRight,
   IconPathDown,
@@ -78,6 +79,8 @@ import {
 // brand-supplied Review AI icon art (44px = 22px @2x), color baked in
 import iconSpelling from '../assets/icon-spelling.png'
 import iconTranslate from '../assets/icon-translate.png'
+import iconTransparency from '../assets/icon-transparency.png'
+import iconCrop from '../assets/icon-crop.png'
 import { ChartTypeDialog } from './ChartTypeDialog'
 import {
   BIG,
@@ -92,6 +95,7 @@ export type { FormatCmd, SlidesViewMode } from './ribbon-shared'
 import type { FormatCmd } from './ribbon-shared'
 import { RibbonHomeTab } from './RibbonHomeTab'
 import { RibbonInsertTab } from './RibbonInsertTab'
+import { autoContextTabForElement, contextTabForElement, type ContextTab } from './context-tabs'
 
 const IS_MAC = navigator.platform.toLowerCase().includes('mac')
 /** shell tab mode: the tab strip above owns traffic lights / caption buttons */
@@ -108,7 +112,6 @@ type MainTab =
   | 'slideShow'
   | 'review'
   | 'view'
-type ContextTab = 'tableDesign' | 'chartDesign' | 'pictureFormat'
 
 // Mac has no "File" tab (file operations go through the native menu), Windows does
 const TABS: readonly MainTab[] = IS_MAC
@@ -469,7 +472,11 @@ const CHART_STYLE_PRESETS: ChartStylePreset[] = [
 function chartPresetActive(info: ChartStyleInfo | null | undefined, p: ChartStylePreset): boolean {
   if (!info) return false
   const s = p.style
-  const barKind = info.kind === 'bar' || info.kind === 'barStacked' || info.kind === 'comboBarLine'
+  const barKind =
+    info.kind === 'bar' ||
+    info.kind === 'bar3D' ||
+    info.kind === 'barStacked' ||
+    info.kind === 'comboBarLine'
   return (
     info.legendPos === s.legendPos &&
     info.dataLabels === s.dataLabels &&
@@ -504,7 +511,7 @@ function ChartStyleThumb({
   const family =
     kind === 'line' || kind === 'area' || kind === 'scatter' || kind === 'radar'
       ? 'line'
-      : kind === 'pie' || kind === 'doughnut'
+      : kind === 'pie' || kind === 'pie3D' || kind === 'doughnut'
         ? 'pie'
         : 'bar'
   if (style.gridlines && family !== 'pie') {
@@ -653,7 +660,7 @@ function TableToggleBtn({
     <button
       className={`rb-icon ${on ? 'active' : ''}`}
       disabled={disabled}
-      title={t(on ? 'ribbonToggleOffTip' : 'ribbonToggleOnTip', { name: label })}
+      data-tip={t(on ? 'ribbonToggleOffTip' : 'ribbonToggleOnTip', { name: label })}
       onClick={() => (on ? offClick() : onClick())}
     >
       {label}
@@ -664,7 +671,7 @@ function TableToggleBtn({
 function DisabledBig({ icon, label }: { icon: ReactNode; label: string }) {
   const { t } = useI18n()
   return (
-    <button className="rb-big" disabled title={t('ribbonNotSupported', { name: label })}>
+    <button className="rb-big" disabled data-tip={t('ribbonNotSupported', { name: label })}>
       <span className="rb-big-icon">{icon}</span>
       <span>{label}</span>
     </button>
@@ -674,7 +681,6 @@ function DisabledBig({ icon, label }: { icon: ReactNode; label: string }) {
 /** per-tab priority for responsive collapse: when the ribbon
  * body overflows, these groups (in order) fold into a single dropdown button */
 const COLLAPSE_ORDER: Record<string, string[]> = {
-  home: ['slides'],
   animations: ['motionPaths', 'animation'],
 }
 
@@ -696,7 +702,7 @@ function RbCheck({
     <button
       className={`rb-check${on ? ' on' : ''}`}
       disabled={disabled}
-      title={title}
+      data-tip={title}
       onClick={onClick}
     >
       <span className="rb-check-box">
@@ -721,6 +727,8 @@ function RbCheck({
 export function Ribbon({
   hasDoc,
   deckEmpty,
+  canUndo,
+  canRedo,
   dirty,
   editing,
   autoSave,
@@ -850,7 +858,10 @@ export function Ribbon({
   contextChartStyle,
   chartColorSchemes,
   contextPictureCanCutout,
+  contextPictureStroke,
+  onPictureStroke,
   onPictureCrop,
+  cropActive,
   onPictureOpacity,
   onPictureCutout,
   onEditTableStyle,
@@ -863,15 +874,10 @@ export function Ribbon({
   canDistribute,
 }: Props) {
   const { t } = useI18n()
-  // Contextual tabs: table → table design; chart → chart design (imported charts auto-convert on first edit); picture → picture format
-  const contextTab: ContextTab | null =
-    contextElementType === 'table'
-      ? 'tableDesign'
-      : contextElementType === 'chart'
-        ? 'chartDesign'
-        : contextElementType === 'picture'
-          ? 'pictureFormat'
-          : null
+  // Text-bearing shapes keep picture-format commands available, but do not auto-activate
+  // that tab; ordinary shapes and multi-picture selections retain the existing behavior.
+  const contextTab = contextTabForElement(contextElementType ?? null)
+  const autoContextTab = autoContextTabForElement(contextElementType ?? null)
 
   const [tab, setTab] = useState<MainTab | ContextTab>('home')
   const [fileOpen, setFileOpen] = useState(false)
@@ -883,6 +889,32 @@ export function Ribbon({
   const [layoutPickOpen, setLayoutPickOpen] = useState(false)
   const [slideSizeOpen, setSlideSizeOpen] = useState(false)
   const [transparencyOpen, setTransparencyOpen] = useState(false)
+  const [pictureBorderOpen, setPictureBorderOpen] = useState(false)
+  // Debounced picture-border commit: color drags fire repeatedly, and a pending
+  // color commit must not clobber a width click landing meanwhile
+  const pictureBorderTimer = useRef<number | null>(null)
+  const pictureBorderDraft = useRef<{ color: string; widthPt: number } | null>(null)
+  const commitPictureBorder = (
+    patch: Partial<{ color: string; widthPt: number }>,
+    immediate = false,
+  ) => {
+    if (pictureBorderTimer.current) window.clearTimeout(pictureBorderTimer.current)
+    const base = pictureBorderDraft.current ?? {
+      color: toPickerHex(contextPictureStroke?.color) ?? '#000000',
+      widthPt: contextPictureStroke?.widthPt ?? 1,
+    }
+    const draft = { ...base, ...patch }
+    pictureBorderDraft.current = draft
+    const fire = () => {
+      pictureBorderTimer.current = null
+      onPictureStroke?.({
+        ...draft,
+        ...(contextPictureStroke?.dashPreset ? { dash: contextPictureStroke.dashPreset } : {}),
+      })
+    }
+    if (immediate) fire()
+    else pictureBorderTimer.current = window.setTimeout(fire, 200)
+  }
   const [lastColor, setLastColor] = useState('#C43E1C')
   // Bullet color "more colors" native picker echo
   const [lastBulletColor, setLastBulletColor] = useState('#C43E1C')
@@ -935,6 +967,7 @@ export function Ribbon({
     if (!keep.includes('layoutPick')) setLayoutPickOpen(false)
     if (!keep.includes('slideSize')) setSlideSizeOpen(false)
     if (!keep.includes('transparency')) setTransparencyOpen(false)
+    if (!keep.includes('pictureBorder')) setPictureBorderOpen(false)
     if (!keep.includes('table')) setTableOpen(false)
     if (!keep.includes('layout')) setLayoutOpen(false)
     if (!keep.includes('translate')) setTranslateOpen(false)
@@ -946,22 +979,31 @@ export function Ribbon({
     if (!keep.includes('slideShow')) setSlideShowOpen(false)
   }, [])
 
+  // Any ribbon popup open? Drives outside-press dismissal AND suspends the
+  // ribbon-tabs window drag region (drag regions swallow mousedown, so a
+  // press there could never dismiss otherwise)
+  const anyPanelOpen =
+    tableOpen ||
+    colorOpen ||
+    translateOpen ||
+    insertDrop != null ||
+    fontOpen ||
+    sizeOpen ||
+    layoutOpen ||
+    chartDrop != null ||
+    arrangeOpen ||
+    slideShowOpen ||
+    paraOpen ||
+    pictureBorderOpen ||
+    layoutPickOpen ||
+    slideSizeOpen ||
+    transparencyOpen ||
+    lineSpacingOpen ||
+    collapseOpen != null
+
   // Clicking elsewhere collapses the table picker (the font color palette uses onMouseDown without stealing focus, collapsing naturally when the edit commits)
   useEffect(() => {
-    if (
-      !tableOpen &&
-      !colorOpen &&
-      !translateOpen &&
-      !insertDrop &&
-      !fontOpen &&
-      !sizeOpen &&
-      !layoutOpen &&
-      !chartDrop &&
-      !arrangeOpen &&
-      !slideShowOpen &&
-      !paraOpen
-    )
-      return
+    if (!anyPanelOpen) return
     const close = () => {
       setTableOpen(false)
       setColorOpen(false)
@@ -974,31 +1016,34 @@ export function Ribbon({
       setArrangeOpen(false)
       setSlideShowOpen(false)
       setParaOpen(false)
+      setPictureBorderOpen(false)
+      setLayoutPickOpen(false)
+      setSlideSizeOpen(false)
+      setTransparencyOpen(false)
+      setLineSpacingOpen(false)
       setCollapseOpen(null)
     }
     window.addEventListener('mousedown', close)
-    return () => window.removeEventListener('mousedown', close)
-  }, [
-    tableOpen,
-    colorOpen,
-    translateOpen,
-    insertDrop,
-    fontOpen,
-    sizeOpen,
-    layoutOpen,
-    chartDrop,
-    arrangeOpen,
-    slideShowOpen,
-    paraOpen,
-    collapseOpen,
-  ])
+    // shell tab strip is a sibling WebContentsView: its presses reach us only
+    // via the app:chrome-pressed relay; blur covers app/window switching
+    window.addEventListener('blur', close)
+    const offChrome = window.slidesApi?.onChromePressed?.(close)
+    return () => {
+      window.removeEventListener('mousedown', close)
+      window.removeEventListener('blur', close)
+      offChrome?.()
+    }
+  }, [anyPanelOpen])
 
-  // ── Responsive collapse: when the ribbon body overflows,
-  // whole groups fold into a single dropdown button (flyout = original controls).
-  // Groups collapse in COLLAPSE_ORDER; they expand back when their measured
-  // inline width fits again.
+  // ── Responsive collapse (PowerPoint model): the collapsed set is a pure
+  // function of the current width, never of resize history — pick the fewest
+  // COLLAPSE_ORDER groups whose folding lets the full inline layout fit.
+  // Expanded/collapsed widths are cached per group so the required width is
+  // computable in every state (before the first fold the collapsed width is
+  // an estimate, corrected by measurement as soon as the group first folds).
   const bodyRef = useRef<HTMLDivElement | null>(null)
   const inlineWidthsRef = useRef(new Map<string, number>())
+  const collapsedWidthsRef = useRef(new Map<string, number>())
   useLayoutEffect(() => {
     setCollapsedGroups([])
     setCollapseOpen(null)
@@ -1007,45 +1052,75 @@ export function Ribbon({
     const el = bodyRef.current
     if (!el) return
     const order = COLLAPSE_ORDER[tab] ?? []
+    if (!order.length) return
     const evaluate = () => {
-      const slack = el.clientWidth - el.scrollWidth
-      if (slack < 0) {
-        setCollapsedGroups((cur) => {
-          const next = order.find((g) => !cur.includes(g))
-          if (!next) return cur
-          const groupEl = el.querySelector<HTMLElement>(`[data-rbgroup="${next}"]`)
-          if (groupEl) inlineWidthsRef.current.set(next, groupEl.offsetWidth)
-          return [...cur, next]
-        })
-      } else {
-        setCollapsedGroups((cur) => {
-          if (!cur.length) return cur
-          const last = cur[cur.length - 1]!
-          const collapsedW =
-            el.querySelector<HTMLElement>(`[data-rbgroup="${last}"]`)?.offsetWidth ?? 60
-          const needed = (inlineWidthsRef.current.get(last) ?? 240) - collapsedW
-          // 16px hysteresis so a borderline width doesn't oscillate
-          if (slack > needed + 16) return cur.slice(0, -1)
-          return cur
-        })
+      const kids = Array.from(el.children) as HTMLElement[]
+      if (!kids.length) return
+      const first = kids[0]!
+      const last = kids[kids.length - 1]!
+      let fullWidth = last.offsetLeft + last.offsetWidth - first.offsetLeft
+      // refresh width caches and normalize the measured extent to "all expanded"
+      const saving = (g: string) =>
+        Math.max(
+          0,
+          (inlineWidthsRef.current.get(g) ?? 240) - (collapsedWidthsRef.current.get(g) ?? 68),
+        )
+      for (const g of order) {
+        const groupEl = el.querySelector<HTMLElement>(`[data-rbgroup="${g}"]`)
+        if (!groupEl) continue
+        if (collapsedGroups.includes(g)) {
+          collapsedWidthsRef.current.set(g, groupEl.offsetWidth)
+          fullWidth += saving(g)
+        } else {
+          inlineWidthsRef.current.set(g, groupEl.offsetWidth)
+        }
       }
+      // fewest folded groups whose savings make the layout fit `avail`
+      const fitCount = (avail: number) => {
+        let need = fullWidth
+        let k = 0
+        while (k < order.length && need > avail) {
+          need -= saving(order[k]!)
+          k++
+        }
+        return k
+      }
+      const mustCollapse = fitCount(el.clientWidth)
+      // integer offset* measurements make the normalized width jitter by a
+      // couple of px — demand a little real slack before unfolding so a
+      // borderline width can't oscillate
+      const next =
+        mustCollapse >= collapsedGroups.length
+          ? mustCollapse
+          : Math.min(Math.max(fitCount(el.clientWidth - 8), mustCollapse), collapsedGroups.length)
+      if (next !== collapsedGroups.length) setCollapsedGroups(order.slice(0, next))
     }
     evaluate()
     const ro = new ResizeObserver(evaluate)
     ro.observe(el)
+    // group contents can change width without the body resizing (font loads,
+    // locale, contextual controls) — watch every group as well
+    el.querySelectorAll<HTMLElement>('.ribbon-group').forEach((g) => ro.observe(g))
     return () => ro.disconnect()
   }, [tab, collapsedGroups])
 
-  // Contextual tab auto-switch: jump in when it appears, back to "Home" when it disappears
+  // Contextual tab auto-switch: jump in for dedicated object tools, but not text-bearing shapes.
+  // Track visibility separately so a manually opened picture-format tab still closes on deselect.
   const prevContextTab = useRef<ContextTab | null>(null)
+  const prevAutoContextTab = useRef<ContextTab | null>(null)
   useEffect(() => {
-    if (contextTab && contextTab !== prevContextTab.current) {
-      setTab(contextTab)
-    } else if (!contextTab && prevContextTab.current) {
-      setTab((cur) => (cur === prevContextTab.current ? 'home' : cur))
+    const previousContextTab = prevContextTab.current
+    const previousAutoContextTab = prevAutoContextTab.current
+    if (autoContextTab && autoContextTab !== previousAutoContextTab) {
+      setTab(autoContextTab)
+    } else if (!autoContextTab && previousAutoContextTab) {
+      setTab((cur) => (cur === previousAutoContextTab ? 'home' : cur))
+    } else if (!contextTab && previousContextTab) {
+      setTab((cur) => (cur === previousContextTab ? 'home' : cur))
     }
     prevContextTab.current = contextTab
-  }, [contextTab])
+    prevAutoContextTab.current = autoContextTab
+  }, [contextTab, autoContextTab])
 
   /** Insert tab dropdown big button (click toggles, content stopPropagation) */
   const dropBig = (
@@ -1060,7 +1135,7 @@ export function Ribbon({
       <button
         className={`rb-big ${insertDrop === key ? 'active' : ''}`}
         disabled={disabled}
-        title={title}
+        data-tip={title}
         onMouseDown={(e) => {
           e.stopPropagation()
           closeSiblingPanels(e, closePanels, 'insert')
@@ -1179,7 +1254,8 @@ export function Ribbon({
     <button
       className={`rb-icon${className ? ` ${className}` : ''}`}
       disabled={!editing}
-      title={editing ? title : t('ribbonEditableHint', { title })}
+      data-tip={editing ? title : t('ribbonEditableHint', { title })}
+      aria-label={title}
       onMouseDown={(e) => {
         e.preventDefault()
         if (editing) onFormat(cmd)
@@ -1308,7 +1384,9 @@ export function Ribbon({
   return (
     <div className="ribbon">
       <div
-        className={`ribbon-tabs ${IN_TAB ? '' : IS_MAC ? 'ribbon-tabs-mac' : 'ribbon-tabs-win'}`}
+        className={`ribbon-tabs ${IN_TAB ? '' : IS_MAC ? 'ribbon-tabs-mac' : 'ribbon-tabs-win'}${
+          anyPanelOpen ? ' ribbon-tabs-nodrag' : ''
+        }`}
       >
         {!IS_MAC && (
           <div className="file-tab-wrap">
@@ -1381,15 +1459,22 @@ export function Ribbon({
             )}
           </div>
         )}
-        <button className="qa-btn" title={t('ribbonSaveTip')} disabled={!dirty} onClick={onSave}>
+        <button
+          className="qa-btn"
+          data-tip={t('ribbonSaveTip')}
+          aria-label={t('ribbonSaveTip')}
+          disabled={!dirty}
+          onClick={onSave}
+        >
           <IconSave size={16} />
         </button>
         {/* onMouseDown+preventDefault like the format buttons: keep contentEditable focus so undo/redo reaches
             the active text edit. onClick with detail===0 covers keyboard activation (Enter/Space emit only click). */}
         <button
           className="qa-btn"
-          title={t('ribbonUndo')}
-          disabled={!hasDoc}
+          data-tip={t('ribbonUndo')}
+          aria-label={t('ribbonUndo')}
+          disabled={!hasDoc || (!canUndo && !editing)}
           onMouseDown={(e) => {
             e.preventDefault()
             onUndo()
@@ -1402,8 +1487,9 @@ export function Ribbon({
         </button>
         <button
           className="qa-btn"
-          title={t('ribbonRedo')}
-          disabled={!hasDoc}
+          data-tip={t('ribbonRedo')}
+          aria-label={t('ribbonRedo')}
+          disabled={!hasDoc || (!canRedo && !editing)}
           onMouseDown={(e) => {
             e.preventDefault()
             onRedo()
@@ -1414,7 +1500,10 @@ export function Ribbon({
         >
           <IconRedo size={16} />
         </button>
-        <label className={`autosave-toggle ${autoSave ? 'on' : ''}`} title={t('ribbonAutoSaveTip')}>
+        <label
+          className={`autosave-toggle ${autoSave ? 'on' : ''}`}
+          data-tip={t('ribbonAutoSaveTip')}
+        >
           <span className="autosave-knob" />
           <span className="autosave-text">{t('ribbonAutoSave')}</span>
           <input
@@ -1441,7 +1530,7 @@ export function Ribbon({
             key={contextTab}
             className={`ribbon-tab ribbon-tab-context ${tab === contextTab ? 'active' : ''}`}
             onClick={() => setTab(contextTab)}
-            title={t(TAB_LABEL[contextTab])}
+            data-tip={t(TAB_LABEL[contextTab])}
           >
             {t(TAB_LABEL[contextTab])}
           </button>
@@ -1490,7 +1579,8 @@ export function Ribbon({
                         key={hex}
                         className={`ink-swatch ${preset.color === hex ? 'active' : ''}`}
                         style={{ background: `#${hex}` }}
-                        title={`#${hex}`}
+                        data-tip={`#${hex}`}
+                        aria-label={`#${hex}`}
                         disabled={!hasDoc}
                         onClick={() => updatePenPreset(index, { color: hex })}
                       />
@@ -1501,7 +1591,8 @@ export function Ribbon({
                       <button
                         key={w}
                         className={`ink-width ${preset.width === w ? 'active' : ''}`}
-                        title={t('ribbonInkWidthTip', { w })}
+                        data-tip={t('ribbonInkWidthTip', { w })}
+                        aria-label={t('ribbonInkWidthTip', { w })}
                         disabled={!hasDoc}
                         onClick={() => updatePenPreset(index, { width: w })}
                       >
@@ -1525,7 +1616,7 @@ export function Ribbon({
                   <button
                     className={`rb-big ${inkTool === 'select' ? 'active' : ''}`}
                     disabled={!hasDoc}
-                    title={t('ribbonSelectTip')}
+                    data-tip={t('ribbonSelectTip')}
                     onClick={() => {
                       setPenFlyout(null)
                       onInkTool('select')
@@ -1539,7 +1630,7 @@ export function Ribbon({
                   <button
                     className={`rb-big ${inkTool === 'eraser' ? 'active' : ''}`}
                     disabled={!hasDoc}
-                    title={t('ribbonEraserTip')}
+                    data-tip={t('ribbonEraserTip')}
                     onClick={() => {
                       setPenFlyout(null)
                       onInkTool('eraser')
@@ -1561,7 +1652,10 @@ export function Ribbon({
                           key={i}
                           className={`pen-btn ${held ? 'down' : ''}`}
                           disabled={!hasDoc}
-                          title={
+                          data-tip={
+                            preset.kind === 'pen' ? t('ribbonPenTip') : t('ribbonHighlighterTip')
+                          }
+                          aria-label={
                             preset.kind === 'pen' ? t('ribbonPenTip') : t('ribbonHighlighterTip')
                           }
                           onClick={(event) => {
@@ -1595,7 +1689,7 @@ export function Ribbon({
                   <button
                     className="rb-big"
                     disabled={!hasDoc || inkCount === 0}
-                    title={t('ribbonEraseAllTip')}
+                    data-tip={t('ribbonEraseAllTip')}
                     onClick={onInkClearAll}
                   >
                     <span className="rb-big-icon">
@@ -1624,7 +1718,7 @@ export function Ribbon({
                     key={tp.id}
                     className="theme-card"
                     disabled={!hasDoc}
-                    title={t('ribbonApplyThemeTip', { name: themeDisplayName(tp, t) })}
+                    data-tip={t('ribbonApplyThemeTip', { name: themeDisplayName(tp, t) })}
                     onClick={() => onApplyTheme(tp)}
                     style={{ background: `#${tp.colors.lt1}`, color: `#${tp.colors.dk1}` }}
                   >
@@ -1656,7 +1750,7 @@ export function Ribbon({
                   armColorInput(el)
                   el.click()
                 }}
-                title={t('ribbonBgFillTip')}
+                data-tip={t('ribbonBgFillTip')}
               >
                 <span className="rb-big-icon rb-big-icon-colored">
                   <IconPageColor size={BIG} />
@@ -1681,10 +1775,10 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={() => onBackground(bgColor, true)}
-                title={t('ribbonBgApplyAllTip', { color: bgColor })}
+                data-tip={t('ribbonBgApplyAllTip', { color: bgColor })}
               >
                 <span className="rb-big-icon">
-                  <IconPageSize size={BIG} />
+                  <IconApplyAll size={BIG} />
                 </span>
                 <span>{t('ribbonApplyToAll')}</span>
               </button>
@@ -1700,7 +1794,7 @@ export function Ribbon({
                     closeSiblingPanels(e, closePanels, 'slideSize')
                   }}
                   onClick={() => setSlideSizeOpen((v) => !v)}
-                  title={t('ribbonSlideSizeTip')}
+                  data-tip={t('ribbonSlideSizeTip')}
                 >
                   <span className="rb-big-icon">
                     <IconPageSize size={BIG} />
@@ -1741,7 +1835,7 @@ export function Ribbon({
                   className={`rb-big ${transition === tr.kind ? 'active' : ''}`}
                   disabled={!hasDoc}
                   onClick={() => onTransition(tr.kind, false)}
-                  title={
+                  data-tip={
                     tr.kind === 'none'
                       ? t('ribbonTransNoneTip')
                       : t('ribbonTransApplyTip', { name: t(tr.label) })
@@ -1758,10 +1852,10 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={() => onTransition(transition, true)}
-                title={t('ribbonTransApplyAllTip')}
+                data-tip={t('ribbonTransApplyAllTip')}
               >
                 <span className="rb-big-icon">
-                  <IconPageSize size={BIG} />
+                  <IconApplyAll size={BIG} />
                 </span>
                 <span>{t('ribbonApplyToAll')}</span>
               </button>
@@ -1774,7 +1868,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc || animCount === 0}
                 onClick={onAnimPreview}
-                title={t('ribbonAnimPreviewTip')}
+                data-tip={t('ribbonAnimPreviewTip')}
               >
                 <span className="rb-big-icon">
                   <IconPlayCurrent size={BIG} />
@@ -1804,7 +1898,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc || !hasSelection}
                 onClick={() => onApplyAnimation('none')}
-                title={t('ribbonAnimNoneTip')}
+                data-tip={t('ribbonAnimNoneTip')}
               >
                 <span className="rb-big-icon rb-anim-glyph">
                   <IconAnimNone size={BIG} />
@@ -1821,7 +1915,7 @@ export function Ribbon({
                     if (hasDoc && hasSelection) animHoverStart(a.kind)
                   }}
                   onMouseLeave={animHoverStop}
-                  title={t('ribbonAnimApplyTip', {
+                  data-tip={t('ribbonAnimApplyTip', {
                     cls: t(ANIM_CLS_TITLE[a.cls]),
                     name: t(a.label),
                   })}
@@ -1861,7 +1955,7 @@ export function Ribbon({
                     if (hasDoc && hasSelection) animHoverStart('motionPath', mp.path)
                   }}
                   onMouseLeave={animHoverStop}
-                  title={t('ribbonMotionPathTip', { name: t(mp.label) })}
+                  data-tip={t('ribbonMotionPathTip', { name: t(mp.label) })}
                 >
                   <span className="rb-big-icon rb-anim-glyph rb-anim-path">{mp.icon}</span>
                   <span>{t(mp.label)}</span>
@@ -1906,7 +2000,7 @@ export function Ribbon({
                 className={`rb-big ${animPaneOpen ? 'active' : ''}`}
                 disabled={!hasDoc}
                 onClick={onToggleAnimPane}
-                title={t('ribbonAnimPaneTip')}
+                data-tip={t('ribbonAnimPaneTip')}
               >
                 <span className="rb-big-icon">
                   <IconNavPane size={BIG} />
@@ -1917,7 +2011,7 @@ export function Ribbon({
                 className={`rb-big ${animByParagraph ? 'active' : ''}`}
                 disabled={!hasDoc}
                 onClick={onToggleAnimByParagraph}
-                title={t('ribbonAnimByParaTip')}
+                data-tip={t('ribbonAnimByParaTip')}
               >
                 <span className="rb-big-icon">
                   <IconBullets size={BIG} />
@@ -1934,7 +2028,7 @@ export function Ribbon({
                     disabled={!timingAnim}
                     value={timingAnim?.trigger ?? 'onClick'}
                     onChange={(e) => onAnimTiming({ trigger: e.target.value as AnimTrigger })}
-                    title={t('ribbonAnimTriggerTip')}
+                    data-tip={t('ribbonAnimTriggerTip')}
                   >
                     <option value="onClick">{t('ribbonAnimOnClick')}</option>
                     <option value="withPrev">{t('ribbonAnimWithPrev')}</option>
@@ -2001,7 +2095,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={() => onSlideShow(true)}
-                title={t('ribbonFromBeginningTip')}
+                data-tip={t('ribbonFromBeginningTip')}
               >
                 <span className="rb-big-icon">
                   <IconPlayFromStart size={BIG} />
@@ -2012,7 +2106,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={() => onSlideShow(false)}
-                title={t('ribbonFromCurrentTip')}
+                data-tip={t('ribbonFromCurrentTip')}
               >
                 <span className="rb-big-icon">
                   <IconPlayCurrent size={BIG} />
@@ -2023,7 +2117,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={() => onPresenterView(true)}
-                title={t('ribbonPresenterViewTip')}
+                data-tip={t('ribbonPresenterViewTip')}
               >
                 <span className="rb-big-icon">
                   <IconPresenterView size={BIG} />
@@ -2034,7 +2128,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={onCustomShow}
-                title={t('ribbonCustomShowTip')}
+                data-tip={t('ribbonCustomShowTip')}
               >
                 <span className="rb-big-icon">
                   <IconCustomShow size={BIG} />
@@ -2049,7 +2143,7 @@ export function Ribbon({
                 className={`rb-big ${currentHidden ? 'active' : ''}`}
                 disabled={!hasDoc}
                 onClick={onToggleHidden}
-                title={currentHidden ? t('ribbonUnhideSlideTip') : t('ribbonHideSlideTip')}
+                data-tip={currentHidden ? t('ribbonUnhideSlideTip') : t('ribbonHideSlideTip')}
               >
                 <span className="rb-big-icon">
                   <IconHideSlide size={BIG} />
@@ -2060,7 +2154,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={onRehearse}
-                title={t('ribbonRehearseTip')}
+                data-tip={t('ribbonRehearseTip')}
               >
                 <span className="rb-big-icon">
                   <IconRehearse size={BIG} />
@@ -2076,7 +2170,7 @@ export function Ribbon({
               <button
                 className="rb-big"
                 disabled={!hasDoc}
-                title={`${t('ribbonSpellCheckTip')} — ${t('ribbonAiCreditNote')}`}
+                data-tip={`${t('ribbonSpellCheckTip')} — ${t('ribbonAiCreditNote')}`}
                 onClick={() => {
                   if (confirmAiRewrite()) onAiPreset(t('ribbonSpellCheckPrompt'))
                 }}
@@ -2092,7 +2186,7 @@ export function Ribbon({
                 <button
                   className={`rb-big ${translateOpen ? 'active' : ''}`}
                   disabled={!hasDoc}
-                  title={`${t('ribbonTranslateTip')} — ${t('ribbonAiCreditNote')}`}
+                  data-tip={`${t('ribbonTranslateTip')} — ${t('ribbonAiCreditNote')}`}
                   onMouseDown={(e) => {
                     e.stopPropagation()
                     closeSiblingPanels(e, closePanels, 'translate')
@@ -2132,7 +2226,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={onNewComment}
-                title={t('ribbonNewCommentTip')}
+                data-tip={t('ribbonNewCommentTip')}
               >
                 <span className="rb-big-icon">
                   <IconComment size={BIG} />
@@ -2143,7 +2237,7 @@ export function Ribbon({
                 className={`rb-big ${commentsOpen ? 'active' : ''}`}
                 disabled={!hasDoc}
                 onClick={onToggleComments}
-                title={t('ribbonCommentsPaneTip')}
+                data-tip={t('ribbonCommentsPaneTip')}
               >
                 <span className="rb-big-icon">
                   <IconNavPane size={BIG} />
@@ -2191,7 +2285,7 @@ export function Ribbon({
                   className={`rb-big ${viewMode === mode ? 'active' : ''}`}
                   disabled={!hasDoc}
                   onClick={() => onViewMode(mode)}
-                  title={title}
+                  data-tip={title}
                 >
                   <span className="rb-big-icon">{icon}</span>
                   <span>{label}</span>
@@ -2201,7 +2295,7 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={onSlideMaster}
-                title={t('ribbonViewMasterTip')}
+                data-tip={t('ribbonViewMasterTip')}
               >
                 <span className="rb-big-icon">
                   <IconSlideMaster size={BIG} />
@@ -2211,7 +2305,7 @@ export function Ribbon({
             </Group>
             <div className="ribbon-sep" />
             <Group label={t('ribbonGroupShow')}>
-              <div className="rb-col rb-check-col">
+              <div className="rb-check-grid">
                 <RbCheck
                   label={t('ribbonRuler')}
                   on={showRuler}
@@ -2233,8 +2327,6 @@ export function Ribbon({
                   title={t('ribbonGuidesTip')}
                   onClick={onToggleGuides}
                 />
-              </div>
-              <div className="rb-col rb-check-col">
                 <RbCheck
                   label={t('ribbonNotes')}
                   on={showNotes}
@@ -2256,7 +2348,7 @@ export function Ribbon({
                 <button
                   className="rb-small"
                   disabled={!hasDoc}
-                  onClick={() => onZoom(Math.min(zoom * 1.15, 3))}
+                  onClick={() => onZoom((z) => Math.min(z * 1.15, 3))}
                 >
                   <IconZoomIn size={18} />
                   <span>{t('ribbonZoomIn')}</span>
@@ -2264,7 +2356,7 @@ export function Ribbon({
                 <button
                   className="rb-small"
                   disabled={!hasDoc}
-                  onClick={() => onZoom(Math.max(zoom / 1.15, 0.25))}
+                  onClick={() => onZoom((z) => Math.max(z / 1.15, 0.25))}
                 >
                   <IconZoomOut size={18} />
                   <span>{t('ribbonZoomOut')}</span>
@@ -2278,10 +2370,10 @@ export function Ribbon({
                 className="rb-big"
                 disabled={!hasDoc}
                 onClick={onZoomFit}
-                title={t('ribbonFitWindowTip')}
+                data-tip={t('ribbonFitWindowTip')}
               >
                 <span className="rb-big-icon">
-                  <IconWholePage size={BIG} />
+                  <IconFitWindow size={BIG} />
                 </span>
                 <span>{t('ribbonFitWindow')}</span>
               </button>
@@ -2294,7 +2386,7 @@ export function Ribbon({
                 <button
                   key={p.key}
                   className="rb-table-style-card"
-                  title={t(p.label)}
+                  data-tip={t(p.label)}
                   disabled={!onEditTableStyle}
                   onClick={() => onEditTableStyle?.({ styleName: p.key })}
                 >
@@ -2330,7 +2422,8 @@ export function Ribbon({
                     key={c}
                     className="rb-color-swatch"
                     style={{ background: c }}
-                    title={c}
+                    data-tip={c}
+                    aria-label={c}
                     disabled={!onEditTableStyle}
                     // preventDefault keeps a cell text-edit session alive so shading targets that cell
                     onMouseDown={(e) => e.preventDefault()}
@@ -2344,7 +2437,8 @@ export function Ribbon({
                 ))}
                 <button
                   className="rb-color-swatch rb-color-none"
-                  title={t('ribbonNoShading')}
+                  data-tip={t('ribbonNoShading')}
+                  aria-label={t('ribbonNoShading')}
                   disabled={!onEditTableStyle}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() =>
@@ -2363,7 +2457,8 @@ export function Ribbon({
               <div className="rb-table-border-row">
                 <button
                   className="rb-icon"
-                  title={t('ribbonAllBordersTip')}
+                  data-tip={t('ribbonAllBordersTip')}
+                  aria-label={t('ribbonAllBordersTip')}
                   disabled={!onEditTableStyle}
                   onClick={() =>
                     onEditTableStyle?.({
@@ -2377,7 +2472,8 @@ export function Ribbon({
                 </button>
                 <button
                   className="rb-icon"
-                  title={t('ribbonClearBordersTip')}
+                  data-tip={t('ribbonClearBordersTip')}
+                  aria-label={t('ribbonClearBordersTip')}
                   disabled={!onEditTableStyle}
                   onClick={() => onEditTableStyle?.({ borderPreset: 'none' })}
                 >
@@ -2390,7 +2486,7 @@ export function Ribbon({
                   type="color"
                   defaultValue="#000000"
                   className="rb-color-input"
-                  title={t('ribbonBorderColorTip')}
+                  data-tip={t('ribbonBorderColorTip')}
                   onPointerDown={(e) => armColorInput(e.currentTarget)}
                   onChange={(e) => onEditTableStyle?.({ borderColor: e.target.value })}
                 />
@@ -2398,7 +2494,7 @@ export function Ribbon({
                 <select
                   className="rb-select-sm"
                   defaultValue="1"
-                  title={t('ribbonBorderWeightTip')}
+                  data-tip={t('ribbonBorderWeightTip')}
                   onChange={(e) => onEditTableStyle?.({ borderWidthPt: Number(e.target.value) })}
                 >
                   <option value="0.5">0.5pt</option>
@@ -2418,7 +2514,7 @@ export function Ribbon({
                 <button
                   className={`rb-big ${chartDrop === 'elements' ? 'active' : ''}`}
                   disabled={!onEditChart}
-                  title={t('ribbonAddChartElementTip')}
+                  data-tip={t('ribbonAddChartElementTip')}
                   onMouseDown={(e) => {
                     e.stopPropagation()
                     closeSiblingPanels(e, closePanels, 'chart')
@@ -2531,7 +2627,7 @@ export function Ribbon({
                 <button
                   className={`rb-big ${chartDrop === 'colors' ? 'active' : ''}`}
                   disabled={!onEditChart}
-                  title={t('ribbonChangeColorsTip')}
+                  data-tip={t('ribbonChangeColorsTip')}
                   onMouseDown={(e) => {
                     e.stopPropagation()
                     closeSiblingPanels(e, closePanels, 'chart')
@@ -2556,7 +2652,7 @@ export function Ribbon({
                       <button
                         key={s.key}
                         className="rb-chart-scheme-card"
-                        title={s.label}
+                        data-tip={s.label}
                         onClick={() => {
                           setChartDrop(null)
                           onEditChart?.({ colorScheme: s.key })
@@ -2582,7 +2678,7 @@ export function Ribbon({
                   <button
                     key={p.key}
                     className={`rb-chart-style-card ${chartPresetActive(contextChartStyle, p) ? 'active' : ''}`}
-                    title={t(p.label)}
+                    data-tip={t(p.label)}
                     disabled={!onEditChart}
                     onClick={() => onEditChart?.({ ...p.style })}
                   >
@@ -2596,7 +2692,7 @@ export function Ribbon({
             <Group label={t('ribbonGroupData')}>
               <button
                 className="rb-big"
-                title={t('ribbonSwitchRowColTip')}
+                data-tip={t('ribbonSwitchRowColTip')}
                 disabled={!onEditChart}
                 onClick={() => onEditChart?.({ switchRowCol: true })}
               >
@@ -2607,7 +2703,7 @@ export function Ribbon({
               </button>
               <button
                 className="rb-big"
-                title={t('ribbonEditDataTip')}
+                data-tip={t('ribbonEditDataTip')}
                 disabled={!onOpenChartDataDialog}
                 onClick={onOpenChartDataDialog}
               >
@@ -2622,7 +2718,7 @@ export function Ribbon({
               <button
                 className="rb-big"
                 disabled={!onEditChart}
-                title={t('ribbonChangeChartType')}
+                data-tip={t('ribbonChangeChartType')}
                 onClick={() => setChartTypeDlgOpen(true)}
               >
                 <span className="rb-big-icon">
@@ -2651,30 +2747,36 @@ export function Ribbon({
             <Group label={t('ribbonGroupAdjust')}>
               <button
                 className="rb-big"
-                title={
+                data-tip={
                   contextPictureCanCutout ? t('ribbonRemoveBgTip') : t('ribbonRemoveBgDisabledTip')
                 }
                 disabled={!onPictureCutout || !contextPictureCanCutout}
                 onClick={onPictureCutout}
               >
                 <span className="rb-big-icon">
-                  <IconRemoveBg size={BIG + 2} />
+                  {/* BIG, not BIG+2: the shared 28px glyph size keeps this button's
+                      icon-row height (and label line) identical to its neighbors */}
+                  <IconRemoveBg size={BIG} />
                 </span>
                 <span>{t('ribbonRemoveBg')}</span>
               </button>
               <div className="rb-drop-wrap">
                 <button
                   className={`rb-big ${transparencyOpen ? 'active' : ''}`}
-                  disabled={!onPictureOpacity}
+                  disabled={!onPictureOpacity || contextElementType !== 'picture'}
                   onMouseDown={(e) => {
                     e.stopPropagation()
                     closeSiblingPanels(e, closePanels, 'transparency')
                   }}
                   onClick={() => setTransparencyOpen((v) => !v)}
-                  title={t('ribbonTransparency')}
+                  data-tip={t('ribbonTransparency')}
                 >
-                  <span className="rb-big-icon" style={{ fontSize: 20 }}>
-                    ◐<RbCaret />
+                  <span className="rb-big-icon">
+                    {/* 28px box around the 22px art so the icon row matches the SVG glyphs' height */}
+                    <span className="ai-feature-icon" aria-hidden="true">
+                      <img src={iconTransparency} width={22} height={22} alt="" />
+                    </span>
+                    <RbCaret />
                   </span>
                   <span>{t('ribbonTransparency')}</span>
                 </button>
@@ -2696,15 +2798,84 @@ export function Ribbon({
               </div>
             </Group>
             <div className="ribbon-sep" />
+            <Group label={t('paneFormatOutline')}>
+              <div className="rb-drop-wrap">
+                <button
+                  className={`rb-big ${pictureBorderOpen ? 'active' : ''}`}
+                  disabled={!onPictureStroke}
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    closeSiblingPanels(e, closePanels, 'pictureBorder')
+                  }}
+                  onClick={() => {
+                    pictureBorderDraft.current = null
+                    setPictureBorderOpen((v) => !v)
+                  }}
+                  data-tip={t('paneFormatOutline')}
+                >
+                  <span className="rb-big-icon">
+                    <IconPageBorders size={BIG} />
+                    <RbCaret />
+                  </span>
+                  <span>{t('paneFormatOutline')}</span>
+                </button>
+                {pictureBorderOpen && (
+                  <div className="rb-drop rb-menu" onMouseDown={(e) => e.stopPropagation()}>
+                    <label className="rb-menu-input">
+                      {t('paneFormatOutlineColor')}
+                      <input
+                        type="color"
+                        defaultValue={toPickerHex(contextPictureStroke?.color) ?? '#000000'}
+                        onPointerDown={(e) => armColorInput(e.currentTarget)}
+                        onChange={(e) => commitPictureBorder({ color: e.target.value })}
+                      />
+                    </label>
+                    <div className="rb-menu-sep" />
+                    {[0.5, 1, 1.5, 2.25, 3, 4.5, 6].map((pt) => (
+                      <button
+                        key={pt}
+                        className={contextPictureStroke?.widthPt === pt ? 'active' : ''}
+                        onClick={() => {
+                          setPictureBorderOpen(false)
+                          commitPictureBorder({ widthPt: pt }, true)
+                        }}
+                      >
+                        {pt} pt
+                      </button>
+                    ))}
+                    <div className="rb-menu-sep" />
+                    <button
+                      className={!contextPictureStroke ? 'active' : ''}
+                      onClick={() => {
+                        setPictureBorderOpen(false)
+                        // A pending debounced color commit still holds the prior draft
+                        // in its closure and would re-apply the border after the clear
+                        if (pictureBorderTimer.current) {
+                          window.clearTimeout(pictureBorderTimer.current)
+                          pictureBorderTimer.current = null
+                        }
+                        pictureBorderDraft.current = null
+                        onPictureStroke?.(null)
+                      }}
+                    >
+                      {t('paneFormatNoOutline')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </Group>
+            <div className="ribbon-sep" />
             <Group label={t('ribbonGroupSize')}>
               <button
-                className="rb-big"
-                title={t('ribbonCropTip')}
-                disabled={!onPictureCrop}
+                className={`rb-big ${cropActive ? 'active' : ''}`}
+                data-tip={t('ribbonCropTip')}
+                disabled={!onPictureCrop || contextElementType !== 'picture'}
                 onClick={onPictureCrop}
               >
                 <span className="rb-big-icon">
-                  <IconCrop size={BIG} />
+                  <span className="ai-feature-icon" aria-hidden="true">
+                    <img src={iconCrop} width={22} height={22} alt="" />
+                  </span>
                 </span>
                 <span>{t('ribbonCrop')}</span>
               </button>

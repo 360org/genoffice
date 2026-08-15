@@ -1,9 +1,11 @@
 /** Home tab of the slides ribbon. Extracted from Ribbon.tsx. */
 import { useState } from 'react'
 import { platformShortcuts } from '@genoffice/i18n'
+import { isSymbolFontFamily } from '@genoffice/ui'
 import { saveEditSelection } from '../TextEditOverlay'
 import { armColorInput } from '../color-input'
 import { displayFontFamily } from '../konva-adapter'
+import { useSystemFontFamilies } from '../system-fonts'
 import {
   GensparkMark,
   IconAiBeautify,
@@ -55,6 +57,11 @@ import {
   type RibbonTabCtx,
 } from './ribbon-shared'
 
+// Symbol fonts (Wingdings & co.) render their own name as pictographs, so the
+// picker shows those names in the UI font (like Word) instead of the font itself.
+const fontPreviewFamily = (f: string): string | undefined =>
+  isSymbolFontFamily(f) ? undefined : displayFontFamily(f)
+
 export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
   const {
     aiOpen,
@@ -104,7 +111,6 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
     arrangeOpen,
     closePanels,
     collapseOpen,
-    collapsedGroups,
     colorOpen,
     commitFontDraft,
     commitSizeDraft,
@@ -144,6 +150,9 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
   // Typed-ahead font query: only what the user actually typed filters the menu
   // (opening via the caret or focusing shows the full list)
   const [fontFilter, setFontFilter] = useState('')
+  const { families: systemFontFamilies, load: loadSystemFonts } = useSystemFontFamilies()
+  const matchesFontFilter = (f: string) =>
+    !fontFilter.trim() || f.toLowerCase().includes(fontFilter.trim().toLowerCase())
   const EMU_PER_PX = 9525
   const commitHangDraft = () => {
     const px = parseFloat(hangDraft.replace(',', '.'))
@@ -274,17 +283,19 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
       <Group label={t('ribbonTabSlideShow')}>
         <div className="rb-drop-wrap">
           <button
-            className="rb-big"
+            className="rb-big rb-split"
             disabled={!hasDoc}
             onClick={() => onSlideShow(slideShowFromStart)}
             data-tip={t(slideShowFromStart ? 'ribbonFromBeginningTip' : 'ribbonFromCurrentTip')}
           >
             <span className="rb-big-icon">
-              {slideShowFromStart ? (
-                <IconPlayFromStart size={BIG} />
-              ) : (
-                <IconPlayCurrent size={BIG} />
-              )}
+              <span className="rb-split-main">
+                {slideShowFromStart ? (
+                  <IconPlayFromStart size={BIG} />
+                ) : (
+                  <IconPlayCurrent size={BIG} />
+                )}
+              </span>
               <span
                 className={`rb-caret-hit${slideShowOpen ? ' active' : ''}`}
                 onMouseDown={(e) => {
@@ -334,11 +345,13 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
         </div>
       </Group>
       <div className="ribbon-sep" />
+      {/* The slides group always renders collapsed behind one dropdown; the
+          flyout holds the combined new-slide + layout / add-section layout */}
       <Group
         label={t('ribbonGroupSlides')}
         groupId="slides"
         collapse={{
-          collapsed: collapsedGroups.includes('slides'),
+          collapsed: true,
           open: collapseOpen === 'slides',
           onToggle: () => {
             closePanels(['collapse'])
@@ -349,13 +362,15 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
       >
         <div className="rb-drop-wrap">
           <button
-            className="rb-big"
+            className="rb-big rb-split"
             disabled={!hasDoc}
             onClick={onAddSlide}
             data-tip={t('ribbonNewSlideTip')}
           >
             <span className="rb-big-icon">
-              <IconNewSlide size={BIG} />
+              <span className="rb-split-main">
+                <IconNewSlide size={BIG} />
+              </span>
               <span
                 className={`rb-caret-hit${layoutOpen ? ' active' : ''}`}
                 data-tip={t('ribbonChooseLayoutNew')}
@@ -387,58 +402,56 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
             </div>
           )}
         </div>
-        <div className="rb-drop-wrap">
-          <button
-            className={`rb-big ${layoutPickOpen ? 'active' : ''}`}
-            disabled={!hasDoc}
-            onMouseDown={(e) => {
-              e.stopPropagation()
-              closeSiblingPanels(e, closePanels, 'layoutPick')
-            }}
-            onClick={() => setLayoutPickOpen((v) => !v)}
-            data-tip={t('ribbonLayoutTip')}
-          >
-            <span className="rb-big-icon">
-              <IconSlideLayout size={BIG} />
+        <div className="rb-col rb-slides-col">
+          <div className="rb-drop-wrap">
+            <button
+              className={`rb-small ${layoutPickOpen ? 'active' : ''}`}
+              disabled={!hasDoc}
+              onMouseDown={(e) => {
+                e.stopPropagation()
+                closeSiblingPanels(e, closePanels, 'layoutPick')
+              }}
+              onClick={() => setLayoutPickOpen((v) => !v)}
+              data-tip={t('ribbonLayoutTip')}
+            >
+              <IconSlideLayout size={20} />
+              <span>{t('ribbonLayout')}</span>
               <RbCaret />
-            </span>
-            <span>{t('ribbonLayout')}</span>
+            </button>
+            {layoutPickOpen && (
+              <div className="rb-drop rb-layout-drop" onMouseDown={(e) => e.stopPropagation()}>
+                <div className="rb-drop-title">{t('ribbonChooseLayoutChange')}</div>
+                <LayoutList
+                  layouts={layouts}
+                  size={layoutSize}
+                  onPick={(path) => {
+                    setLayoutPickOpen(false)
+                    onSetLayout(path)
+                  }}
+                />
+                <div className="rb-menu-div" />
+                <button
+                  className="rb-layout-reset"
+                  onClick={() => {
+                    setLayoutPickOpen(false)
+                    onResetLayout()
+                  }}
+                >
+                  {t('ribbonResetLayout')}
+                </button>
+              </div>
+            )}
+          </div>
+          <button
+            className="rb-small"
+            disabled={!hasDoc}
+            onClick={onAddSection}
+            data-tip={t('ribbonAddSectionTip')}
+          >
+            <IconSection size={20} />
+            <span>{t('ribbonAddSection')}</span>
           </button>
-          {layoutPickOpen && (
-            <div className="rb-drop rb-layout-drop" onMouseDown={(e) => e.stopPropagation()}>
-              <div className="rb-drop-title">{t('ribbonChooseLayoutChange')}</div>
-              <LayoutList
-                layouts={layouts}
-                size={layoutSize}
-                onPick={(path) => {
-                  setLayoutPickOpen(false)
-                  onSetLayout(path)
-                }}
-              />
-              <div className="rb-menu-div" />
-              <button
-                className="rb-layout-reset"
-                onClick={() => {
-                  setLayoutPickOpen(false)
-                  onResetLayout()
-                }}
-              >
-                {t('ribbonResetLayout')}
-              </button>
-            </div>
-          )}
         </div>
-        <button
-          className="rb-big"
-          disabled={!hasDoc}
-          onClick={onAddSection}
-          data-tip={t('ribbonAddSectionTip')}
-        >
-          <span className="rb-big-icon">
-            <IconSection size={BIG} />
-          </span>
-          <span>{t('ribbonAddSection')}</span>
-        </button>
       </Group>
       <div className="ribbon-sep" />
       <Group label={t('ribbonGroupFont')}>
@@ -475,6 +488,7 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
                     // Ribbon menus are mutually exclusive: close any open sibling
                     // popup (size/color/...) before opening the font list
                     closePanels(['font'])
+                    loadSystemFonts()
                     setFontOpen(true)
                   }}
                   onBlur={() => {
@@ -507,6 +521,7 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
                     if (editing || hasTextSelection) {
                       closeSiblingPanels(e, closePanels, 'font')
                       setFontFilter('')
+                      if (!fontOpen) loadSystemFonts()
                       setFontOpen((v) => !v)
                     }
                   }}
@@ -519,20 +534,18 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
                   className="rb-drop rb-menu rb-menu-scroll rb-font-menu"
                   onMouseDown={(e) => e.stopPropagation()}
                 >
-                  {(curFontFamily && !FONT_FAMILIES.includes(curFontFamily)
+                  {(curFontFamily &&
+                  !FONT_FAMILIES.includes(curFontFamily) &&
+                  !systemFontFamilies.includes(curFontFamily)
                     ? [curFontFamily, ...FONT_FAMILIES]
                     : FONT_FAMILIES
                   )
-                    .filter(
-                      (f) =>
-                        !fontFilter.trim() ||
-                        f.toLowerCase().includes(fontFilter.trim().toLowerCase()),
-                    )
+                    .filter(matchesFontFilter)
                     .map((f) => (
                       <button
                         key={f}
                         className={f === curFontFamily ? 'on' : ''}
-                        style={{ fontFamily: displayFontFamily(f) }}
+                        style={{ fontFamily: fontPreviewFamily(f) }}
                         onMouseDown={(e) => {
                           e.preventDefault()
                           onFontFamily(f)
@@ -542,6 +555,25 @@ export function RibbonHomeTab({ rb }: { rb: RibbonTabCtx }) {
                         {f}
                       </button>
                     ))}
+                  {systemFontFamilies.some(matchesFontFilter) && (
+                    <>
+                      <div className="rb-menu-group-label">{t('ribbonFontsSystem')}</div>
+                      {systemFontFamilies.filter(matchesFontFilter).map((f) => (
+                        <button
+                          key={f}
+                          className={f === curFontFamily ? 'on' : ''}
+                          style={{ fontFamily: fontPreviewFamily(f) }}
+                          onMouseDown={(e) => {
+                            e.preventDefault()
+                            onFontFamily(f)
+                            setFontOpen(false)
+                          }}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </>
+                  )}
                 </div>
               )}
             </div>
