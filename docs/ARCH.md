@@ -1,91 +1,125 @@
-# ARCH.md — Kiến trúc Hệ thống Whitelabel VuaOffice
+# ARCH.md — Kiến trúc Tổng thể Hệ thống VuaOffice
 
-> Sinh từ [SPEC.md](SPEC.md) và [REQUIREMENTS.md](REQUIREMENTS.md).
-
-Tài liệu này mô tả thiết kế kiến trúc và mô hình hoạt động của cơ chế Whitelabel (Branding & Rebranding Engine) cho dự án **VuaOffice**.
-
-## 1. Sơ đồ Hoạt động Tổng quan (High-Level Architecture)
-
-Hệ thống Whitelabel đóng vai trò là một lớp trung gian (Wrapper) chuyển đổi Codebase gốc của GenOffice thành VuaOffice trước khi chạy môi trường phát triển (Dev) hoặc đóng gói sản phẩm (Build/Distribute).
-
-```mermaid
-graph TD
-    subgraph "Nguồn Đầu Vào (Input Source)"
-        GC[Official Codebase GenOffice]
-        WCONF[whitelabel/brand-config.json]
-        WASS[whitelabel/assets/*]
-    end
-
-    subgraph "Whitelabel Engine"
-        WCLI[scripts/whitelabel.js]
-    end
-
-    subgraph "Môi Trường Thực Thi (Target Build)"
-        TCODE[Codebase đã thay đổi thương hiệu]
-        TBUILD[Build Artifacts: VuaOffice.app / VuaOffice.exe]
-    end
-
-    WCONF --> WCLI
-    WASS --> WCLI
-    GC --> WCLI
-    
-    WCLI -- apply --> TCODE
-    TCODE -- npm run build:all --> TBUILD
-    WCLI -- restore --> GC
-```
-
-## 2. Chi tiết Luồng Git Workflow khi cập nhật Upstream
-
-Để đảm bảo dự án không bị xung đột (conflict) code khi kéo bản cập nhật mới từ upstream repository (`genspark-ai/genoffice`), chúng ta sử dụng quy trình Git tích hợp với lệnh `restore` của Whitelabel CLI.
-
-```mermaid
-sequenceDiagram
-    participant Dev as Nhà phát triển VuaOffice
-    participant Git as Git Repository
-    participant CLI as scripts/whitelabel.js
-    participant Upstream as Upstream GenOffice
-
-    Note over Dev, Upstream: Dự án đang ở trạng thái rebrand (applied)
-    Dev->>CLI: Chạy node scripts/whitelabel.js restore
-    CLI->>Git: Thực hiện git checkout trả codebase về trạng thái sạch gốc
-    Note over Git: Codebase sạch 100% thương hiệu gốc
-    Dev->>Git: git checkout main && git pull upstream main
-    Git->>Upstream: Đồng bộ cập nhật mới từ upstream
-    Note over Git: Merge code tự động không bị conflict whitelabel
-    Dev->>CLI: Chạy node scripts/whitelabel.js apply
-    CLI->>Git: Patch cấu hình + Rebrand thương hiệu mới dựa trên code mới
-    Note over Dev, Git: Codebase đã tích hợp bản cập nhật mới & được gắn thương hiệu VuaOffice
-```
-
-## 3. Các Thành phần Hệ thống (Core Components)
-
-### 3.1 Whitelabel CLI Script (`scripts/whitelabel.js`)
-- **Nhiệm vụ**: Thực thi việc vá file cấu hình, thay thế text strings bằng regex, sao chép file assets đồ họa và khôi phục trạng thái codebase qua git.
-- **Đặc điểm**:
-  - Không sử dụng thư viện ngoài (dependency-free) để chạy độc lập và cực kỳ nhanh.
-  - Sử dụng module `fs` và `path` của NodeJS và shell command `git checkout` thông qua `child_process.execSync`.
-
-### 3.2 Lớp Cấu hình Thương hiệu (`whitelabel/brand-config.json`)
-- **Nhiệm vụ**: Chứa toàn bộ metadata, URL API và quy tắc thay thế text cho thương hiệu.
-- **Đặc điểm**:
-  - Dễ dàng thay đổi cấu hình mà không cần hiểu cấu trúc code.
-  - Hỗ trợ Regex rule cho phép thay đổi linh hoạt các từ khóa ở nhiều file khác nhau.
-
-### 3.3 Tích hợp AI Provider Gateway (`packages/ai-provider`)
-- **Nhiệm vụ**: Định nghĩa các kênh phân phối request AI thông qua API gateway của 360 CORP (omirouter và 9router) tương thích với chuẩn OpenAPI.
-- **Đặc điểm**:
-  - Tách biệt logic API endpoint khỏi các ứng dụng client.
-  - Cung cấp cơ chế tự động điền URL mặc định cho omirouter/9router nhưng vẫn cho phép user thay đổi Base URL qua giao diện cấu hình.
-
-### 3.4 Module VuaMail (`apps/mail`)
-- **Nhiệm vụ**: Cung cấp ứng dụng email client phong cách Microsoft Outlook tích hợp Mail Engine và AI Assistant trong bộ VuaOffice.
-- **Đặc điểm**:
-  - **Data Engine**: Kế thừa SQLite storage, offline op-queue và sync engine từ GenMail.
-  - **UI Layer**: React 19 Fluent UI Ribbon 3 cột (AppRail/Folders, Message List, Reading/Compose Pane) chuẩn VuaOffice Theme Tokens.
-  - **AI Integration**: Hỗ trợ tóm tắt chuỗi thư, phản hồi nhanh và tạo bản nháp qua `@genoffice/ai-provider`.
+> **Tài liệu Kiến trúc Kỹ thuật (Technical Architecture Document)**  
+> **Áp dụng cho**: Bộ ứng dụng VuaOffice Desktop Suite & Hạ tầng AI Gateway 360 CORP  
+> **Phiên bản**: v0.6.7+
 
 ---
 
-**Người viết:** Sếp (Product Owner) & Em (Architect)
-**Trạng thái:** Approved
-**Ngày duyệt:** 2026-08-15
+## 1. Sơ đồ Kiến trúc Tổng quan (High-Level Architecture)
+
+VuaOffice được xây dựng trên mô hình **Monorepo Kiến trúc Đa Lớp (Multi-Layer Modular Architecture)** sử dụng npm workspaces, Electron 43, React 19, TypeScript 5.9 và Rust sidecar engine.
+
+```mermaid
+graph TD
+    subgraph "Desktop Shell Layer (apps/shell)"
+        MainProcess["Electron Main Process<br/>(tab-manager, updater, app-settings, menu)"]
+        PreloadBridge["Preload ContextBridge<br/>(IPC API Channels, Security Isolation)"]
+        HomeRenderer["Home Launcher & Settings<br/>(React 19, Semantic Tokens, Project Store)"]
+    end
+
+    subgraph "Application Suite Layer (apps/*)"
+        DocsApp["apps/docs<br/>(Word/Docx Editor)"]
+        SheetsApp["apps/sheets<br/>(Excel/Xlsx Engine)"]
+        SlidesApp["apps/slides<br/>(PowerPoint/Pptx)"]
+        PdfApp["apps/pdf<br/>(PDF Reader & Annotator)"]
+        MdApp["apps/markdown<br/>(Tiptap GFM Notes)"]
+        MailApp["apps/mail<br/>(VuaMail Client)"]
+    end
+
+    subgraph "Core Engine & Shared Libraries Layer (packages/*)"
+        DocxEng["@genoffice/docx-engine<br/>(OpenXML Parser & Paging)"]
+        PptxEng["@genoffice/pptx-engine<br/>(Slide Layout & Shapes)"]
+        PptxRnd["@genoffice/pptx-render<br/>(HarfBuzz & Konva)"]
+        FileParse["@genoffice/file-parse<br/>(Binary & Stream Parser)"]
+        UiLib["@genoffice/ui<br/>(Semantic Tokens & Components)"]
+        I18nLib["@genoffice/i18n<br/>(19 Languages Core)"]
+        AgentCore["@genoffice/agent-core<br/>(Agentic Loop & Tools)"]
+        AiProvider["@genoffice/ai-provider<br/>(OmiRouter, 9Router, Hermes)"]
+    end
+
+    subgraph "Whitelabel & Distribution Layer"
+        BrandCfg["whitelabel/brand-config.json"]
+        BrandScript["scripts/whitelabel.js"]
+        CiBuild["GitHub Actions CI/CD<br/>(release.yml)"]
+    end
+
+    HomeRenderer --> PreloadBridge
+    PreloadBridge --> MainProcess
+    MainProcess --> DocsApp & SheetsApp & SlidesApp & PdfApp & MdApp & MailApp
+
+    DocsApp --> DocxEng & UiLib & I18nLib & AiProvider & AgentCore
+    SheetsApp --> UiLib & I18nLib & AiProvider & AgentCore
+    SlidesApp --> PptxEng & PptxRnd & UiLib & I18nLib & AiProvider & AgentCore
+    PdfApp --> FileParse & UiLib & I18nLib & AiProvider & AgentCore
+    MdApp --> UiLib & I18nLib & AiProvider & AgentCore
+    MailApp --> UiLib & I18nLib & AiProvider & AgentCore
+
+    BrandCfg & BrandScript -.-> Desktop Shell Layer & Application Suite Layer
+```
+
+---
+
+## 2. Kiến trúc Tiến trình Electron & Phân lập Bảo mật (IPC & Multi-Process Model)
+
+VuaOffice thực thi nghiêm ngặt tiêu chuẩn bảo mật của Electron:
+- **`contextIsolation: true`** và **`nodeIntegration: false`** trên tất cả các cửa sổ và tab view.
+- **Tiến trình Shell (`apps/shell`)**: Đóng vai trò là Host chính, quản lý vòng đời ứng dụng, các menu hệ thống native, auto-updater và cấu hình.
+- **Quản lý Tab View Đa tiến trình (`TabManager`)**: Mỗi tài liệu mở (Docs, Sheets, Slides, PDF, Markdown, Mail) chạy trên một `WebContentsView` độc lập. Sự cố sập tiến trình (renderer crash) ở một tài liệu không làm ảnh hưởng đến các tài liệu khác hoặc Shell chính.
+
+```mermaid
+sequenceDiagram
+    participant User as Người dùng
+    participant Renderer as Home / App Renderer
+    participant Preload as Preload ContextBridge
+    participant Main as Electron Main Process
+    participant AI as 360 AI Gateway (OmiRouter/Hermes)
+
+    User->>Renderer: Thao tác UI / Yêu cầu AI
+    Renderer->>Preload: Gọi API typed an toàn (window.aiOffice)
+    Preload->>Main: IPC Invoke / Send (ipcRenderer)
+    Main->>AI: HTTPS Stream Request (Zero client key exposure)
+    AI-->>Main: SSE Token Chunks
+    Main-->>Preload: IPC Event (Stream chunks)
+    Preload-->>Renderer: Cập nhật DOM / Canvas thời gian thực
+```
+
+---
+
+## 3. Hạ tầng Trí tuệ Nhân tạo Đa tầng (AI Gateway & Provider Architecture)
+
+Module `@genoffice/ai-provider` cung cấp cơ chế định tuyến linh hoạt:
+
+1. **Mặc định (Production Mode)**: Kết nối tự động đến **OmiRouter AI** (`https://api.omirouter.com/v1`) hoặc **9Router AI** (`https://api.9router.com/v1`).
+2. **Tác tử Thông minh (Agentic Workflows)**: Kết nối đến **Hermes Agent** (`https://hermes.vuahethong.com/v1`) hỗ trợ multi-step tool calls, tra cứu tài liệu và phân tích tự động.
+3. **Chế độ Nhà phát triển (Developer Mode)**: Kích hoạt thông qua menu `Help > Troubleshooting > Enable Developer Mode`, cho phép cấu hình tùy biến Endpoint và Key (OpenAI, Anthropic, Gemini, DeepSeek, Local Ollama/vLLM).
+
+---
+
+## 4. Hệ thống Semantic Theme Tokens & Giao diện Doanh nghiệp
+
+- **Hệ thống Tokens (`packages/ui/src/tokens.css`)**: Định nghĩa các biến CSS biến thiên theo chế độ Light, Dark và System:
+  - Nền & Bề mặt: `var(--surface)`, `var(--surface-subtle)`, `var(--bg-hover)`, `var(--border)`
+  - Văn bản: `var(--text)`, `var(--text-primary)`, `var(--text-muted)`
+  - Màu thương hiệu (Accent): `--accent` và `--accent-dark` được kế thừa theo từng app con.
+- **Nguyên tắc "Dark Chrome, White Paper"**: Giao diện điều khiển (Ribbon, Sidebar, Menu) thay đổi linh hoạt theo Theme hệ thống, trong khi vùng nội dung tài liệu (Trang giấy Docs, Ô bảng tính Sheets, Khung chiếu Slides, Trang PDF) giữ nguyên màu sắc tiêu chuẩn để đảm bảo tính toàn vẹn khi in ấn và xuất bản.
+
+---
+
+## 5. Cơ chế Whitelabel & Quy trình Đồng bộ Upstream Tự động
+
+Để giải quyết bài toán đồng bộ liên tục với upstream `genspark-ai/genoffice` mà không làm mất tùy biến của 360 CORP:
+
+1. **Cấu hình Tập trung (`whitelabel/brand-config.json`)**: Định nghĩa toàn bộ chuỗi ký tự, URL Gateway, bundle ID và tài nguyên đồ họa.
+2. **Whitelabel Script (`scripts/whitelabel.js`)**:
+   - `apply`: Tự động vá cấu hình electron-builder, cập nhật package.json, đồng bộ logo/icon và áp dụng regex thay thế từ khóa.
+   - `restore`: Sử dụng `git checkout` để hoàn tác mã nguồn về trạng thái sạch gốc trước khi thực hiện pull/merge.
+3. **Quy trình Git Sync 2 Remote**:
+   - **GitLab (`origin`)**: Lưu trữ private đầy đủ lịch sử phát triển.
+   - **GitHub (`github`)**: Lưu trữ bản phân phối công khai, lọc tự động các file nhạy cảm theo `.githubignore` qua `git-sync-publish.sh`.
+
+---
+
+**Chủ quản**: 360 CORP  
+**Trạng thái**: Đã phê duyệt (Approved)  
+**Ngày cập nhật**: 2026-08-16

@@ -1,115 +1,132 @@
-# REQUIREMENTS.md — VuaOffice Whitelabel & Rebrand
+# REQUIREMENTS.md — Đặc tả Yêu cầu Hệ thống VuaOffice
 
-> Sinh từ [IDEA.md](IDEA.md). Mỗi section truy nguồn về IDEA tương ứng.
-
-## 1. Tổng quan dự án
-
-### 1.1 Mục tiêu kinh doanh
-- Chuyển đổi bộ ứng dụng GenOffice thành **VuaOffice** thuộc sở hữu của **360 CORP**.
-- Độc lập hạ tầng AI bằng cách định tuyến qua **omirouter** và **9router**.
-- Tự động hoá 100% quy trình rebrand qua CLI để tối ưu chi phí vận hành và bảo trì khi cập nhật từ upstream.
-
-### 1.2 Đối tượng người dùng (Personas)
-- **Doanh nghiệp vừa và nhỏ (SMEs) tại Việt Nam**: Cần bộ công cụ soạn thảo tài liệu (Docs, Sheets, Slides, Markdown, PDF) tích hợp AI với giao diện tiếng Việt, thương hiệu uy tín của 360 CORP.
-- **Quản trị viên hệ thống (IT Admin)**: Cần deploy và cấu hình ứng dụng VuaOffice với API Key AI Router riêng của doanh nghiệp.
-
-### 1.3 Phạm vi (Scope)
-- **Trong phạm vi:**
-  - Viết CLI script `scripts/whitelabel.js` để tự động hóa việc `apply` rebrand (patch cấu hình build, copy logo/icon, thay thế từ khóa) và `restore` codebase gốc.
-  - Cấu hình file `whitelabel/brand-config.json` chứa toàn bộ biến số thương hiệu (tên app, appID, text replacement rules, mặc định provider).
-  - Tích hợp 2 provider AI mới: `omirouter` và `ninerouter` vào hệ thống core `packages/ai-provider`.
-  - Thay đổi default AI provider từ `genspark` thành `omirouter`.
-  - Thay đổi toàn bộ logo và icon ứng dụng (PNG, ICNS, ICO, SVG) sang logo VuaOffice.
-- **Ngoài phạm vi:**
-  - Sửa đổi giao diện gốc hoặc tính năng cốt lõi của các ứng dụng con (Docs, Sheets, Slides, PDF).
-  - Thay đổi cơ chế lưu trữ file hoặc quản lý tab nội bộ của Electron.
-
-## 2. Yêu cầu chức năng (Functional Requirements)
-
-### 2.1 CLI Script Whitelabel
-- **Mô tả:** CLI script hỗ trợ hai câu lệnh `node scripts/whitelabel.js apply` và `node scripts/whitelabel.js restore`.
-- **Tiêu chí nghiệm thu:**
-  - Khi chạy `apply`: Toàn bộ cấu hình Electron (productName, appId, executableName, author) được cập nhật theo `brand-config.json`. Các từ khóa "GenOffice" và "Genspark" trong file code được chỉ định sẽ được thay thế tương ứng thành "VuaOffice" và "360 CORP". Logo và icon được sao chép đè lên file gốc.
-  - Khi chạy `restore`: Khôi phục lại toàn bộ codebase sạch sẽ về trạng thái ban đầu của upstream thông qua `git checkout`. Không để sót file rác hoặc thay đổi thương hiệu nào trong git tracker.
-- **Nguồn:** IDEA §Vision, §Giá trị cốt lõi
-
-### 2.2 Tích hợp AI Router (omirouter / ninerouter)
-- **Mô tả:** Tích hợp `omirouter` và `ninerouter` vào danh sách AI Provider của ứng dụng.
-- **Tiêu chí nghiệm thu:**
-  - Hỗ trợ các model mặc định: `claude-3-5-sonnet`, `gpt-4o`, `gemini-1.5-pro`, `deepseek-chat`.
-  - Hỗ trợ custom Base URL lấy từ cấu hình `brand-config.json` hoặc nhập thủ công trong phần cài đặt AI của ứng dụng.
-  - Thiết lập default AI provider của ứng dụng là `omirouter`.
-  - Luồng stream AI tương thích chuẩn OpenAI (`streamOpenAiCompatible`).
-- **Nguồn:** IDEA §Bài toán cần giải quyết, §Vision
-
-### 2.3 Tích hợp Module VuaMail (`apps/mail`)
-- **Mô tả:** Tích hợp ứng dụng email client VuaMail vào thanh công cụ và launcher của VuaOffice Suite.
-- **Tiêu chí nghiệm thu:**
-  - Kế thừa engine lưu trữ SQLite cục bộ và hàng đợi offline OpQueue từ GenMail.
-  - Giao diện Outlook Ribbon 3 cột (AppRail, Folder Tree, Message List, Reading/Compose Pane) chuẩn Fluent UI trên React 19.
-  - Tích hợp tính năng AI: tóm tắt chuỗi thư (Thread Summary), soạn thư thông minh (AI Compose Draft) và trả lời nhanh (Smart Reply).
-  - Tương thích 100% Theme Semantic Tokens (Light/Dark mode) của VuaOffice.
-
-### 2.4 Tính năng Kiểm tra Cập nhật Thủ công (Manual Check for Updates)
-- **Mô tả:** Cho phép người dùng chủ động kiểm tra phiên bản mới từ UI hoặc menu hệ thống.
-- **Tiêu chí nghiệm thu:**
-  - Tích hợp menu `Check for Updates…` trên macOS Application Menu và Windows/Linux Help menu.
-  - Tích hợp nút kiểm tra trong Account dropdown menu tại màn hình chính `Home.tsx`.
-  - Phản hồi trực quan bằng Native Dialog khi đã ở bản mới nhất hoặc có lỗi kết nối; giữ im lặng đối với kiểm tra ngầm định kỳ.
-
-## 3. Yêu cầu phi chức năng (Non-Functional Requirements)
-
-### 3.1 Hiệu năng
-- Script whitelabel apply/restore phải thực thi nhanh chóng (< 2 giây).
-- Quá trình stream AI qua omirouter/9router không được làm tăng độ trễ (latency) so với kết nối trực tiếp đến các provider gốc.
-
-### 3.2 Bảo mật
-- Không lưu cứng API Keys trong mã nguồn. Cung cấp giao diện cấu hình API key cho người dùng cuối.
-- Dữ liệu truyền tải qua API Router phải sử dụng giao thức HTTPS bảo mật.
-
-### 3.3 Khả năng bảo trì (Maintainability)
-- Toàn bộ thay đổi phải được cô lập và có thể rollback sạch sẽ để phục vụ cho quy trình Git Merge từ upstream GenOffice.
-- Cấu hình thương hiệu tách biệt hoàn toàn khỏi logic code thông qua `whitelabel/brand-config.json`.
-
-### 3.4 Đa ngôn ngữ (i18n)
-- Hỗ trợ tiếng Việt và tiếng Anh đồng bộ với hệ thống i18n sẵn có của GenOffice.
-
-## 4. Thiết kế & Trải nghiệm (UX/UI)
-
-### 4.1 Brand guidelines
-- Tên hiển thị trên thanh tiêu đề ứng dụng, menu và các thông tin giới thiệu: **VuaOffice**.
-- Đơn vị phát triển hiển thị: **360 CORP**.
-- Logo ứng dụng: Sử dụng logo VuaOffice (được override tại `apps/shell/src/renderer/src/assets/genoffice-logo.svg`).
-- Icon ứng dụng: Override đầy đủ định dạng PNG, ICNS (macOS), ICO (Windows).
-
-## 5. Tích hợp & Phụ thuộc
-
-### 5.1 Hệ thống bên ngoài
-- **OmiRouter API**: Gateway phân phối AI của 360 CORP (mặc định: `https://api.omirouter.com/v1`).
-- **9Router API**: Gateway phân phối AI dự phòng của 360 CORP (mặc định: `https://api.9router.com/v1`).
-
-### 5.2 Hệ sinh thái
-- Liên kết nhận diện thương hiệu với hệ sinh thái **360 CORP**.
-
-## 6. Ràng buộc (Constraints)
-
-### 6.1 Công nghệ
-- NodeJS >= 22.12.0
-- Electron >= 43.3.0
-- Git phải được cài đặt trên máy dev/build để phục vụ cơ chế `restore` (git checkout).
-
-## 7. Tiêu chí nghiệm thu (Acceptance Criteria)
-
-| # | Tiêu chí | Phương pháp kiểm tra |
-|---|----------|---------------------|
-| 1 | Áp dụng Whitelabel thành công | Chạy `npm run whitelabel:apply`, kiểm tra thông tin hiển thị trong `package.json` và `electron-builder.cjs` |
-| 2 | Khôi phục Codebase gốc sạch sẽ | Chạy `npm run whitelabel:restore`, chạy `git status` đảm bảo không còn file code nào bị modified (ngoại trừ brand-config.json và scripts/whitelabel.js) |
-| 3 | Tích hợp AI Router thành công | Chạy typecheck và kiểm tra settings AI trong ứng dụng có xuất hiện OmiRouter AI và 9Router AI với URL tương ứng |
-| 4 | Build ứng dụng thành công | Chạy `npm run dist:mac` build ra file cài đặt `.dmg` / `.app` mang tên VuaOffice và hoạt động bình thường |
+> **Tài liệu Yêu cầu Sản phẩm & Kỹ thuật (Product & Technical Requirements Document)**  
+> **Truy nguồn từ**: [IDEA.md](IDEA.md)  
+> **Chủ quản**: 360 CORP  
+> **Phiên bản**: v0.6.7+
 
 ---
 
-**Nguồn:** [IDEA.md](IDEA.md)
-**Người duyệt:** Sếp (Product Owner)
-**Trạng thái:** Approved
-**Ngày duyệt:** 2026-08-10
+## 1. Tổng quan Dự án & Bối cảnh
+
+### 1.1 Mục tiêu Kinh doanh & Kỹ thuật
+- Xây dựng **VuaOffice** trở thành bộ công cụ văn phòng máy tính (Desktop Office Suite) hoàn chỉnh, mã nguồn mở, tích hợp trí tuệ nhân tạo (AI-Native) 100% miễn phí bản quyền.
+- Hoàn toàn làm chủ hạ tầng định tuyến AI thông qua mạng lưới Gateway của 360 CORP (**OmiRouter**, **9Router**, **Hermes Agent**) và hỗ trợ Custom Endpoint tương thích chuẩn OpenAI API.
+- Tự động hóa 100% quy trình Rebrand/Whitelabel thông qua CLI và quy trình đồng bộ 2 Remote Git (GitLab Private / GitHub Public).
+
+### 1.2 Chân dung Người dùng (User Personas)
+- **Doanh nghiệp & Tổ chức (Enterprise & SMEs)**: Cần giải pháp văn phòng bảo mật, làm chủ dữ liệu, tiết kiệm chi phí bản quyền Microsoft Office, hỗ trợ chuẩn định dạng OpenXML (.docx, .xlsx, .pptx).
+- **Chuyên viên Tri thức & Lập trình viên (Knowledge Workers & Developers)**: Cần công cụ soạn thảo kết hợp AI thông minh, hỗ trợ Markdown/KaTeX/Mermaid, tóm tắt PDF, trích xuất dữ liệu tự động và khả năng tùy biến AI Provider trong Developer Mode.
+- **Quản trị viên Hệ thống (IT Admins)**: Cần khả năng triển khai đồng loạt qua gói cài đặt chuẩn (DMG, EXE, AppImage/DEB) và dễ dàng quản lý phân phối cập nhật tự động (Auto-Updater).
+
+---
+
+## 2. Yêu cầu Chức năng Hệ thống (Functional Requirements)
+
+### 2.1 Khung Ứng dụng Desktop Host (`apps/shell`)
+- **Quản lý Đa Tab & Phân lập Tiến trình**:
+  - Mở nhiều tài liệu đồng thời trên các tab riêng biệt.
+  - Mỗi tab chạy trên một `WebContentsView` độc lập (`contextIsolation: true`, `nodeIntegration: false`). Sự cố ở một tab không làm sập ứng dụng chính.
+- **Màn hình Khởi chạy (Home Launcher)**:
+  - Hiển thị danh sách tệp gần đây (Recent Files), ghim tệp quan trọng (Pinned Files).
+  - Khởi tạo nhanh tài liệu mới cho 6 loại ứng dụng: Docs, Sheets, Slides, PDF, Markdown, Mail.
+  - Header Sidebar hiển thị logo thương hiệu sắc nét VuaOffice.
+- **Hệ thống Menu Hệ thống & Phím tắt**:
+  - Tích hợp chuẩn menu macOS Application Menu và Windows/Linux Menu Bar.
+  - Hỗ trợ menu `Help > Troubleshooting > Enable Developer Mode` (dạng Checkbox toggle).
+- **Cơ chế Cập nhật Tự động & Thủ công (Auto & Manual Updater)**:
+  - Tự động kiểm tra bản cập nhật ngầm sau 15 giây khởi động và định kỳ mỗi 4 giờ.
+  - Hỗ trợ kiểm tra thủ công qua menu `Check for Updates…` và Account popup với thông báo Dialog rõ ràng.
+
+### 2.2 Soạn thảo Văn bản VuaOffice Docs (`apps/docs`)
+- **Định dạng Hỗ trợ**: Đọc/ghi chuẩn xác tệp `.docx` (OpenXML), xuất PDF, in ấn trực tiếp.
+- **Bộ máy Phân trang (Pagination Engine)**: Phân trang thời gian thực, hiển thị thước đo lề, header/footer, bảng biểu, ngắt trang chuẩn xác như Microsoft Word.
+- **Tác tử AI Đồng hành (Docs AI Assistant)**:
+  - Viết tiếp văn bản, viết lại theo phong cách chuyên nghiệp (Rewrite), tóm tắt và dịch thuật đa ngôn ngữ.
+  - **Paragraph-level Patching**: Thay thế và cập nhật trực tiếp từng đoạn văn bản trong DOM mà không làm mất định dạng hoặc xáo trộn bố cục xung quanh.
+
+### 2.3 Bảng tính & Phân tích Dữ liệu VuaOffice Sheets (`apps/sheets`)
+- **Định dạng Hỗ trợ**: `.xlsx`, `.xlsm`, `.csv`, `.tsv`.
+- **Hiệu năng & Rust Engine**: Tích hợp Rust sidecar engine cho tác vụ xử lý tệp dữ liệu lớn (> 100,000 dòng) và tính toán công thức phức tạp.
+- **Tác tử AI Bảng tính (Sheets AI Copilot)**:
+  - Tự động tạo công thức Excel phức tạp theo yêu cầu ngôn ngữ tự nhiên.
+  - Phân tích xu hướng dữ liệu, tự động dựng Pivot Table và biểu đồ minh họa trực quan.
+
+### 2.4 Trình chiếu & Thiết kế Slide VuaOffice Slides (`apps/slides`)
+- **Định dạng Hỗ trợ**: `.pptx`, `.ppsx`.
+- **Bộ máy Kết xuất (Render Engine)**: Kết xuất Canvas 2D + Konva với công nghệ HarfBuzz Text Shaping đảm bảo hiển thị hoàn hảo dấu tiếng Việt.
+- **Tác tử AI Thiết kế Slide**:
+  - Tạo dàn ý bài thuyết trình từ chủ đề hoặc trích xuất từ tài liệu Word/PDF.
+  - Tự động dựng toàn bộ slide với bố cục chuyên nghiệp, phối màu hài hòa và tạo ghi chú thuyết trình (Speaker Notes).
+  - Tự động xuất bản slide chất lượng cao sang định dạng PPTX và PDF.
+
+### 2.5 Xem & Ghi chú VuaOffice PDF (`apps/pdf`)
+- **Định dạng Hỗ trợ**: `.pdf`.
+- **Công cụ Ghi chú & Chỉnh sửa**: Highlight, gạch chân, vẽ tay, chèn ghi chú (Sticky Notes), đóng dấu bản quyền (Stamp) và quản lý chữ ký số.
+- **Tác tử AI Đọc hiểu PDF (Long-Context PDF Q&A)**: Đọc hiểu tài liệu hàng trăm trang, trích xuất tóm tắt nội dung chính và chuyển đổi bảng biểu PDF sang Sheets.
+
+### 2.6 Soạn thảo Kỹ thuật VuaOffice Markdown (`apps/markdown`)
+- **Định dạng Hỗ trợ**: `.md`, `.markdown`.
+- **Tính năng Soạn thảo**: Tiptap Editor hỗ trợ GitHub Flavored Markdown (GFM), công thức toán học KaTeX, sơ đồ tư duy/kiến trúc Mermaid, Task Lists và xuất bản sang HTML/PDF.
+
+### 2.7 Ứng dụng Email Doanh nghiệp VuaMail (`apps/mail`)
+- **Kiến trúc & Lưu trữ**: SQLite cục bộ lưu trữ metadata, full-text search index và hàng đợi ngoại tuyến OpQueue.
+- **Giao diện**: Giao diện Fluent UI Ribbon 3 cột theo chuẩn Microsoft Outlook.
+- **Khả năng AI**: Tóm tắt chuỗi email dài, gợi ý trả lời nhanh (Smart Reply), hỗ trợ soạn thảo thư doanh nghiệp.
+
+---
+
+## 3. Yêu cầu Kết nối & Hạ tầng AI Gateway
+
+### 3.1 Cấu hình AI Provider Mặc định
+- Kết nối tự động qua hạ tầng **OmiRouter AI** (`https://api.omirouter.com/v1`) và **9Router AI** (`https://api.9router.com/v1`).
+- Mô hình hỗ trợ: `claude-3-5-sonnet`, `gpt-4o`, `gemini-1.5-pro`, `deepseek-chat`.
+
+### 3.2 Tác tử Thông minh Hermes Agent
+- Kết nối đến **Hermes Agent** (`https://hermes.vuahethong.com/v1`).
+- Hỗ trợ luồng suy luận đa bước (Agentic Tool Calling) và truy xuất dữ liệu ngữ cảnh nâng cao.
+
+### 3.3 Chế độ Nhà phát triển (Developer Mode)
+- Bật/tắt linh hoạt qua menu `Help > Troubleshooting > Enable Developer Mode`.
+- Cho phép cấu hình Custom OpenAI-compatible Base URL và API Key cá nhân.
+
+---
+
+## 4. Yêu cầu Phi Chức năng (Non-Functional Requirements)
+
+### 4.1 Hiệu năng & Khởi động
+- Thời gian khởi động ứng dụng lạnh (Cold Start) < 1.5 giây trên thiết bị tiêu chuẩn.
+- Thao tác chuyển đổi tab, mở tài liệu diễn ra tức thì (< 300ms).
+- Script `whitelabel:apply` thực thi hoàn tất < 2 giây.
+
+### 4.2 Bảo mật & Quyền riêng tư (Security & Privacy)
+- **Zero Client Key Exposure**: Không lưu cứng API Key trong mã nguồn client; gọi API qua tiến trình Main bảo vệ nghiêm ngặt.
+- **Phân lập Renderer**: Mọi cửa sổ/tab chạy với `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`.
+- **Kiểm soát External URL**: Toàn bộ liên kết ngoài phải qua cổng kiểm duyệt an toàn `safeExternalUrl` (chỉ chấp nhận http/https/mailto).
+
+### 4.3 Khả năng Bảo trì & Đồng bộ Upstream
+- Tách biệt 100% cấu hình thương hiệu trong `whitelabel/brand-config.json`.
+- Khôi phục codebase sạch tức thì bằng lệnh `npm run whitelabel:restore` trước khi pull/merge từ upstream `genspark-ai/genoffice`.
+
+### 4.4 Đa ngôn ngữ (i18n) & Design System
+- Hỗ trợ đầy đủ Tiếng Việt và Tiếng Anh cùng 17 ngôn ngữ quốc tế khác.
+- Tuân thủ nghiêm ngặt hệ thống Semantic Theme Tokens trong `packages/ui/src/tokens.css` và quy tắc "Dark Chrome, White Paper".
+
+---
+
+## 5. Ma trận Kiểm tra Nghiệm thu (Traceability & Acceptance Matrix)
+
+| ID | Hạng mục Yêu cầu | Phương pháp Nghiệm thu | Trạng thái |
+|---|---|---|---|
+| **FR-01** | Áp dụng Whitelabel thương hiệu VuaOffice | Chạy `npm run whitelabel:apply`, kiểm tra hiển thị Logo, Icon và cấu hình electron-builder | Đạt |
+| **FR-02** | Khôi phục Codebase gốc sạch sẽ | Chạy `npm run whitelabel:restore`, `git status` trả về trạng thái sạch | Đạt |
+| **FR-03** | Tích hợp OmiRouter, 9Router, Hermes | Chạy typecheck và kiểm tra dropdown AI Settings trong ứng dụng | Đạt |
+| **FR-04** | Toggle Developer Mode qua Menu Help | Kiểm tra checkbox trong `Help > Troubleshooting > Enable Developer Mode` | Đạt |
+| **FR-05** | Kiểm tra cập nhật thủ công & tự động | Kiểm tra menu `Check for Updates…` và Account dropdown menu | Đạt |
+| **FR-06** | Đóng gói phân phối đa nền tảng | Build thành công gói cài đặt DMG/EXE/DEB mang tên VuaOffice | Đạt |
+
+---
+
+**Chủ quản**: 360 CORP  
+**Trạng thái**: Đã phê duyệt (Approved)  
+**Ngày cập nhật**: 2026-08-16

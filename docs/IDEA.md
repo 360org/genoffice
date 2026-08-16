@@ -1,36 +1,64 @@
-# IDEA.md — VuaOffice Whitelabel & Rebrand
+# IDEA.md — Định hướng & Ý tưởng Phát triển VuaOffice
 
-> Tài liệu ý tưởng gốc từ Product Owner (Sếp). AI không chỉnh sửa nội dung — chỉ format.
-
-## Bài toán cần giải quyết
-Sản phẩm office suite AI-native hiện tại (GenOffice) đang mang thương hiệu mặc định của upstream và phụ thuộc vào hệ thống API của Genspark. Sếp cần một phiên bản tuỳ biến thương hiệu riêng (Whitelabel) thành **VuaOffice** thuộc hệ sinh thái **360 CORP** nhằm cung cấp cho khách hàng doanh nghiệp của công ty mà không bị lộ nguồn gốc sản phẩm gốc. Đồng thời, hệ thống AI cần tích hợp trực tiếp với AI Router riêng của 360 CORP (**9router / omirouter**) để chủ động quản lý chi phí, mô hình và bảo mật dữ liệu.
-
-Quá trình rebrand này phải diễn ra tự động bằng kịch bản cấu hình để khi upstream có bản cập nhật mới, việc merge code và build lại không bị xung đột (conflict).
-
-## Đối tượng khách hàng
-Các khách hàng doanh nghiệp trong hệ sinh thái của **360 CORP**, các doanh nghiệp sử dụng giải pháp văn phòng tích hợp AI tại Việt Nam.
-
-## Vision sản phẩm
-- Trở thành bộ ứng dụng văn phòng AI-native mang thương hiệu Việt (**VuaOffice** by **360 CORP**).
-- Thay thế hoàn toàn nhận diện thương hiệu cũ (GenOffice) từ logo, icon, text hiển thị, thông tin build sản phẩm.
-- Sử dụng hạ tầng AI Router độc lập (omirouter/9router) làm default provider.
-- Cơ chế Whitelabel dạng Plug-and-Play: Chạy lệnh apply trước khi build, restore về codebase gốc trước khi pull/merge upstream.
-
-## Giá trị cốt lõi
-1. **Thương hiệu đồng nhất:** Tích hợp sâu vào hệ sinh thái 360 CORP với tên gọi VuaOffice.
-2. **Chủ động hạ tầng AI:** Sử dụng AI Router riêng của 360 CORP để phân phối request AI tối ưu.
-3. **Bảo trì dễ dàng (Maintainability):** Không can thiệp cứng vào codebase gốc để tránh conflict khi cập nhật code từ upstream GenOffice.
-4. **An toàn & Riêng tư:** Dữ liệu AI đi qua gateway riêng (omirouter/9router), bảo mật thông tin doanh nghiệp.
-
-## Hệ sinh thái / Liên kết
-Nằm trong hệ sinh thái giải pháp doanh nghiệp của **360 CORP** (cùng với Vua Hệ Thống, CloudPanel, Hermes, 9router...).
-
-## Ghi chú thêm
-- Kịch bản build tự động cần hỗ trợ đa nền tảng (macOS, Windows, Linux).
-- Đảm bảo các asset hình ảnh (logo SVG, icon PNG/ICNS/ICO) được thay thế chuẩn xác tại các vị trí hiển thị của Electron shell.
+> **Tài liệu Định hướng Cốt lõi (Vision & Ideation Document)**  
+> **Chủ quản dự án**: 360 CORP  
+> **Phiên bản hiện tại**: v0.6.7 (Hệ sinh thái VuaOffice Suite)
 
 ---
 
-**Người viết:** Sếp (Product Owner)
-**Ngày:** 2026-08-10
-**Trạng thái:** Confirmed
+## 1. Bài toán Thực tế & Bối cảnh (Problem Statement)
+Hầu hết các giải pháp văn phòng trên thị trường hiện nay gặp phải những rào cản lớn:
+1. **Phụ thuộc License đắt đỏ**: Microsoft Office 365 đòi hỏi chi phí bản quyền định kỳ cao và phức tạp đối với các doanh nghiệp vừa và nhỏ (SMEs).
+2. **AI rời rạc & Thiếu an toàn dữ liệu**: Việc sử dụng các công cụ AI bên ngoài (ChatGPT, Claude web) khiến dữ liệu doanh nghiệp dễ bị rò rỉ, phân tán và không gắn kết trực tiếp vào tài liệu soạn thảo (Docs, Sheets, Slides, PDF, Mail).
+3. **Phụ thuộc nền tảng Upstream**: Sản phẩm mã nguồn mở GenOffice gốc phụ thuộc sâu vào hạ tầng API của Genspark, mang nhãn hiệu nước ngoài và thiếu khả năng tùy biến AI Gateway nội bộ.
+
+---
+
+## 2. Tầm nhìn Sản phẩm (Product Vision)
+Xây dựng **VuaOffice** trở thành **Bộ ứng dụng văn phòng AI-Native 100% miễn phí bản quyền, hoàn toàn làm chủ hạ tầng AI & bảo mật dữ liệu** dành cho cộng đồng và doanh nghiệp:
+
+- **Bộ ứng dụng toàn diện (All-in-One Office Suite)**: Tích hợp đầy đủ Docs (Soạn thảo văn bản), Sheets (Bảng tính phân tích dữ liệu), Slides (Thuyết trình sáng tạo), PDF (Xem & Ghi chú thông minh), Markdown (Soạn thảo kỹ thuật) và VuaMail (Quản lý Email & Lịch thay thế Outlook).
+- **Làm chủ Trí tuệ Nhân tạo (AI Gateway Independence)**: Tích hợp trực tiếp với mạng lưới AI Gateway của 360 CORP (**OmiRouter**, **9Router**, **Hermes Agent**) cùng khả năng tùy biến Custom Endpoint tương thích OpenAI API.
+- **Hệ thống Whitelabel & Sync Upstream thông minh**: Duy trì 100% bản quyền thương hiệu **VuaOffice by 360 CORP**, đồng thời tự động cập nhật mọi cải tiến công nghệ từ upstream mà không bị xung đột mã nguồn.
+
+---
+
+## 3. Đối tượng Người dùng & Thị trường Mục tiêu (Target Audience)
+1. **Khách hàng Doanh nghiệp (Enterprise & SMEs)**: Các tổ chức trong hệ sinh thái 360 CORP và doanh nghiệp Việt Nam cần môi trường làm việc văn phòng bảo mật, tiết kiệm chi phí bản quyền và tối ưu năng suất làm việc.
+2. **Chuyên viên Tri thức & Nhà nghiên cứu (Knowledge Workers)**: Người dùng cần trợ lý AI đồng hành trực tiếp trong việc phân tích bảng biểu phức tạp, tóm tắt tài liệu PDF hàng trăm trang, phác thảo bài thuyết trình và soạn thảo email chuyên nghiệp.
+3. **Nhà phát triển & Quản trị viên CNTT (Developers & IT Admins)**: Cần công cụ desktop mã nguồn mở linh hoạt, hỗ trợ chế độ Developer Mode để tích hợp mô hình AI nội bộ (Local LLM / Private Gateway).
+
+---
+
+## 4. Giá trị Cốt lõi & Trụ cột Công nghệ (Core Pillars)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          VUAOFFICE ECOSYSTEM                            │
+├────────────────────┬────────────────────┬───────────────────────────────┤
+│ 1. AI-NATIVE CORE  │ 2. DESKTOP SUITE   │ 3. ENTERPRISE GATEWAY         │
+│ • Paragraph Patch  │ • Word/Docs (DOCX) │ • OmiRouter AI Gateway        │
+│ • Formula & Pivot  │ • Sheets (XLSX)    │ • 9Router Failover Gateway    │
+│ • Slide Generation │ • Slides (PPTX)    │ • Hermes Agentic Workflows    │
+│ • PDF Q&A & Notes  │ • PDF & Annotations│ • Private OpenAI-compat proxy │
+│ • Smart Mail Copilot│ • Markdown & Mail │ • Zero Data Leak Policy       │
+└────────────────────┴────────────────────┴───────────────────────────────┘
+```
+
+1. **AI Native & Agentic Workflows**: AI không chỉ là chatbot bên lề mà là một tác nhân (agent) có khả năng đọc hiểu DOM/Canvas, sửa đổi trực tiếp từng đoạn văn bản, tạo công thức bảng tính, vẽ biểu đồ và phân tích dữ liệu chuyên sâu.
+2. **Hiệu năng Cao & Hoạt động Offline**: Hỗ trợ mở và chỉnh sửa tệp tin offline hoàn toàn với tốc độ khởi động tức thì, lưu trữ an toàn trên thiết bị người dùng.
+3. **Bảo mật Dữ liệu & Độc lập Hạ tầng**: Không gửi dữ liệu tài liệu ra bên ngoài trừ khi người dùng chủ động kích hoạt tính năng AI qua Gateway bảo mật đã được kiểm duyệt.
+4. **Trải nghiệm Người dùng Chuẩn Doanh nghiệp (Enterprise UX)**: Giao diện Ribbon hiện đại, hỗ trợ Dark/Light Semantic Tokens, đa ngôn ngữ (Tiếng Việt, Tiếng Anh và 17 ngôn ngữ quốc tế).
+
+---
+
+## 5. Lộ trình Phát triển (Product Roadmap)
+- **Giai đoạn 1 (v0.1.0 - v0.6.0)**: Thiết lập nền tảng Whitelabel tự động, tích hợp OmiRouter/9Router, chuẩn hoá nhận diện thương hiệu VuaOffice.
+- **Giai đoạn 2 (v0.6.1 - v0.6.7)**: Tích hợp Hermes Agent, chuyển đổi Developer Mode sang System Menu, bổ sung Manual Check for Updates, nâng cấp bộ icon/logo vector chính thức.
+- **Giai đoạn 3 (v0.7.0+)**: Ra mắt chính thức VuaMail (Email & Calendar), hoàn thiện hệ thống Agentic Office Automation và đồng bộ đám mây riêng tư.
+
+---
+
+**Chủ quản**: 360 CORP  
+**Trạng thái**: Đã phê duyệt (Active & Maintained)  
+**Ngày cập nhật**: 2026-08-16

@@ -1,24 +1,47 @@
-# SPEC.md — VuaOffice Whitelabel & Rebrand
+# SPEC.md — Đặc tả Kỹ thuật Chi tiết VuaOffice
 
-> Sinh từ [REQUIREMENTS.md](REQUIREMENTS.md). Tham chiếu trực tiếp các mục yêu cầu.
+> **Tài liệu Đặc tả Kỹ thuật (Technical Specification Document)**  
+> **Tham chiếu từ**: [REQUIREMENTS.md](REQUIREMENTS.md) và [ARCH.md](ARCH.md)  
+> **Phiên bản**: v0.6.7+
 
-## 1. Cấu trúc Thư mục Whitelabel
+---
 
-Toàn bộ các tài nguyên phục vụ whitelabel được lưu trữ trong thư mục `whitelabel/` ở root của dự án. Cấu trúc như sau:
+## 1. Cấu trúc Cây Thư mục & Workspace Monorepo
+
+Dự án sử dụng mô hình npm workspaces với cấu trúc chuẩn hóa:
 
 ```text
-whitelabel/
-├── brand-config.json       # File cấu hình biến số và luật thay thế text
-└── assets/                 # Thư mục chứa tài nguyên đồ họa thay thế
-    ├── logo.svg            # Logo VuaOffice định dạng vector SVG
-    ├── icon.png            # Icon ứng dụng PNG
-    ├── icon.icns           # Icon ứng dụng định dạng macOS (.icns)
-    └── icon.ico            # Icon ứng dụng định dạng Windows (.ico)
+vuaoffice/
+├── apps/
+│   ├── docs/               # Ứng dụng Soạn thảo Văn bản (.docx)
+│   ├── sheets/             # Ứng dụng Bảng tính & Phân tích Dữ liệu (.xlsx)
+│   ├── slides/             # Ứng dụng Trình chiếu & Thiết kế Slide (.pptx)
+│   ├── pdf/                # Ứng dụng Xem & Ghi chú PDF (.pdf)
+│   ├── markdown/           # Ứng dụng Soạn thảo GFM Notes (.md)
+│   ├── mail/               # Ứng dụng VuaMail Client (Email & Lịch)
+│   └── shell/              # Khung ứng dụng Desktop chính (Host Shell)
+├── packages/
+│   ├── docx-engine/        # Lõi phân tích và bố cục OpenXML DOCX
+│   ├── pptx-engine/        # Lõi phân tích cấu trúc OpenXML PPTX
+│   ├── pptx-render/        # Lõi render Slide Canvas & HarfBuzz Font Shaping
+│   ├── file-parse/         # Lõi phân tích nhị phân và stream file
+│   ├── ui/                 # Thư viện UI chung & Semantic CSS Tokens
+│   ├── i18n/               # Hệ thống Đa ngôn ngữ (19 ngôn ngữ)
+│   ├── font-metrics/       # Đo đạc kích thước font chính xác
+│   ├── ai-provider/        # Tích hợp AI Gateway (OmiRouter, 9Router, Hermes)
+│   ├── agent-core/         # Lõi thực thi Agentic Tools & Reasoning Loop
+│   ├── ai-search/          # Tìm kiếm thông minh qua vector/embeddings
+│   ├── project-store/      # Quản lý cấu trúc thư mục dự án cục bộ
+│   └── electron-utils/     # Tiện ích IPC và tương tác hệ điều hành
+├── docs/                   # Toàn bộ tài liệu kiến trúc, đặc tả, hướng dẫn
+├── whitelabel/             # Cấu hình thương hiệu và tài nguyên đồ họa VuaOffice
+├── scripts/                # Kịch bản tự động hóa Whitelabel & Sync
+└── tools/                  # Công cụ kiểm tra lint, theme colors, licenses
 ```
 
-## 2. Đặc tả File Cấu hình `brand-config.json`
+---
 
-File `brand-config.json` định nghĩa các tham số cấu hình tĩnh của thương hiệu.
+## 2. Đặc tả Cấu hình Whitelabel (`whitelabel/brand-config.json`)
 
 ```json
 {
@@ -29,16 +52,24 @@ File `brand-config.json` định nghĩa các tham số cấu hình tĩnh của t
   "defaultProvider": "omirouter",
   "omirouterUrl": "https://api.omirouter.com/v1",
   "ninerouterUrl": "https://api.9router.com/v1",
+  "hermesUrl": "https://hermes.vuahethong.com/v1",
   "textReplacements": [
     {
       "files": [
         "apps/shell/src/renderer/src/strings.ts",
-        "apps/shell/index.html",
         "apps/shell/src/renderer/index.html",
+        "apps/shell/src/renderer/update.html",
         "apps/shell/src/renderer/src/Home.tsx",
-        "apps/shell/src/main/index.ts"
+        "apps/shell/src/main/tab-manager.ts",
+        "apps/shell/src/main/index.ts",
+        "apps/docs/src/renderer/components/Ribbon.tsx",
+        "apps/slides/src/renderer/components/RibbonHomeTab.tsx",
+        "apps/slides/src/renderer/App.tsx",
+        "apps/markdown/src/renderer/components/Ribbon.tsx",
+        "apps/sheets/src/renderer/ExcelShell.tsx"
       ],
       "rules": [
+        { "regex": "Genspark AI", "to": "VuaOffice AI" },
         { "regex": "\\bGenOffice\\b", "to": "VuaOffice" },
         { "regex": "\\bGenspark\\b", "to": "360 CORP" }
       ]
@@ -47,90 +78,63 @@ File `brand-config.json` định nghĩa các tham số cấu hình tĩnh của t
 }
 ```
 
-Các thuộc tính quan trọng:
-- `appName`: Tên hiển thị của ứng dụng.
-- `appId`: Application Bundle Identifier của Electron.
-- `executableName`: Tên file thực thi sau khi build (`.app` hoặc `.exe`).
-- `defaultProvider`: Provider mặc định cho AI (`omirouter` hoặc `ninerouter`...).
-- `textReplacements`: Danh sách các file nguồn cần thay thế từ khóa thương hiệu dựa trên Regex.
+---
 
-## 3. Đặc tả CLI Script `scripts/whitelabel.js`
+## 3. Đặc tả Kỹ thuật các Module Ứng dụng Cốt lõi
 
-CLI Script được phát triển bằng NodeJS thuần (không dependency ngoài) để đảm bảo tốc độ và tính tương thích cao.
+### 3.1 VuaOffice Docs (`apps/docs`)
+- **Định dạng**: `.docx` (OpenXML), `.doc` (via converter), `.txt`, `.rtf`.
+- **Cơ chế Layout**: Phân trang theo thời gian thực (Real-time Canvas Pagination Engine).
+- **Khả năng AI**: Paragraph-level AI Patching (chỉnh sửa cục bộ từng đoạn mà không làm xáo trộn bố cục và định dạng của các đoạn xung quanh).
 
-### 3.1 Luồng Xử lý của Lệnh `apply` (`node scripts/whitelabel.js apply`)
-1. **Đọc Cấu hình**: Đọc file `whitelabel/brand-config.json`.
-2. **Patch file `apps/shell/electron-builder.cjs`**:
-   - Thay thế `productName` bằng `appName`.
-   - Thay thế `appId` bằng `appId`.
-   - Thay thế `executableName` bằng `executableName`.
-3. **Patch file `apps/shell/package.json`**:
-   - Cập nhật `productName` thành `appName`.
-   - Cập nhật `desktopName` thành `${executableName}.desktop`.
-   - Cập nhật `author` thành `author`.
-4. **Patch module `@genoffice/ai-provider`**:
-   - Thêm `omirouter` và `ninerouter` vào enum `AiProviderId` trong `packages/ai-provider/src/types.ts`.
-   - Thêm metadata của `omirouter` và `ninerouter` vào mảng `AI_PROVIDERS` trong `packages/ai-provider/src/providers.ts`.
-   - Cấu hình mặc định `baseUrl` và thiết lập default provider là `defaultProvider` trong `packages/ai-provider/src/providers.ts`.
-   - Chèn logic xử lý router trong `packages/ai-provider/src/stream.ts`.
-5. **Thay thế Text**: Duyệt qua danh sách `textReplacements` trong config, đọc từng file, áp dụng Regex để thay thế text và lưu lại.
-6. **Sao chép Assets**:
-   - Copy `whitelabel/assets/logo.svg` -> `apps/shell/src/renderer/src/assets/genoffice-logo.svg`.
-   - Copy `whitelabel/assets/icon.png` -> `apps/shell/build/icon.png` và `apps/shell/build/icon-mac.png`.
-   - Copy `whitelabel/assets/icon.icns` -> `apps/shell/build/icon.icns`.
-   - Copy `whitelabel/assets/icon.ico` -> `apps/shell/build/icon.ico`.
+### 3.2 VuaOffice Sheets (`apps/sheets`)
+- **Định dạng**: `.xlsx`, `.xlsm`, `.csv`, `.tsv`.
+- **Cơ chế Tính toán**: Nhân tính toán hiệu năng cao kết hợp Rust sidecar engine cho các tệp dữ liệu lớn (> 100,000 dòng).
+- **Khả năng AI**: Tạo công thức Excel tự động, phân tích xu hướng dữ liệu, tự động tạo Pivot Table và biểu đồ trực quan hóa.
 
-### 3.2 Luồng Xử lý của Lệnh `restore` (`node scripts/whitelabel.js restore`)
-1. Đọc danh sách file cần khôi phục bằng cách kết hợp:
-   - Các file cấu hình tĩnh (`electron-builder.cjs`, `package.json`, `types.ts`, `providers.ts`, `stream.ts`, `genoffice-logo.svg`, các file icons).
-   - Danh sách file động lấy từ `textReplacements` trong `brand-config.json`.
-2. Duyệt qua danh sách file và thực hiện khôi phục về trạng thái sạch bằng Git:
-   `git checkout -- "<file_path>"`
-3. Nếu file không nằm trong Git tracker hoặc có lỗi, báo log warning thay vì làm crash script.
+### 3.3 VuaOffice Slides (`apps/slides`)
+- **Định dạng**: `.pptx`, `.ppsx`.
+- **Cơ chế Render**: Canvas 2D + Konva Engine với HarfBuzz Text Shaping đảm bảo hiển thị chuẩn xác tiếng Việt và các ngôn ngữ phức tạp.
+- **Khả năng AI**: Sinh dàn ý thuyết trình từ tài liệu Word/PDF, tự động tạo slide với bố cục và hình ảnh minh họa phù hợp.
 
-## 4. Tích hợp AI Provider trong Codebase
+### 3.4 VuaOffice PDF (`apps/pdf`)
+- **Định dạng**: `.pdf`.
+- **Cơ chế Render**: PDF.js WebWorker Rendering Engine với lớp phủ Vector Overlay phục vụ vẽ tay, đóng dấu, highlight và gạch chân.
+- **Khả năng AI**: Đọc hiểu tài liệu dài (Long-Context PDF Q&A), tóm tắt các điểm chính và trích xuất bảng dữ liệu từ PDF sang Sheets.
 
-### 4.1 Thêm AI Provider IDs
-Trong `packages/ai-provider/src/types.ts`:
+### 3.5 VuaOffice Markdown (`apps/markdown`)
+- **Định dạng**: `.md`, `.markdown`.
+- **Cơ chế Soạn thảo**: Tiptap Editor (ProseMirror core) hỗ trợ GFM, KaTeX, Mermaid diagrams, và Task Lists.
+
+### 3.6 VuaOffice Mail (`apps/mail`)
+- **Giao diện**: Fluent UI Ribbon 3 cột theo chuẩn Microsoft Outlook.
+- **Cơ sở dữ liệu**: SQLite cục bộ lưu trữ metadata, full-text search index và hàng đợi offline OpQueue.
+- **Khả năng AI**: Tóm tắt chuỗi email dài, tạo bản thảo phản hồi thông minh và phân loại email quan trọng (Focused Inbox).
+
+---
+
+## 4. Đặc tả Tích hợp AI Provider & Gateway (`@genoffice/ai-provider`)
+
+### 4.1 Định nghĩa Types & Providers
 ```typescript
-export type AiProviderId = 'genspark' | 'anthropic' | 'gemini' | 'deepseek' | 'openai' | 'openrouter' | 'custom' | 'omirouter' | 'ninerouter' | 'hermes'
+export type AiProviderId = 
+  | 'omirouter' 
+  | 'ninerouter' 
+  | 'hermes' 
+  | 'genspark' 
+  | 'anthropic' 
+  | 'openai' 
+  | 'gemini' 
+  | 'deepseek' 
+  | 'custom'
 ```
 
-### 4.2 Cấu hình AI Provider Metadata
-Trong `packages/ai-provider/src/providers.ts`:
-Bổ sung `hermes` với endpoint mặc định `https://hermes.vuahethong.com/v1`.
-
-## 5. Đặc tả Tính năng Kiểm tra Cập nhật Thủ công (Manual Check for Updates)
-
-### 5.1 Main Process (`apps/shell/src/main/updater.ts`)
-- Hàm `checkForUpdatesManual()`:
-  - **Dev Mode**: Hiển thị native dialog thông báo ứng dụng đang chạy ở môi trường phát triển (Development Mode).
-  - **Packaged Release**: Gọi `autoUpdater.checkForUpdates()`. Bật cờ `isManualCheck = true` để hiển thị hộp thoại native khi đã ở bản mới nhất (`updAlreadyLatest`) hoặc khi gặp lỗi kết nối (`updFailed`), đồng thời giữ im lặng khi kiểm tra ngầm định kỳ.
-- Menu Application macOS & Help Menu: Thêm mục `Check for Updates…` ngay dưới `About VuaOffice` trên macOS và trong menu `Help` trên Windows/Linux.
-
-### 5.2 Renderer Process (`apps/shell/src/renderer/src/Home.tsx`)
-- Tích hợp mục "Check for Updates…" vào Account dropdown menu tại màn hình chính, gọi `window.aiOffice.checkForUpdates()` qua IPC.
-
-## 6. Đặc tả Module VuaMail (`apps/mail`)
-
-### 5.1 Kiến trúc Cơ sở dữ liệu SQLite
-- **`accounts`**: Quản lý tài khoản kết nối.
-- **`emails`**: Danh sách thư gồm metadata chính (`id`, `subject`, `from`, `to`, `snippet`, `is_read`, `date_ms`, `folder_id`).
-- **`email_bodies`**: Nội dung `html` và `plain_text` được nạp theo cơ chế lazy-load khi chọn thư.
-- **`op_queue`**: Ghi nhận các thao tác `mark_read`, `delete`, `move_folder`, `send_draft` khi mất kết nối mạng.
-
-### 5.2 Giao diện Người dùng Outlook Clone (React 19)
-- **AppRail**: Thanh bên trái điều hướng chuyển đổi tab `Mail`, `Calendar`, `Contacts`, `To-Do`.
-- **Top Ribbon Toolbar**: Nút *New Email* (kèm split menu), *Delete*, *Archive*, *Reply*, *Reply All*, *Forward*, *AI Tools*.
-- **Folders Pane**: Phân nhóm *Favorites* (Inbox, Sent, Drafts, Deleted Items, Archive).
-- **Message List**: Danh sách thư hỗ trợ phân loại *Focused* và *Other*, tìm kiếm từ khóa, unread indicator.
-- **Reading Pane**: Xem thư, avatar người gửi, danh sách file đính kèm với nút xem trước Docx/PDF trực tiếp.
-- **AI Assist Card**: Tóm tắt nội dung email quan trọng trong 2-3 gạch đầu dòng và gợi ý câu trả lời tự động.
-- Bổ sung định nghĩa `omirouter` và `ninerouter` vào `AI_PROVIDERS`:
+### 4.2 Cấu hình Provider Metadata
 ```typescript
+export const AI_PROVIDERS: readonly AiProviderMeta[] = [
   {
     id: 'omirouter',
-    label: 'OmiRouter AI',
+    label: 'OmiRouter AI (360 CORP)',
     models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'deepseek-chat'],
     defaultModel: 'claude-3-5-sonnet',
     keyPlaceholder: 'sk-or-...',
@@ -138,35 +142,36 @@ Bổ sung `hermes` với endpoint mặc định `https://hermes.vuahethong.com/v
   },
   {
     id: 'ninerouter',
-    label: '9Router AI',
+    label: '9Router AI (360 CORP)',
     models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'deepseek-chat'],
     defaultModel: 'claude-3-5-sonnet',
-    keyPlaceholder: 'sk-or-...',
+    keyPlaceholder: 'sk-9r-...',
     needsBaseUrl: true,
-  }
-```
-- Khởi tạo mặc định `baseUrl` cho hai nhà cung cấp này dựa trên config:
-```typescript
-baseUrl: meta.needsBaseUrl ? (meta.id === 'omirouter' ? 'https://api.omirouter.com/v1' : (meta.id === 'ninerouter' ? 'https://api.9router.com/v1' : '')) : undefined
-```
-- Thay đổi giá trị trả về trong `defaultAiSettings`:
-```typescript
-return { provider: 'omirouter', providers }
-```
-
-### 4.3 Định tuyến Stream AI
-Trong `packages/ai-provider/src/stream.ts`:
-- Định nghĩa switch-case cho `omirouter` và `ninerouter` gọi `streamOpenAiCompatible`:
-```typescript
-    case 'omirouter':
-    case 'ninerouter':
-      if (!config.baseUrl) throw new Error('A Base URL is required')
-      return streamOpenAiCompatible(config.baseUrl, config, system, messages, tools, maxTokens, cb)
+  },
+  {
+    id: 'hermes',
+    label: 'Hermes Agent (360 CORP)',
+    models: ['hermes-3-llama-3.1-8b', 'hermes-3-llama-3.1-70b', 'custom-hermes-model'],
+    defaultModel: 'hermes-3-llama-3.1-8b',
+    keyPlaceholder: 'sk-hermes-...',
+    needsBaseUrl: true,
+  },
+  // ...
+]
 ```
 
 ---
 
-**Nguồn:** [REQUIREMENTS.md](REQUIREMENTS.md)
-**Người duyệt:** Sếp (Product Owner)
-**Trạng thái:** Approved
-**Ngày duyệt:** 2026-08-10
+## 5. Đặc tả Cơ chế Tự động Cập nhật & Kiểm tra Thủ công (Auto & Manual Updater)
+
+- **Cấu hình Feed URL**: Tự động trỏ về `https://github.com/360org/vuaoffice/releases/latest/download`.
+- **Cơ chế Kiểm tra Định kỳ (Background Check)**: Tự động chạy sau 15 giây khi khởi động và lặp lại mỗi 4 giờ. Giữ im lặng nếu không có bản cập nhật mới hoặc lỗi mạng.
+- **Cơ chế Kiểm tra Thủ công (Manual Check)**: Gọi qua hàm `checkForUpdatesManual()` khi người dùng chọn menu:
+  - Hiển thị Dialog thông báo nếu đang ở bản mới nhất hoặc lỗi kết nối.
+  - Mở cửa sổ Update UI nếu có bản phát hành mới với tùy chọn: *Download*, *Install & Restart*, *Later*.
+
+---
+
+**Chủ quản**: 360 CORP  
+**Trạng thái**: Đã phê duyệt (Approved)  
+**Ngày cập nhật**: 2026-08-16

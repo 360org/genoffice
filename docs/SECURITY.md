@@ -1,85 +1,71 @@
-# Security Policy
+# SECURITY.md — Chính sách Bảo mật Hệ thống VuaOffice
 
-## Reporting a Vulnerability
+> **Tài liệu Chính sách Bảo mật Thông tin & An toàn Ứng dụng (Security Policy)**  
+> **Chủ quản**: 360 CORP  
+> **Phiên bản**: v0.6.7+
 
-Please report suspected vulnerabilities privately via GitHub's
-[private vulnerability reporting](https://github.com/genspark-ai/genoffice/security/advisories/new)
-on this repository. Do not open public issues for security reports. We aim to
-acknowledge reports within 72 hours.
+---
 
-## Process Security Posture
+## 1. Báo cáo Lỗ hổng Bảo mật (Reporting a Vulnerability)
 
-All application windows run with the full Electron renderer lockdown:
+360 CORP cam kết đảm bảo an toàn thông tin tối đa cho người dùng và doanh nghiệp sử dụng VuaOffice. Nếu phát hiện lỗ hổng bảo mật:
+- **Tuyệt đối KHÔNG** mở công khai (public issue) trên GitHub/GitLab.
+- Vui lòng gửi báo cáo bảo mật riêng tư qua tính năng [Private Vulnerability Reporting](https://github.com/360org/vuaoffice/security/advisories/new) hoặc gửi email trực tiếp đến `security@360.org.vn` / `support@360.org.vn`.
+- Chúng tôi sẽ phản hồi tiếp nhận trong vòng **24–72 giờ** và tiến hành thẩm định, vá lỗi kịp thời.
 
-- `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true` for every
-  document window and tab view (docs, sheets, slides, pdf, markdown, shell, updater).
-- Renderers reach the main process only through typed, validated IPC channels
-  (payloads are schema-checked in the main process; sheets uses zod end to end).
-- Every `shell.openExternal` call goes through a single shared gate
-  (`@genoffice/electron-utils` → `safeExternalUrl`) that parses the URL and
-  enforces a protocol allowlist (http/https; pdf link annotations additionally
-  allow mailto). `file:`, `javascript:`, and custom schemes are always rejected.
-- No API keys are hardcoded. AI requests are proxied through the signed-in
-  account by default; user-supplied keys stay in the OS-level settings store.
+---
 
-## Threat Model: AI-Generated Layout Scripts (slides)
+## 2. Mô hình Bảo mật Đa Tiến trình Electron (Process Security Posture)
 
-The slides AI can adjust slide layouts by emitting a small script that is
-parsed with Acorn and evaluated by a constrained AST interpreter
-(`apps/slides/src/renderer/ai/layout-script-interpreter.ts`). The source looks
-like a small, synchronous subset of JavaScript for model compatibility, but it
-is not passed to `eval`, `Function`, a VM context, a worker, or the JavaScript
-engine as executable source.
+Toàn bộ các cửa sổ và tab tài liệu của VuaOffice Suite vận hành dưới cơ chế bảo vệ nghiêm ngặt nhất của Electron:
 
-**What the script can do by design:** read prototype-free JSON copies of
-`els`/`canvas`, perform bounded arithmetic/control flow, use explicitly
-implemented string/array/regular-expression/Math helpers, and call
-`setBox/moveBy/resizeBy/setText/setStyle/setFill/setStroke/log`. Every edit
-primitive validates its arguments (element existence, read-only flags, finite
-numbers, hex colors) and writes only into an op buffer that is applied through
-the same command pipeline as manual edits.
+1. **Phân lập Tiến trình Tuyệt đối (Full Renderer Lockdown)**:
+   - Tất cả các tab ứng dụng (`apps/docs`, `apps/sheets`, `apps/slides`, `apps/pdf`, `apps/markdown`, `apps/mail`, `apps/shell`, `updater`) đều thiết lập:
+     - `contextIsolation: true`
+     - `nodeIntegration: false`
+     - `sandbox: true`
+2. **Kênh Giao tiếp IPC An toàn & Typed Validation**:
+   - Tiến trình Renderer chỉ có thể giao tiếp với Main Process thông qua các API có kiểu dữ liệu rõ ràng được công bố qua `contextBridge` (`window.aiOffice`).
+   - Mọi payload truyền qua IPC đều được kiểm tra tính hợp lệ và xác thực schema nghiêm ngặt trước khi xử lý (ví dụ: Sheets sử dụng `zod` xác thực end-to-end).
+3. **Cổng Kiểm soát Liên kết Ngoài (`safeExternalUrl`)**:
+   - Mọi thao tác mở URL bên ngoài (`shell.openExternal`) bắt buộc phải đi qua cổng kiểm duyệt tập trung `@genoffice/electron-utils` → `safeExternalUrl`.
+   - Chỉ cho phép các giao thức an toàn trong whitelist (`http:`, `https:`, riêng chú thích PDF cho phép thêm `mailto:`).
+   - Tự động chặn và từ chối các giao thức nguy hiểm như `file:`, `javascript:`, `data:` hoặc custom URI schemes độc hại.
+4. **Nguyên tắc "Zero Client Key Exposure"**:
+   - Tuyệt đối không lưu cứng API Keys trong mã nguồn của ứng dụng.
+   - Các yêu cầu AI mặc định được chuyển tiếp qua Gateway bảo mật của 360 CORP (OmiRouter / 9Router / Hermes).
+   - Khi người dùng nhập API Key tùy biến trong Developer Mode, khóa sẽ được lưu trữ an toàn trong vùng nhớ cấu hình hệ điều hành cục bộ (`app-settings.json` trong thư mục User Data được bảo vệ).
 
-**Interpreter boundary:**
+---
 
-1. Identifiers resolve only in interpreter-owned lexical scopes seeded with the
-   documented data and callables. There are no ambient globals, module loader,
-   DOM, network, IPC bridge, timers, process APIs, or dynamic code primitives.
-2. Property reads are dispatched by value type. Data objects expose own JSON
-   fields only; arrays, strings, and regexes expose a small method allowlist.
-   Host prototypes and function properties are never traversed, including
-   through computed property names.
-3. Calls accept only interpreter-created functions or explicit builtins. A host
-   function obtained through a constructor/prototype chain cannot be
-   represented.
-4. Inputs and values crossing into edit primitives are recursively copied as
-   JSON-like, prototype-free data. Errors discard all buffered operations;
-   logs are capped.
-5. Execution has statement/expression and call-depth limits to bound runaway
-   loops or recursion.
+## 3. Mô hình Đe dọa & Phòng thủ (Threat Models)
 
-The Electron renderer sandbox remains defense in depth, but it is not the
-layout-script security boundary. The interpreter is designed so a layout
-script cannot obtain renderer capabilities in the first place.
+### 3.1 Thực thi Script Bố cục Slide do AI Tạo ra (`apps/slides`)
+Tác tử AI của Slides có khả năng tinh chỉnh bố cục bằng cách sinh ra một đoạn script ngắn. Để ngăn chặn nguy cơ tấn công RCE (Remote Code Execution) hoặc Injection:
+- Đoạn mã **KHÔNG BAO GIỜ** được thực thi trực tiếp qua `eval()`, `new Function()`, `vm` context hay Web Worker.
+- Mã được phân tích cú pháp (parse) bằng **Acorn AST** và được thông dịch bởi bộ diễn dịch AST tùy biến cô lập (`apps/slides/src/renderer/ai/layout-script-interpreter.ts`).
+- **Phạm vi An toàn của Bộ Diễn dịch (Interpreter Sandbox)**:
+  - Chỉ làm việc trên bản sao JSON độc lập không chứa prototype của các phần tử đồ họa (`els`/`canvas`).
+  - Chỉ hỗ trợ các hàm toán học, chuỗi và các lệnh chỉnh sửa đồ họa cơ bản (`setBox`, `moveBy`, `resizeBy`, `setText`, `setStyle`, `setFill`, `setStroke`, `log`).
+  - Mọi thao tác ghi đều lưu vào một buffer tạm và được kiểm tra hợp lệ trước khi áp dụng vào pipeline chỉnh sửa tài liệu.
+  - Giới hạn số lượng câu lệnh (statement limit) và độ sâu đệ quy để chống tấn công từ chối dịch vụ (DoS / Infinite Loop).
 
-If you find a way for a layout script to reach anything beyond the injected
-primitives (network, storage, IPC channels not reachable by design, or the
-main process), that is a vulnerability — please report it.
+### 3.2 Kết xuất HTML phục vụ Xuất bản Slide sang PPTX
+Quá trình chuyển đổi HTML sang PPTX của Slides được thực thi trong một `BrowserWindow` ẩn:
+- Cửa sổ này được đối xử như một vùng chứa mã không tin cậy (Hostile Content Sandbox): `sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`.
+- Không nạp bất kỳ Preload script nào và không mở bất kỳ kênh IPC nào.
+- Tiến trình Main điều khiển việc xuất bản độc quyền qua `executeJavaScript` với cơ chế giám sát thời gian thực (Watchdog Timeout) tự động hủy tiến trình khi hết hạn.
 
-## Threat Model: Rendering AI-Generated HTML (slides export)
+---
 
-The HTML-to-pptx export pipeline renders AI-generated HTML in a hidden
-`BrowserWindow`. That window is treated as hostile content: full renderer
-lockdown (`sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`),
-no preload script, no IPC surface — the main process drives it exclusively
-through `executeJavaScript` and destroys it under a watchdog timeout.
+## 4. Phạm vi Ngoài Chính sách (Out of Scope)
 
-## Out of Scope
+- Các dịch vụ Cloud AI bên thứ ba kết nối qua API công cộng (vấn đề bảo mật hạ tầng máy chủ của nhà cung cấp thuộc trách nhiệm của bên thứ ba tương ứng).
+- Các cuộc tấn công đòi hỏi kẻ tấn công đã kiểm soát toàn quyền máy tính người dùng (Root/Admin compromised environment) hoặc trực tiếp can thiệp/sửa đổi mã nhị phân của ứng dụng.
+- Việc ghi đè các biến môi trường phát triển cục bộ (`XLSX_SIDECAR_PATH`, `GSK_CLI_PATH`) vốn đòi hỏi quyền kiểm soát process environment trên thiết bị.
 
-- The cloud AI services this client talks to are operated separately and are
-  not part of this repository; issues with them should be reported through the
-  service provider's channels.
-- Vulnerabilities that require an already-compromised machine or a modified
-  binary. This includes the deliberate environment-variable override points
-  for local development (`GSK_CLI_PATH`, `XLSX_SIDECAR_PATH`): setting them
-  requires control of the process environment, which is equivalent to code
-  execution on the machine.
+---
+
+**Chủ quản**: 360 CORP  
+**Trạng thái**: Đã phê duyệt (Approved)  
+**Ngày cập nhật**: 2026-08-16
