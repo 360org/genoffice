@@ -124,6 +124,7 @@
 | **FR-04** | Toggle Developer Mode qua Menu Help | Kiểm tra checkbox trong `Help > Troubleshooting > Enable Developer Mode` | Đạt |
 | **FR-05** | Kiểm tra cập nhật thủ công & tự động | Kiểm tra menu `Check for Updates…` và Account dropdown menu | Đạt |
 | **FR-06** | Đóng gói phân phối đa nền tảng | Build thành công gói cài đặt DMG/EXE/DEB mang tên VuaOffice | Đạt |
+| **FR-07** | Báo cáo chẩn đoán & Log lỗi hệ thống | Mở menu `Help > Troubleshooting > Generate Log, Diagnostic Report...`, kiểm tra export file và gửi GitLab Issues | Đạt |
 
 ---
 

@@ -172,6 +172,25 @@ export const AI_PROVIDERS: readonly AiProviderMeta[] = [
 
 ---
 
+## 6. Đặc tả Tính năng Thu thập Log & Báo cáo Lỗi (Diagnostic Report System)
+
+Hệ thống cung cấp cơ chế thu thập và báo cáo lỗi trực tiếp về bộ phận kỹ thuật 360 CORP qua GitLab Issues:
+
+- **Đường dẫn Menu**: `Help` ➜ `Troubleshooting` ➜ `Generate Log, Diagnostic Report…` (hoặc `Tạo Báo cáo Chẩn đoán & Log lỗi…`).
+- **Giao diện Modal (`DiagnosticReportModal.tsx`)**:
+  - **Mã định danh sự cố (Reference ID)**: Dạng `VUA-DIAG-YYYYMMDD-XXXXX` kèm nút copy nhanh.
+  - **Thông tin hệ thống**: OS Platform/Arch, Electron, Chromium, Node.js version, RAM metric, Developer Mode state, Language & Theme.
+  - **Kiểm tra mạng song song (Network Reachability)**: Ping đồng thời GitLab API, OmiRouter AI, 9Router AI và Hermes Agent endpoint với timeout 4s.
+  - **Bộ lọc bảo mật (Scrubber & Redactor)**:
+    - Xóa sạch đường dẫn thư mục cá nhân (`/Users/...` ➜ `~`).
+    - Redact toàn bộ Bearer Token, API Key (`sk-...`, `glpat-...`, `ghp_...`).
+    - Làm mờ địa chỉ email và địa chỉ IPv4 cục bộ.
+    - Ẩn cấu hình nhạy cảm (`<redacted>`).
+  - **Xuất tệp (Export to file)**: Hỗ trợ lưu ra `.txt` hoặc `.json` qua hộp thoại Save Dialog của hệ điều hành.
+  - **Gửi về VuaOffice (Send to VuaOffice)**: Định dạng báo cáo dạng Markdown hoàn chỉnh và gửi trực tiếp về GitLab Issues của `360org/vuaoffice`.
+
+---
+
 **Chủ quản**: 360 CORP  
 **Trạng thái**: Đã phê duyệt (Approved)  
 **Ngày cập nhật**: 2026-08-16

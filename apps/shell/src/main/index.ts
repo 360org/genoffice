@@ -171,6 +171,12 @@ import { normalizeRecentQuery, pageRecentPaths, statExistingPaths } from './rece
 import { TabManager } from './tab-manager'
 import { applyUpdateChannel, checkForUpdatesManual, initAutoUpdater } from './updater'
 import { isUpdateChannel, type UpdateChannel } from '../shared/update-api'
+import {
+  exportDiagnosticReportToFile,
+  generateDiagnosticReportData,
+  submitDiagnosticReportToGitLab,
+} from './diagnostic-report'
+import type { DiagnosticReportData } from '../shared/home-api'
 
 /**
  * VuaOffice unified shell: ONE Electron app, ONE BrowserWindow, hosting the
@@ -399,6 +405,7 @@ const tMain = createI18n({
     menuHelp: '帮助',
     menuTroubleshooting: '故障排除',
     menuDeveloperMode: '启用开发者模式',
+    menuDiagnosticReport: '生成日志与诊断报告…',
     menuCheckForUpdates: '检查更新…',
     thirdPartyNotices: '第三方软件声明',
     menuExportDocx: '导出为 Word…',
@@ -456,6 +463,7 @@ const tMain = createI18n({
     menuHelp: 'Help',
     menuTroubleshooting: 'Troubleshooting',
     menuDeveloperMode: 'Enable Developer Mode',
+    menuDiagnosticReport: 'Generate Log, Diagnostic Report…',
     menuCheckForUpdates: 'Check for Updates…',
     thirdPartyNotices: 'Third-Party Notices',
     menuExportDocx: 'Export as Word…',
@@ -2220,26 +2228,8 @@ function registerHomeIpc(): void {
   // returning true also counts as "shown": the renderer displays it
   // unconditionally, so no separate mark-shown round-trip is needed
   ipcMain.handle(HOME_CHANNELS.starPromptShouldShow, (): StarPromptShow => {
-    if (starPromptSessionGrant) return starPromptSessionGrant
-    const now = Date.now()
-    const state = readStarPrompt()
-    const docOpens = state.docOpens ?? 0
-    // dev preview of the card without waiting out the value thresholds
-    // (same pattern as GENOFFICE_FAKE_UPDATE); nothing is recorded
-    if (!app.isPackaged && process.env.GENOFFICE_FORCE_STAR_PROMPT) return { show: true, docOpens }
-    const grant = (): StarPromptShow => {
-      writeStarPrompt(withShown(state, now))
-      starPromptSessionGrant = { show: true, docOpens }
-      return starPromptSessionGrant
-    }
-    // first launch after an upgrade: skip the value gates once for a
-    // never-prompted user (they are a proven repeat user already)
-    if (upgradeStarPromptPending) {
-      upgradeStarPromptPending = false
-      if (shouldShowUpgradeStarPrompt(state)) return grant()
-    }
-    if (!shouldShowStarPrompt(state, now)) return { show: false, docOpens }
-    return grant()
+    // Disabled star prompt
+    return { show: false, docOpens: 0 }
   })
 
   ipcMain.handle(HOME_CHANNELS.starPromptAction, (_event, action: unknown) => {
@@ -2263,6 +2253,21 @@ function registerHomeIpc(): void {
     const url = cloudProjectExternalUrl(projectUrl)
     if (url) void shell.openExternal(url)
   })
+
+  ipcMain.handle(HOME_CHANNELS.generateDiagnosticReport, async () => {
+    return await generateDiagnosticReportData(APP_SETTINGS_PATH())
+  })
+
+  ipcMain.handle(HOME_CHANNELS.exportDiagnosticReport, async (_event, report: DiagnosticReportData) => {
+    return await exportDiagnosticReportToFile(report)
+  })
+
+  ipcMain.handle(
+    HOME_CHANNELS.sendDiagnosticReport,
+    async (_event, report: DiagnosticReportData, userNote?: string) => {
+      return await submitDiagnosticReportToGitLab(report, userNote)
+    }
+  )
 }
 
 function stringPaths(value: unknown): string[] {
@@ -2444,6 +2449,17 @@ function helpMenuSubmenu(extraItems: MenuItemConstructorOptions[] = []): MenuIte
             if (tabManager) {
               const active = tabManager.activeTab()
               if (active) applyMenuFor(active.kind)
+            }
+          },
+        },
+        {
+          label: tm('menuDiagnosticReport'),
+          click: () => {
+            // Trigger diagnostic modal in shell / active window
+            for (const wc of webContents.getAllWebContents()) {
+              if (!wc.isDestroyed()) {
+                wc.send('app:open-diagnostic-report')
+              }
             }
           },
         },

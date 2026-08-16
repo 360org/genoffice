@@ -152,6 +152,62 @@ export interface HomeApi {
   checkForUpdates(): Promise<void>
   /** subscribe to developer mode changes from application menu */
   onDeveloperModeChanged?(handler: (isDevMode: boolean) => void): () => void
+  /** generate a sanitized diagnostic and log report */
+  generateDiagnosticReport(): Promise<DiagnosticReportData>
+  /** export diagnostic report to local disk file */
+  exportDiagnosticReport(report: DiagnosticReportData): Promise<DiagnosticExportResult>
+  /** send diagnostic report to GitLab issues */
+  sendDiagnosticReport(report: DiagnosticReportData, userNote?: string): Promise<DiagnosticSubmitResult>
+  /** subscribe to menu trigger for opening the diagnostic report modal */
+  onOpenDiagnosticReport?(handler: () => void): () => void
+}
+
+export interface DiagnosticEndpointStatus {
+  name: string
+  url: string
+  reachable: boolean
+  status?: number
+  error?: string
+  latencyMs?: number
+}
+
+export interface DiagnosticSystemInfo {
+  appVersion: string
+  electronVersion: string
+  nodeVersion: string
+  chromeVersion: string
+  osPlatform: string
+  osRelease: string
+  osArch: string
+  totalMemoryMB: number
+  freeMemoryMB: number
+  uptimeSec: number
+  developerMode: boolean
+  language: string
+  theme: string
+}
+
+export interface DiagnosticReportData {
+  reportId: string
+  generatedAt: string
+  system: DiagnosticSystemInfo
+  sanitizedConfig: Record<string, unknown>
+  networkReachability: DiagnosticEndpointStatus[]
+  recentLogs: string[]
+  rawText: string
+}
+
+export interface DiagnosticExportResult {
+  success: boolean
+  filePath?: string
+  error?: string
+}
+
+export interface DiagnosticSubmitResult {
+  success: boolean
+  issueUrl?: string
+  issueIid?: number
+  error?: string
 }
 
 /** 'starred' = went to GitHub or said "already starred" (never prompt again);
@@ -296,6 +352,9 @@ export const HOME_CHANNELS = {
   getAiSettings: 'home:get-ai-settings',
   setAiSettings: 'home:set-ai-settings',
   checkForUpdates: 'home:check-for-updates',
+  generateDiagnosticReport: 'home:generate-diagnostic-report',
+  exportDiagnosticReport: 'home:export-diagnostic-report',
+  sendDiagnosticReport: 'home:send-diagnostic-report',
 } as const
 
 export const PROJECT_CHANNELS = {

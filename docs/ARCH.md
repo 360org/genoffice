@@ -106,7 +106,19 @@ Module `@genoffice/ai-provider` cung cấp cơ chế định tuyến linh hoạt
 
 ---
 
-## 5. Cơ chế Whitelabel & Quy trình Đồng bộ Upstream Tự động
+## 5. Hệ thống Thu thập Log & Diagnostic Report
+
+Module `apps/shell/src/main/diagnostic-report.ts` chịu trách nhiệm thu thập và xử lý an toàn dữ liệu chẩn đoán:
+- **Vùng đệm Log tròn (Circular Log Buffer)**: Lưu trữ 150 sự kiện log gần nhất trong phiên làm việc.
+- **Engine Làm sạch Dữ liệu (Scrubber Engine)**:
+  - Tự động thay thế đường dẫn thư mục người dùng (`/Users/...` ➜ `~`).
+  - Lọc và thay thế toàn bộ Bearer Token, API Key, GitLab Token bằng `<redacted>`.
+  - Làm mờ Email người dùng và địa chỉ IP cục bộ.
+- **Cơ chế Gửi Báo cáo (GitLab Issues Dispatcher)**: Tự động tổng hợp dữ liệu thành định dạng Markdown chuẩn và gửi trực tiếp về hệ thống GitLab Issues (`360org/vuaoffice`).
+
+---
+
+## 6. Cơ chế Whitelabel & Quy trình Đồng bộ Upstream Tự động
 
 Để giải quyết bài toán đồng bộ liên tục với upstream `genspark-ai/genoffice` mà không làm mất tùy biến của 360 CORP:
 

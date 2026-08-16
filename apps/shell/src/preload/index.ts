@@ -236,6 +236,20 @@ const homeApi: HomeApi = {
     ipcRenderer.on('app:developer-mode-changed', listener)
     return () => ipcRenderer.removeListener('app:developer-mode-changed', listener)
   },
+  async generateDiagnosticReport() {
+    return await ipcRenderer.invoke(HOME_CHANNELS.generateDiagnosticReport)
+  },
+  async exportDiagnosticReport(report) {
+    return await ipcRenderer.invoke(HOME_CHANNELS.exportDiagnosticReport, report)
+  },
+  async sendDiagnosticReport(report, userNote) {
+    return await ipcRenderer.invoke(HOME_CHANNELS.sendDiagnosticReport, report, userNote)
+  },
+  onOpenDiagnosticReport(handler) {
+    const listener = () => handler()
+    ipcRenderer.on('app:open-diagnostic-report', listener)
+    return () => ipcRenderer.removeListener('app:open-diagnostic-report', listener)
+  },
 }
 
 function asCloudProjectsSnapshot(result: unknown): CloudProjectsSnapshot | null {

@@ -20,6 +20,7 @@ import { useI18n } from './locale'
 import type { I18n, StringKey } from './locale'
 import { AiSettingsModal } from './AiSettingsModal'
 import { AboutModal } from './AboutModal'
+import { DiagnosticReportModal } from './DiagnosticReportModal'
 
 declare global {
   interface Window {
@@ -1571,12 +1572,19 @@ export function Home() {
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null)
   const [showAiSettings, setShowAiSettings] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
+  const [showDiagnosticReport, setShowDiagnosticReport] = useState(false)
   const [appVersion, setAppVersion] = useState('')
 
   useEffect(() => {
     void window.aiOffice.getAppVersion?.().then((v) => {
       if (v) setAppVersion(v)
     })
+    const unsubDiag = window.aiOffice.onOpenDiagnosticReport?.(() => {
+      setShowDiagnosticReport(true)
+    })
+    return () => {
+      unsubDiag?.()
+    }
   }, [])
   // name in the greeting; omitted when logged out
   const [accountName, setAccountName] = useState('')
@@ -2681,6 +2689,9 @@ export function Home() {
 
       {showAiSettings && <AiSettingsModal onClose={() => setShowAiSettings(false)} />}
       {showAbout && <AboutModal appVersion={appVersion} onClose={() => setShowAbout(false)} />}
+      {showDiagnosticReport && (
+        <DiagnosticReportModal onClose={() => setShowDiagnosticReport(false)} />
+      )}
     </div>
   )
 }
