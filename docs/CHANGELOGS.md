@@ -3,6 +3,14 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.9] - 2026-08-16
+
+### Added
+- **Tích hợp gửi trực tiếp GitLab Issues API v4 cho Báo cáo Chẩn đoán**:
+  - Gửi log chẩn đoán lỗi trực tiếp từ Desktop app lên GitLab Issues (`360org/vuaoffice`) qua REST API chính thức.
+  - Tự động tạo Issue với nhãn `diagnostic-report`, `user-report` và trả về liên kết xem ticket.
+  - Chuẩn hoá toàn bộ thông điệp giao diện người dùng theo thương hiệu VuaOffice ("Gửi tới VuaOffice", "Đã gửi báo cáo thành công tới VuaOffice Issues!").
+
 ## [0.6.8] - 2026-08-16
 
 ### Added
