@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactElement } from 'react'
-import logoIcon from './assets/vuaoffice-icon.svg'
+import logoLockup from './assets/vuaoffice-logo.svg'
 import iconDocx from './assets/file-docx.svg'
 import iconXlsx from './assets/file-xlsx.svg'
 import iconPptx from './assets/file-pptx.svg'
@@ -2522,8 +2522,7 @@ export function Home() {
     <div className="home">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img className="logo-icon" src={logoIcon} alt="VuaOffice" width="28" height="28" />
-          <span className="logo-text">VuaOffice</span>
+          <img className="logo-lockup" src={logoLockup} alt="VuaOffice" height="32" />
         </div>
 
         <nav className="sidebar-nav">

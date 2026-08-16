@@ -108,6 +108,31 @@ npm run dist:linux
 
 ---
 
+## 📚 Cấu trúc Tài liệu Dự án (Documentation)
+
+Toàn bộ tài liệu kiến trúc, đặc tả và hướng dẫn kỹ thuật của VuaOffice được tổ chức tập trung trong thư mục [`/Volumes/DATA/DEV/vuaoffice/docs/`](docs/):
+
+- **Tài liệu hệ thống cốt lõi**:
+  - [Ý tưởng & Định hướng (`IDEA.md`)](docs/IDEA.md)
+  - [Kiến trúc Tổng thể (`ARCH.md`)](docs/ARCH.md)
+  - [Đặc tả Kỹ thuật (`SPEC.md`)](docs/SPEC.md)
+  - [Yêu cầu Chức năng (`REQUIREMENTS.md`)](docs/REQUIREMENTS.md)
+  - [Hướng dẫn Triển khai & Build (`DEPLOY_GUIDE.md`)](docs/DEPLOY_GUIDE.md)
+  - [Nhật ký Phát triển (`CHANGELOGS.md`)](docs/CHANGELOGS.md)
+  - [Chính sách Bảo mật (`SECURITY.md`)](docs/SECURITY.md)
+  - [Hướng dẫn Đóng góp (`CONTRIBUTING.md`)](docs/CONTRIBUTING.md)
+  - [Cấu hình AI Agent (`AGENTS.md`)](docs/AGENTS.md)
+- **Tài liệu chi tiết theo từng Ứng dụng**:
+  - [VuaOffice Docs](docs/docs/architecture.md)
+  - [VuaOffice Sheets](docs/sheets/architecture.md)
+  - [VuaOffice Slides](docs/slides/architecture.md)
+  - [VuaOffice PDF](docs/pdf/architecture.md)
+  - [VuaOffice Markdown](docs/markdown/architecture.md)
+  - [VuaOffice Mail](docs/mail/architecture.md)
+  - [VuaOffice Shell](docs/shell/architecture.md)
+
+---
+
 ## ⚖️ Bản quyền & Ghi nhận (Attribution & License)
 
 - **Mã nguồn**: VuaOffice được phát triển dựa trên dự án mã nguồn mở **GenOffice** tuân thủ theo [Apache License 2.0](LICENSE).

@@ -14,6 +14,10 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
   - Bổ sung provider `hermes` với endpoint mặc định `https://hermes.vuahethong.com/v1` trong `@genoffice/ai-provider`.
 
 ### Changed
+- **Cập nhật Logo Sidebar và Tái cấu trúc Tài liệu Dự án**:
+  - Thay thế icon tại góc trên bên trái Sidebar Home bằng Logo thương hiệu VuaOffice chính thức (`vuaoffice-logo.svg`).
+  - Tái cấu trúc toàn bộ tài liệu dự án (`IDEA.md`, `ARCH.md`, `SPEC.md`, `REQUIREMENTS.md`, `DEPLOY_GUIDE.md`, `CHANGELOGS.md`, `SECURITY.md`, `CONTRIBUTING.md`, `AGENTS.md`) vào thư mục `/Volumes/DATA/DEV/vuaoffice/docs/`.
+  - Phân bổ tài liệu module độc lập theo các thư mục con: `docs/docs/`, `docs/sheets/`, `docs/slides/`, `docs/pdf/`, `docs/markdown/`, `docs/mail/`, `docs/shell/`.
 - **Đồng bộ Tài nguyên Icon & Logo Thương hiệu VuaOffice**:
   - Chuẩn hoá toàn bộ icon ứng dụng từ `whitelabel/Logo/vuaoffice-icon.svg` và `whitelabel/Logo/Vua Office Icon.png`.
   - Tạo lại bộ icon native macOS đa độ phân giải (`whitelabel/assets/icon.icns`), Windows (`whitelabel/assets/icon.ico`) và PNG assets (`whitelabel/assets/icon.png`, `whitelabel/assets/app-icon.png`).

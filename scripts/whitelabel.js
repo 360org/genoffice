@@ -13,15 +13,26 @@ if (fs.existsSync(ebPath)) {
   fs.writeFileSync(ebPath, eb, 'utf8');
 }
 
-// Copy icon assets
+// Copy icon & logo assets
 const assetsDir = path.join(__dirname, '../whitelabel/assets');
+const logoDir = path.join(__dirname, '../whitelabel/Logo');
 const shellBuild = path.join(__dirname, '../apps/shell/build');
+const shellAssets = path.join(__dirname, '../apps/shell/src/renderer/src/assets');
+
 if (fs.existsSync(assetsDir) && fs.existsSync(shellBuild)) {
   ['icon.png', 'icon.icns', 'icon.ico'].forEach(icon => {
     if (fs.existsSync(path.join(assetsDir, icon))) {
       fs.copyFileSync(path.join(assetsDir, icon), path.join(shellBuild, icon));
       if (icon === 'icon.icns') fs.copyFileSync(path.join(assetsDir, icon), path.join(shellBuild, 'app.icns'));
       if (icon === 'icon.ico') fs.copyFileSync(path.join(assetsDir, icon), path.join(shellBuild, 'app.ico'));
+    }
+  });
+}
+
+if (fs.existsSync(logoDir) && fs.existsSync(shellAssets)) {
+  ['vuaoffice-logo.svg', 'vuaoffice-icon.svg'].forEach(asset => {
+    if (fs.existsSync(path.join(logoDir, asset))) {
+      fs.copyFileSync(path.join(logoDir, asset), path.join(shellAssets, asset));
     }
   });
 }
