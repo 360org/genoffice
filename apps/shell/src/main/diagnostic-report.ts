@@ -244,14 +244,15 @@ export async function exportDiagnosticReportToFile(report: DiagnosticReportData)
 }
 
 /**
- * Submit diagnostic report to GitLab Issues on 360org/vuaoffice
+ * Submit diagnostic report directly to GitLab Issues on 360org/vuaoffice
  */
+const GITLAB_PROJECT_ID = '85301646'
+const GITLAB_REPORT_TOKEN = 'glpat-ybg6wbOvqRpWfDBP6trlzGM6MQpvOjEKdTpiejM4Dg.01.1603xumso'
+
 export async function submitDiagnosticReportToGitLab(
   report: DiagnosticReportData,
   userNote?: string
 ): Promise<DiagnosticSubmitResult> {
-  // GitLab project 360org/vuaoffice
-  // Public reporting proxy or direct submission
   const issueTitle = `[Bug Report] Diagnostic Log - ${report.reportId}`
 
   const markdownDescription = [
@@ -289,59 +290,46 @@ export async function submitDiagnosticReportToGitLab(
     `</details>`,
     ``,
     `---`,
-    `*Report submitted via VuaOffice Suite Help > Troubleshooting*`,
+    `*Report submitted automatically via VuaOffice Suite Help > Troubleshooting*`,
   ].join('\n')
 
   try {
-    // 360 CORP Diagnostic Submission Endpoint / GitLab direct dispatch
-    // We send payload to 360 CORP Telemetry Gateway or GitLab REST API
-    const response = await fetch('https://telemetry.vuahethong.com/api/v1/diagnostic-report', {
+    // Direct call to official GitLab REST API v4
+    const response = await fetch(`https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}/issues`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'PRIVATE-TOKEN': GITLAB_REPORT_TOKEN,
         'User-Agent': `VuaOffice-Suite/${report.system.appVersion}`,
       },
       body: JSON.stringify({
-        project: '360org/vuaoffice',
         title: issueTitle,
         description: markdownDescription,
-        labels: ['diagnostic-report', 'user-report', report.system.osPlatform],
-        reportId: report.reportId,
-        metadata: {
-          appVersion: report.system.appVersion,
-          platform: report.system.osPlatform,
-          generatedAt: report.generatedAt,
-        },
+        labels: ['diagnostic-report', 'user-report', report.system.osPlatform].join(','),
       }),
     })
 
     if (response.ok) {
-      const data = (await response.json()) as { issueUrl?: string; issueIid?: number }
+      const data = (await response.json()) as { web_url?: string; iid?: number }
       return {
         success: true,
-        issueUrl: data.issueUrl || 'https://gitlab.com/360org/vuaoffice/-/issues',
-        issueIid: data.issueIid,
+        issueUrl: data.web_url || `https://gitlab.com/360org/vuaoffice/-/work_items/${data.iid}`,
+        issueIid: data.iid,
       }
     } else {
-      // Fallback: return direct issue creation link if telemetry proxy offline
-      const directIssueUrl = `https://gitlab.com/360org/vuaoffice/-/issues/new?issue[title]=${encodeURIComponent(
-        issueTitle
-      )}&issue[description]=${encodeURIComponent(markdownDescription.slice(0, 3000))}`
-
+      const errText = await response.text()
+      appendDiagnosticLog('ERROR', `GitLab direct dispatch failed (${response.status}): ${errText}`)
       return {
-        success: true,
-        issueUrl: directIssueUrl,
+        success: false,
+        error: `GitLab API responded with status ${response.status}`,
       }
     }
   } catch (err: unknown) {
-    // Fallback: build direct link
-    const directIssueUrl = `https://gitlab.com/360org/vuaoffice/-/issues/new?issue[title]=${encodeURIComponent(
-      issueTitle
-    )}`
-
+    const message = err instanceof Error ? err.message : String(err)
+    appendDiagnosticLog('ERROR', `Failed to dispatch report to GitLab: ${message}`)
     return {
-      success: true,
-      issueUrl: directIssueUrl,
+      success: false,
+      error: scrubSensitiveText(message),
     }
   }
 }

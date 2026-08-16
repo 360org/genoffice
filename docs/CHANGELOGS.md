@@ -7,6 +7,7 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
 
 ### Added
 - **Tính năng Thu thập Log & Báo cáo Lỗi Hệ thống (Generate Log, Diagnostic Report)**:
+    - Tích hợp gửi trực tiếp GitLab Issues API v4 với xác thực phân quyền an toàn, tự động tạo Issue và trả về liên kết xem ticket cho người dùng.
   - Bổ sung menu `Help > Troubleshooting > Generate Log, Diagnostic Report…` trên macOS/Windows/Linux (hỗ trợ đầy đủ đa ngôn ngữ qua `tMain`).
   - Xây dựng modal `DiagnosticReportModal.tsx` hiển thị mã định danh duy nhất (Reference ID: `VUA-DIAG-YYYYMMDD-XXXXX`), thông số phần cứng/hệ điều hành/Electron/Node.js, kiểm tra kết nối mạng song song (GitLab API, OmiRouter, 9Router, Hermes).
   - Tích hợp bộ lọc làm sạch dữ liệu nhạy cảm (`scrubSensitiveText`): xoá đường dẫn thư mục cá nhân (`~`), làm mờ Bearer token, API keys (`sk-...`, `glpat-...`, `ghp_...`), email và IPv4.
