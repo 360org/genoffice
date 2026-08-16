@@ -106,6 +106,13 @@ function assertModuleTreesPresent() {
 const config = {
   appId: 'com.vuahethong.vuaoffice',
   productName: 'VuaOffice',
+  protocols: [
+    {
+      name: 'VuaOffice Deep Link',
+      schemes: ['vuaoffice'],
+      role: 'Viewer',
+    },
+  ],
   // Resolved from the installed electron package so dependency bumps can
   // never leave a stale hard-coded pin behind (packaging would silently ship
   // the old runtime).

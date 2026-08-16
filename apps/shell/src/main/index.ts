@@ -76,6 +76,7 @@ import {
   hasGskAuth,
   loadGenofficeAuth,
   resolveGskEntry,
+  saveGenofficeAuth,
   setGskProxyUrl,
   startGenofficeLogin,
 } from '@genoffice/ai-search'
@@ -1951,15 +1952,15 @@ function statEntries(paths: string[]): RecentEntry[] {
 }
 
 function registerHomeIpc(): void {
-  // signed-in means VuaOffice's own device-code login; the shared gsk CLI key
-  // is only a silent fallback, deliberately not shown here to nudge users onto our key
-  ipcMain.handle(HOME_CHANNELS.accountStatus, async () => {
-    if (!loadGenofficeAuth()) return { loggedIn: false }
-    await proxyBootstrap
-    const info = await gskLoginInfo()
-    return info
-      ? { loggedIn: true, email: info.email, creditBalance: info.creditBalance }
-      : { loggedIn: true }
+  // signed-in means 360 CORP / VuaOffice account login; returns email and profile info
+  ipcMain.handle(HOME_CHANNELS.accountStatus, async (): Promise<AccountStatus> => {
+    const auth = loadGenofficeAuth()
+    if (!auth) return { loggedIn: false }
+    return {
+      loggedIn: true,
+      email: auth.email || undefined,
+      name: auth.name || undefined,
+    }
   })
 
   // login progress is streamed to the requesting renderer; the auth URL is
@@ -1967,25 +1968,15 @@ function registerHomeIpc(): void {
   let pendingLoginUrl = ''
   ipcMain.handle(HOME_CHANNELS.accountLogin, async (event) => {
     const sender = event.sender
-    pendingLoginUrl = ''
-    await proxyBootstrap
+    const loginUrl = 'https://vuahethong.net/web/login?redirect_uri=vuaoffice://auth/callback'
+    pendingLoginUrl = loginUrl
     const send = (payload: AccountLoginEvent) => {
       if (!sender.isDestroyed()) sender.send(HOME_CHANNELS.accountLoginEvent, payload)
     }
-    // open the browser on the first url event only; later events refresh the rescue URL
-    let opened = false
-    const launched = startGenofficeLogin((progress) => {
-      if (progress.url) {
-        pendingLoginUrl = progress.url
-        if (!opened) {
-          opened = true
-          void shell.openExternal(progress.url)
-        }
-      }
-      send(progress)
-    })
-    if (launched) send({ phase: 'launched' })
-    return launched
+    send({ phase: 'url', url: loginUrl, expiresInSec: 600 })
+    void shell.openExternal(loginUrl)
+    send({ phase: 'launched' })
+    return true
   })
 
   ipcMain.handle(HOME_CHANNELS.accountLoginOpenUrl, () => {
@@ -2914,7 +2905,58 @@ async function installMainProcessProxy(): Promise<void> {
 
 // ---- lifecycle (the shell is the only owner) ----
 
+// Register custom protocol client for deep linking (vuaoffice://auth/callback)
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('vuaoffice', process.execPath, [process.argv[1]])
+  }
+} else {
+  app.setAsDefaultProtocolClient('vuaoffice')
+}
+
+function findProtocolUrlIn(argv: string[]): string | undefined {
+  return argv.find((arg) => arg.startsWith('vuaoffice://'))
+}
+
+function handleVuaOfficeUrl(rawUrl: string): boolean {
+  if (!rawUrl || !rawUrl.startsWith('vuaoffice://')) return false
+  try {
+    const parsed = new URL(rawUrl)
+    // Handle auth callback: vuaoffice://auth/callback?token=...&email=...&name=...
+    if (parsed.hostname === 'auth' || parsed.pathname.includes('auth/callback') || parsed.pathname.includes('/callback')) {
+      const token =
+        parsed.searchParams.get('token') ||
+        parsed.searchParams.get('apiKey') ||
+        parsed.searchParams.get('access_token') ||
+        ''
+      const email = parsed.searchParams.get('email') || ''
+      const name = parsed.searchParams.get('name') || ''
+      const keyId = parsed.searchParams.get('key_id') || parsed.searchParams.get('keyId') || undefined
+
+      if (token || email) {
+        saveGenofficeAuth({
+          apiKey: token || 'vuaoffice-session',
+          accessToken: token || undefined,
+          email: email || undefined,
+          name: name || undefined,
+          keyId,
+        })
+
+        for (const wc of webContents.getAllWebContents()) {
+          wc.send(HOME_CHANNELS.accountLoginEvent, { phase: 'success' })
+        }
+      }
+      revealShellWindow()
+      return true
+    }
+  } catch (e) {
+    console.error('Failed to handle vuaoffice protocol URL:', e)
+  }
+  return false
+}
+
 let pendingLaunchPath = supportedFileIn(process.argv) ?? unsupportedFileIn(process.argv)
+let pendingProtocolUrl = findProtocolUrlIn(process.argv)
 
 // show() does not un-minimize, and on macOS ⌘W destroys the shell window while the
 // app keeps running — either way a file opened from Finder would land out of sight.
@@ -2939,7 +2981,24 @@ app.on('open-file', (event, filePath) => {
   if (!openDocumentPath(filePath)) tabManager?.openHomeTab()
 })
 
+app.on('open-url', (event, url) => {
+  event.preventDefault()
+  if (!app.isReady()) {
+    pendingProtocolUrl = url
+    return
+  }
+  if (!handleVuaOfficeUrl(url)) {
+    revealShellWindow()
+  }
+})
+
 app.on('second-instance', (_event, argv, _cwd, additionalData) => {
+  const protocolUrl =
+    findProtocolUrlIn(argv) ?? (additionalData as { protocolUrl?: string } | null)?.protocolUrl
+  if (protocolUrl && handleVuaOfficeUrl(protocolUrl)) {
+    return
+  }
+
   const file =
     supportedFileIn(argv) ??
     unsupportedFileIn(argv) ??
@@ -2963,7 +3022,12 @@ setSessionPathResolver(resolveSheetsSessionPath)
 const devPidFile = () => join(app.getPath('userData'), 'dev-instance.pid')
 
 app.whenReady().then(async () => {
-  const lockData = () => (pendingLaunchPath ? { launchPath: pendingLaunchPath } : {})
+  const lockData = () => {
+    const data: { launchPath?: string; protocolUrl?: string } = {}
+    if (pendingLaunchPath) data.launchPath = pendingLaunchPath
+    if (pendingProtocolUrl) data.protocolUrl = pendingProtocolUrl
+    return data
+  }
   let hasLock = app.requestSingleInstanceLock(lockData())
   if (!hasLock && !app.isPackaged) {
     // Dev watch restart: electron-vite SIGTERMs the previous instance and spawns this
@@ -3038,6 +3102,11 @@ app.whenReady().then(async () => {
   installBackToHomeItems()
   installDockMenu()
   initAutoUpdater(() => shellWindow, currentUpdateChannel())
+
+  if (pendingProtocolUrl) {
+    handleVuaOfficeUrl(pendingProtocolUrl)
+    pendingProtocolUrl = undefined
+  }
 
   if (!pendingLaunchPath || !openDocumentPath(pendingLaunchPath)) tabManager?.openHomeTab()
   pendingLaunchPath = null

@@ -778,7 +778,7 @@ function AccountEntry({
                 onClick={startLogin}
                 title={waiting ? t('waitingLogin') : undefined}
               >
-                {waiting ? t('waitingShort') : t('login')}
+                {waiting ? t('waitingShort') : t('loginGenspark')}
               </button>
               {waiting && authUrl && (
                 <>

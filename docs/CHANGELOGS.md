@@ -3,6 +3,15 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-08-16
+
+### Added
+- **Triển khai Hệ thống Đăng nhập 360 CORP qua Deep Link Callback Flow (`vuaoffice://`)**:
+  - Hỗ trợ luồng đăng nhập/đăng ký hoàn chỉnh: Desktop App ➔ Trình duyệt xác thực trên `https://vuahethong.net/web/login?redirect_uri=vuaoffice://auth/callback` ➔ Trả kết quả về Desktop qua Custom Protocol Scheme `vuaoffice://auth/callback`.
+  - Đăng ký hệ điều hành `protocols: [{ name: 'VuaOffice Deep Link', schemes: ['vuaoffice'] }]` trong `apps/shell/electron-builder.cjs` và `app.setAsDefaultProtocolClient('vuaoffice')`.
+  - Xử lý mượt mà trên cả 3 nền tảng: macOS (`open-url`, `pendingProtocolUrl` khi cold start), Windows/Linux (`second-instance`, `requestSingleInstanceLock`).
+  - Tự động trích xuất `token`, `email`, `name`, lưu an toàn vào `~/.genoffice/auth.json` và đồng bộ tức thì trạng thái Đã đăng nhập trên toàn bộ giao diện (Avatar, Email, Sign out).
+
 ## [0.6.9] - 2026-08-16
 
 ### Added

@@ -132,6 +132,25 @@ Module `apps/shell/src/main/diagnostic-report.ts` chịu trách nhiệm thu th�
 
 ---
 
+## 7. Hệ thống Xác thực 360 CORP & Giao thức Deep Link Callback (`vuaoffice://`)
+
+Hệ thống xác thực tài khoản VuaOffice hoạt động theo mô hình xác thực Web-to-App thông qua Custom Protocol Scheme:
+
+1. **Khởi chạy Đăng nhập (Sign In Flow)**:
+   - Người dùng bấm "Sign in with 360 CORP" trên ứng dụng Desktop.
+   - Electron Main process mở trình duyệt mặc định tới `https://vuahethong.net/web/login?redirect_uri=vuaoffice://auth/callback`.
+2. **Xác thực Đa kênh trên Web**:
+   - Người dùng đăng nhập hoặc đăng ký tài khoản (qua Email / Số điện thoại) trên hệ thống `vuahethong.net`.
+3. **Phản hồi Deep Link (Revert back Callback)**:
+   - Web điều hướng trở lại Desktop qua Custom Scheme: `vuaoffice://auth/callback?token=...&email=...&name=...`.
+   - **macOS**: Bắt sự kiện `app.on('open-url')` hoặc biến `pendingProtocolUrl` khi app khởi động từ trạng thái tắt.
+   - **Windows / Linux**: Bắt qua `app.requestSingleInstanceLock()` và `app.on('second-instance')` (xử lý trực tiếp `argv`).
+4. **Lưu trữ Phiên & Đồng bộ IPC**:
+   - Lưu trữ thông tin credentials an toàn tại `~/.genoffice/auth.json` (chế độ bảo mật `0o600`).
+   - Phát sự kiện IPC `HOME_CHANNELS.accountLoginEvent` (`{ phase: 'success' }`) tới toàn bộ cửa sổ để đồng bộ tức thì trạng thái Đã đăng nhập trên Renderer.
+
+---
+
 **Chủ quản**: 360 CORP  
 **Trạng thái**: Đã phê duyệt (Approved)  
 **Ngày cập nhật**: 2026-08-16

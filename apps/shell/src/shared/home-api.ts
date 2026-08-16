@@ -246,9 +246,10 @@ export interface CloudProjectsSnapshot {
 }
 
 export interface AccountStatus {
-  /** gsk is installed and logged in */
+  /** 360 CORP / VuaOffice account logged in */
   loggedIn: boolean
   email?: string
+  name?: string
 }
 
 /** login flow progress pushed from main (gsk login CLI output) */

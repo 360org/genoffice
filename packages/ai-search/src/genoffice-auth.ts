@@ -117,6 +117,8 @@ export interface GenofficeAuth {
   apiKey: string
   keyId?: string
   accessToken?: string
+  email?: string
+  name?: string
 }
 
 let cachedAuth: GenofficeAuth | null | undefined
@@ -131,6 +133,8 @@ function readAuthFile(): GenofficeAuth | null {
       ...(typeof raw.access_token === 'string' && raw.access_token
         ? { accessToken: raw.access_token }
         : {}),
+      ...(typeof raw.email === 'string' && raw.email ? { email: raw.email } : {}),
+      ...(typeof raw.name === 'string' && raw.name ? { name: raw.name } : {}),
     }
   } catch {
     return null
@@ -147,13 +151,19 @@ export function genofficeApiKey(): string {
   return loadGenofficeAuth()?.apiKey ?? ''
 }
 
-function saveAuth(auth: GenofficeAuth): void {
+export function saveGenofficeAuth(auth: GenofficeAuth): void {
   const path = genofficeAuthPath()
   mkdirSync(dirname(path), { recursive: true })
   writeFileSync(
     path,
     JSON.stringify(
-      { api_key: auth.apiKey, key_id: auth.keyId, access_token: auth.accessToken },
+      {
+        api_key: auth.apiKey,
+        key_id: auth.keyId,
+        access_token: auth.accessToken,
+        email: auth.email,
+        name: auth.name,
+      },
       null,
       2,
     ) + '\n',
