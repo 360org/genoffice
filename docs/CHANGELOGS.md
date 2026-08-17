@@ -16,6 +16,8 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
   - Đăng ký hệ điều hành `protocols: [{ name: 'VuaOffice Deep Link', schemes: ['vuaoffice'] }]` trong `apps/shell/electron-builder.cjs` và `app.setAsDefaultProtocolClient('vuaoffice')`.
   - Xử lý mượt mà trên cả 3 nền tảng: macOS (`open-url`, `pendingProtocolUrl` khi cold start), Windows/Linux (`second-instance`, `requestSingleInstanceLock`).
   - Tự động trích xuất `token`, `email`, `name`, lưu an toàn vào `~/.genoffice/auth.json` và đồng bộ tức thì trạng thái Đã đăng nhập trên toàn bộ giao diện (Avatar, Email, Sign out).
+- **Cập nhật Thông điệp Chào mừng Onboarding**:
+  - Chuẩn hoá thông điệp Onboarding đầu tiên theo định vị bộ công cụ đầy đủ: "The first All in One Free, AI-native office suite" và bao quát đầy đủ Docs, Sheets, Slides, Markdown, Mail, PDF.
 
 ## [0.6.9] - 2026-08-16
 

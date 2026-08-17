@@ -329,9 +329,9 @@ export const strings = {
     newTab: 'New tab',
     // First-run onboarding
     onbTitle1: 'Welcome to VuaOffice',
-    onbSubtitle1: 'The first open-source, AI-native office suite',
+    onbSubtitle1: 'The first All in One Free, AI-native office suite',
     onbBody1:
-      'Create docs, build sheets, make slides, and review PDFs. AI is built into every step.',
+      'Create docs, build sheets, make slides, View Markdown, Work with Email and review PDFs. AI is built into every step.',
     onbTitle2: 'This is just the beginning',
     onbBody2:
       'VuaOffice is still in alpha. Join the group chat on GenTeam to share feedback and help shape what comes next.',
