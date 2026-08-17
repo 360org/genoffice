@@ -3,6 +3,17 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-08-17
+
+### Added
+- **Phát hành Chính thức VuaOffice v1.0.0 (All in One Free, AI-Native Office Suite)**:
+  - Tích hợp trọn bộ 6 ứng dụng văn phòng cốt lõi: VuaOffice Docs (.docx), Sheets (.xlsx), Slides (.pptx), PDF, Markdown (.md), và VuaMail.
+  - Hạ tầng định tuyến AI 360 Gateway hoàn chỉnh: OmiRouter, 9Router, Hermes Agent (`https://hermes.vuahethong.com/v1`) và Custom OpenAI-compatible Endpoints.
+  - Hệ thống đăng nhập tài khoản 360 CORP qua Deep Link Web-to-Desktop callback flow (`vuaoffice://auth/callback`).
+  - Hệ thống Báo cáo Chẩn đoán lỗi tự động (Diagnostic Report Modal) kết nối trực tiếp GitLab Issues API với cơ chế scrubber bảo mật.
+  - Bộ máy Whitelabel & Brand Gate Config-Driven chuẩn mực theo `/Volumes/DATA/DEV/vuaoffice/docs/WHITELABEL_STRATEGY.md`, đảm bảo 100% luật song ánh.
+  - Thông điệp Onboarding đầu tiên chuẩn hóa: "The first All in One Free, AI-native office suite".
+
 ## [0.7.0] - 2026-08-16
 
 ### Added
