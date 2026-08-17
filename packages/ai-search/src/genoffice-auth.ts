@@ -323,7 +323,7 @@ async function runDeviceLogin(
     throw new LoginFlowError(String(created.message ?? 'API key creation failed'))
   }
   const previousKeyId = loadGenofficeAuth()?.keyId
-  saveAuth({
+  saveGenofficeAuth({
     apiKey,
     ...(typeof data.key_id === 'string' ? { keyId: data.key_id } : {}),
     accessToken,

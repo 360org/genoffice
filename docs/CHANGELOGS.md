@@ -6,6 +6,11 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
 ## [0.7.0] - 2026-08-16
 
 ### Added
+- **Triển khai Chuẩn Whitelabel & Upstream Sync Engine Config-Driven**:
+  - Tích hợp chuẩn quy chế bắt buộc `/Volumes/DATA/DEV/vuaoffice/docs/WHITELABEL_STRATEGY.md` và `/Volumes/DATA/DEV/vuaoffice/docs/RELEASE_PROTOCOL.md`.
+  - Thiết lập nguồn chân lý duy nhất `/Volumes/DATA/DEV/vuaoffice/whitelabel/brand-config.json` và module lõi `/Volumes/DATA/DEV/vuaoffice/scripts/lib/brand-core.cjs`.
+  - Cung cấp bộ lệnh `npm run whitelabel:apply`, `whitelabel:restore`, `whitelabel:status`, `whitelabel:selftest` và Brand Gate `npm run brand:gate` (`tools/check-brand.mjs`).
+  - Đảm bảo 100% luật song ánh (Bijectivity Law: `apply(restore(apply(x))) === apply(x)`) trên toàn bộ 447 tệp của dự án.
 - **Triển khai Hệ thống Đăng nhập 360 CORP qua Deep Link Callback Flow (`vuaoffice://`)**:
   - Hỗ trợ luồng đăng nhập/đăng ký hoàn chỉnh: Desktop App ➔ Trình duyệt xác thực trên `https://vuahethong.net/web/login?redirect_uri=vuaoffice://auth/callback` ➔ Trả kết quả về Desktop qua Custom Protocol Scheme `vuaoffice://auth/callback`.
   - Đăng ký hệ điều hành `protocols: [{ name: 'VuaOffice Deep Link', schemes: ['vuaoffice'] }]` trong `apps/shell/electron-builder.cjs` và `app.setAsDefaultProtocolClient('vuaoffice')`.

@@ -1,31 +1,174 @@
 {
-  "appName": "VuaOffice",
-  "appId": "com.vuahethong.vuaoffice",
-  "executableName": "vuaoffice",
-  "author": "360 CORP",
-  "defaultProvider": "omirouter",
-  "omirouterUrl": "https://api.omirouter.com/v1",
-  "ninerouterUrl": "https://api.9router.com/v1",
-  "textReplacements": [
+  "_doc": "NGUỒN CHÂN LÝ DUY NHẤT cho whitelabel. Mọi công cụ (scripts/whitelabel.js, tools/check-brand.mjs) đều đọc tệp này. TUYỆT ĐỐI không hardcode quy tắc thương hiệu ở nơi khác. Xem docs/WHITELABEL_STRATEGY.md.",
+
+  "brand": {
+    "appName": "VuaOffice",
+    "appId": "com.vuahethong.vuaoffice",
+    "executableName": "vuaoffice",
+    "vendor": "360 CORP",
+    "repoSlug": "360org/vuaoffice",
+    "releasesUrl": "https://github.com/360org/vuaoffice/releases/latest",
+    "defaultProvider": "omirouter",
+    "omirouterUrl": "https://api.omirouter.com/v1",
+    "ninerouterUrl": "https://api.9router.com/v1"
+  },
+
+  "upstream": {
+    "_doc": "Định danh của dự án gốc. Dùng để dựng quy tắc nghịch đảo cho lệnh restore.",
+    "repoSlug": "genspark-ai/genoffice",
+    "productName": "GenOffice",
+    "aiBrand": "Genspark"
+  },
+
+  "scan": {
+    "_doc": "Phạm vi quét. Phải bao phủ CẢ renderer, main và shared — không chỉ renderer.",
+    "roots": ["apps"],
+    "includeDirs": ["src/renderer", "src/main", "src/shared", "src/preload"],
+    "extensions": [".ts", ".tsx", ".html", ".css"],
+    "excludeDirs": ["node_modules", "dist", "out", "build", ".build", "release", "target"]
+  },
+
+  "replacements": [
     {
-      "files": [
-        "apps/shell/src/renderer/src/strings.ts",
-        "apps/shell/src/renderer/index.html",
-        "apps/shell/src/renderer/update.html",
-        "apps/shell/src/renderer/src/Home.tsx",
-        "apps/shell/src/main/tab-manager.ts",
-        "apps/shell/src/main/index.ts",
-        "apps/docs/src/renderer/components/Ribbon.tsx",
-        "apps/slides/src/renderer/components/RibbonHomeTab.tsx",
-        "apps/slides/src/renderer/App.tsx",
-        "apps/markdown/src/renderer/components/Ribbon.tsx",
-        "apps/sheets/src/renderer/ExcelShell.tsx"
-      ],
-      "rules": [
-        { "regex": "Genspark AI", "to": "VuaOffice AI" },
-        { "regex": "\\bGenOffice\\b", "to": "VuaOffice" },
-        { "regex": "\\bGenspark\\b", "to": "360 CORP" }
-      ]
+      "_doc": "Cặp thay thế SONG ÁNH (bijective). apply: from->to. restore: to->from. Áp dụng theo thứ tự khai báo, chuỗi dài đặt trước chuỗi ngắn để tránh khớp lồng nhau.",
+      "from": "genspark-ai/genoffice",
+      "to": "360org/vuaoffice",
+      "reason": "Slug kho mã: updater, About pane, package.json repository"
+    },
+    {
+      "from": "GenOffice Docs",
+      "to": "VuaOffice Docs",
+      "reason": "Tiêu đề cửa sổ & system prompt của app Docs"
+    },
+    {
+      "from": "GenOffice Sheets",
+      "to": "VuaOffice Sheets",
+      "reason": "Tiêu đề cửa sổ app Sheets"
+    },
+    {
+      "from": "GenOffice Slides",
+      "to": "VuaOffice Slides",
+      "reason": "Tiêu đề cửa sổ app Slides"
+    },
+    {
+      "from": "GenOffice PDF",
+      "to": "VuaOffice PDF",
+      "reason": "Tiêu đề cửa sổ app PDF"
+    },
+    {
+      "from": "GenOffice Markdown",
+      "to": "VuaOffice Markdown",
+      "reason": "Tiêu đề cửa sổ app Markdown"
+    },
+    {
+      "from": "GenOffice Mail",
+      "to": "VuaOffice Mail",
+      "reason": "Tiêu đề cửa sổ app Mail"
+    },
+    {
+      "from": "Genspark AI",
+      "to": "VuaOffice AI",
+      "reason": "Nhãn Ribbon, tiêu đề AI Panel, badge — CLAUDE.md quy tắc 6"
+    },
+    {
+      "from": "GenOffice",
+      "to": "VuaOffice",
+      "reason": "Quy tắc BAO TRÙM — phải đặt CUỐI CÙNG. Bắt mọi trường hợp sản phẩm tự xưng còn lại (lời mời Star trên GitHub, tác giả chú thích PDF, system prompt của AI). An toàn vì engine sắp xếp chuỗi dài trước, và mọi định danh kỹ thuật/ghi công giấy phép đã được `protected` che chắn."
     }
-  ]
+  ],
+
+  "protected": [
+    {
+      "_doc": "MIỄN TRỪ TUYỆT ĐỐI. Các định danh kỹ thuật KHÔNG BAO GIỜ được đổi tên. Đổi chúng gây thiệt hại lớn hơn lợi ích thương hiệu. Xem WHITELABEL_STRATEGY.md mục 5.",
+      "pattern": "@genoffice/",
+      "reason": "Tên package workspace — 299 tệp import. Đổi = xung đột mọi dòng import mỗi lần merge upstream. Người dùng không thấy."
+    },
+    {
+      "pattern": "GenOffice (Sans|Serif|Songti|Fullwidth|Box|Hiragino|MS|Heiti|Ethiopic|Mincho|Batang|Myungjo|MingLiU|Fixture)",
+      "reason": "Khóa định danh font dùng so khớp local() alias trong fonts.css (CJK: Hàn/Nhật/Trung phồn-giản). Đổi = vỡ fallback font CJK. Danh sách lấy từ toàn bộ alias thực tế trong apps/**/fonts.css và line-metrics.ts."
+    },
+    {
+      "pattern": "\\.genoffice",
+      "reason": "Thư mục dữ liệu ~/.genoffice. Đổi = mất phiên đăng nhập của người dùng hiện hữu."
+    },
+    {
+      "pattern": "GENOFFICE_[A-Z_]+",
+      "reason": "Biến môi trường (GENOFFICE_AUTH_DIR...). Đổi = vỡ tương thích cấu hình."
+    },
+    {
+      "pattern": "GENSPARK_[A-Z_]+",
+      "reason": "Hằng số nội bộ tầng ai-provider (GENSPARK_AGENT_TYPE...). Định danh kỹ thuật, không hiển thị."
+    },
+    {
+      "pattern": "GensparkMark",
+      "reason": "Tên component React trong icons.tsx. Định danh mã nguồn, không phải chuỗi hiển thị."
+    },
+    {
+      "pattern": "genspark\\.ai",
+      "reason": "Tên miền dịch vụ Genspark THẬT (trang nạp credit). Đây là tham chiếu bên thứ ba hợp lệ, không phải tự xưng thương hiệu."
+    },
+    {
+      "pattern": "aiGskLoginBtn|aiCreditsExhausted|aiGsk[A-Za-z]*",
+      "reason": "Chuỗi i18n mô tả việc đăng nhập DỊCH VỤ Genspark thật. Genspark là nhà cung cấp AI hợp lệ trong AI_PROVIDERS — đổi tên sẽ nói dối người dùng."
+    },
+    {
+      "pattern": "登录 Genspark|Genspark にサインイン|Genspark 로그인|Genspark 积分|Sign in to Genspark|Se connecter à Genspark|Bei Genspark anmelden|Iniciar sesión en Genspark",
+      "reason": "Bản địa hóa của nút đăng nhập dịch vụ Genspark thật (mọi ngôn ngữ)."
+    },
+    {
+      "pattern": "(licenseNotice|licenseTitle|copyright|thirdPartyNotice|attribution)\\s*:\\s*(['\"`])(?:(?!\\2).)*\\2",
+      "reason": "⚖️ GHI CÔNG GIẤY PHÉP APACHE 2.0 — NGHĨA VỤ PHÁP LÝ. VuaOffice là sản phẩm phái sinh của dự án mã nguồn mở GenOffice; Apache License 2.0 §4(c) BẮT BUỘC giữ nguyên ghi công tác giả gốc. Đổi 'GenOffice' thành 'VuaOffice' trong các chuỗi này là VI PHẠM GIẤY PHÉP. Tuyệt đối không sửa."
+    },
+    {
+      "pattern": "(Original Work|Copyright)[^\\n]*",
+      "reason": "⚖️ Dòng ghi bản quyền tác giả gốc (Mainfunc, Inc.) trong AboutModal và tiêu đề tệp. Apache License 2.0 §4 yêu cầu giữ nguyên mọi thông báo bản quyền. Tuyệt đối không sửa."
+    },
+    {
+      "pattern": "GenOffice visual signature field|VISUAL_SIGNATURE_CONTENT_PREFIX",
+      "reason": "🔒 MARKER ĐỊNH DẠNG DỮ LIỆU ghi vào bên trong tệp PDF để nhận diện trường chữ ký. Đổi chuỗi này khiến ứng dụng KHÔNG ĐỌC ĐƯỢC chữ ký trong các PDF đã tạo trước đó — mất tương thích ngược dữ liệu người dùng."
+    },
+    {
+      "pattern": "GenOffice[A-Za-z0-9_]",
+      "reason": "🔒 QUY LUẬT TỔNG QUÁT: `GenOffice` LIỀN ngay một chữ/số là ĐỊNH DANH KỸ THUẬT, không bao giờ là chữ hiển thị. Bao gồm tên tệp font trên đĩa (GenOfficeSansKR-Regular-subset.woff2 — đổi là font lỗi 404) và khóa từ điển PDF (PDFName.of('GenOfficeFormField'), 'GenOfficeStaticFormFills' — đổi là không đọc được form/chữ ký trong PDF đã lưu). Chữ hiển thị luôn có dấu cách hoặc dấu câu ngay sau: 'GenOffice Docs', 'Enjoying GenOffice?', \"GenOffice's assistant\"."
+    },
+    {
+      "pattern": "VuaOffice[A-Za-z0-9_]",
+      "reason": "🔒 ĐỐI XỨNG BẮT BUỘC với quy tắc GenOffice[A-Za-z0-9_] ngay trên. Bảo vệ định danh ghép phía ta (VuaOfficeIcon, handleVuaOfficeUrl). THIẾU quy tắc này, chu kỳ restore→apply sẽ HỎNG VĨNH VIỄN mã nguồn: `VuaOfficeIcon` bị restore thành `GenOfficeIcon`, rồi apply KHÔNG đổi ngược được vì `GenOffice[A-Za-z]` đang được bảo vệ. Mọi quy tắc `protected` chặn một chiều đều PHẢI có cặp đối xứng chiều còn lại."
+    }
+  ],
+
+  "driftPatterns": [
+    {
+      "_doc": "Tầng 2 của tools/check-brand.mjs: bắt chuỗi thương hiệu upstream MỚI mà mục `replacements` chưa khai báo. Chỉ liệt kê định danh KHÔNG BAO GIỜ hợp lệ trên bề mặt người dùng.",
+      "pattern": "\\bGenOffice\\b",
+      "reason": "Tên sản phẩm upstream. Sản phẩm của ta tên VuaOffice, nên mọi lần xuất hiện hiển thị cho người dùng đều là rò rỉ — trừ các trường hợp đã miễn trừ ở `protected` (alias font, tên package, ghi công giấy phép)."
+    },
+    {
+      "pattern": "genspark-ai/genoffice",
+      "reason": "Slug kho mã upstream. Xuất hiện ngoài chú thích nghĩa là app đang trỏ về hạ tầng upstream."
+    }
+  ],
+
+  "_driftNote": "CỐ Ý KHÔNG đưa `\\bGenspark\\b` vào driftPatterns. Genspark là NHÀ CUNG CẤP AI HỢP LỆ trong AI_PROVIDERS (đăng nhập gsk, nạp credit tại genspark.ai/pricing), nên tên này xuất hiện hợp pháp ở hàng trăm chuỗi i18n. Đưa vào sẽ tạo 338 cảnh báo giả, khiến cả cổng kiểm tra bị vô hiệu hóa vì nhiễu. Biến thể mang tính thương hiệu sản phẩm (`Genspark AI`) đã được bắt chính xác ở Tầng 1 qua `replacements`.",
+
+  "fileTargets": {
+    "_doc": "Các tệp cần patch riêng ngoài luồng thay thế chuỗi thông thường.",
+    "electronBuilder": "apps/shell/electron-builder.cjs",
+    "rootPackageJson": "package.json"
+  },
+
+  "assets": {
+    "_doc": "Tài sản đồ họa sao chép khi apply.",
+    "icons": {
+      "from": "whitelabel/assets",
+      "to": "apps/shell/build",
+      "files": ["icon.png", "icon.icns", "icon.ico"],
+      "aliases": { "icon.icns": "app.icns", "icon.ico": "app.ico" }
+    },
+    "logos": {
+      "from": "whitelabel/Logo",
+      "to": "apps/shell/src/renderer/src/assets",
+      "files": ["vuaoffice-logo.svg", "vuaoffice-icon.svg"]
+    }
+  }
 }

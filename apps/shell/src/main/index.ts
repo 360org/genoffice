@@ -158,6 +158,7 @@ import {
 } from '../../../markdown/src/main/markdown-main'
 import type {
   AccountLoginEvent,
+  AccountStatus,
   RecentEntry,
   RecentPage,
   RenameResult,
@@ -350,7 +351,7 @@ let cachedGithubStars: number | null = null
 async function fetchGithubStars(): Promise<number | null> {
   if (cachedGithubStars !== null) return cachedGithubStars
   try {
-    const response = await fetch('https://api.github.com/repos/genspark-ai/genoffice', {
+    const response = await fetch('https://api.github.com/repos/360org/vuaoffice', {
       headers: { Accept: 'application/vnd.github+json' },
       signal: AbortSignal.timeout(5000),
     })
