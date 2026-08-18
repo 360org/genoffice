@@ -22,7 +22,7 @@ function createWindow(): void {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'VuaOffice Mail',
+    title: 'GenOffice Mail',
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       sandbox: false,

@@ -99,7 +99,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, onS
           >
             <input
               type="text"
-              placeholder="✨ Yêu cầu VuaOffice AI viết nháp (VD: Viết mail xin nghỉ phép / Báo cáo tuần)..."
+              placeholder="✨ Yêu cầu Genspark AI viết nháp (VD: Viết mail xin nghỉ phép / Báo cáo tuần)..."
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAiDraft()}

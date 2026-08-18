@@ -2530,7 +2530,7 @@ export function Home() {
     <div className="home">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img className="logo-lockup" src={logoLockup} alt="VuaOffice" height="32" />
+          <img className="logo-lockup" src={logoLockup} alt="GenOffice" height="32" />
         </div>
 
         <nav className="sidebar-nav">
