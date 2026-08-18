@@ -11,7 +11,7 @@ export const aiStrings = defineStrings({
     aiStarterContinue: '接着现有内容往下写',
     aiGskLoginBtn: '登录 Genspark',
     aiUndelivered: '未发送成功',
-    aiPanelTitle: 'Genspark AI',
+    aiPanelTitle: 'Genspark',
     aiOpenAssistant: '打开 AI 助手',
     aiSummarizeBtn: 'AI 总结',
     aiSummarizePrompt: '总结这篇文档的主要内容和要点',
@@ -114,13 +114,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Polish the whole document for a more professional tone',
     aiStarterContinue: 'Continue writing from where the document leaves off',
     aiGskLoginBtn: 'Sign in to Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Not delivered — this message had no effect',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Not sent',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Open AI assistant',
     aiSummarizeBtn: 'AI Summarize',
     aiSummarizePrompt: 'Summarize the main content and key points of this document',
@@ -229,13 +224,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: '全文を推敲してよりプロフェッショナルな文体に',
     aiStarterContinue: '今の内容の続きを書いて',
     aiGskLoginBtn: 'Genspark にサインイン',
-<<<<<<< HEAD
-    aiUndelivered: '未送信 — このメッセージは反映されていません',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: '送信できませんでした',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI アシスタントを開く',
     aiSummarizeBtn: 'AI 要約',
     aiSummarizePrompt: 'この文書の主な内容と要点を要約してください',
@@ -345,13 +335,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: '전체 문서를 더 전문적인 어조로 다듬어 줘',
     aiStarterContinue: '지금 내용에 이어서 계속 써 줘',
     aiGskLoginBtn: 'Genspark 로그인',
-<<<<<<< HEAD
-    aiUndelivered: '전송되지 않음 — 이 메시지는 적용되지 않았습니다',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: '전송되지 않았습니다',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI 도우미 열기',
     aiSummarizeBtn: 'AI 요약',
     aiSummarizePrompt: '이 문서의 주요 내용과 핵심 사항을 요약해 주세요',
@@ -460,13 +445,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Peaufiner tout le document pour un ton plus professionnel',
     aiStarterContinue: 'Continuer la rédaction là où le document s’arrête',
     aiGskLoginBtn: 'Se connecter à Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Non envoyé — ce message n’a pas été pris en compte',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Non envoyé',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: "Ouvrir l'assistant IA",
     aiSummarizeBtn: 'Résumé IA',
     aiSummarizePrompt: 'Résumez le contenu principal et les points clés de ce document',
@@ -579,13 +559,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Das ganze Dokument für einen professionelleren Ton überarbeiten',
     aiStarterContinue: 'Dort weiterschreiben, wo das Dokument aufhört',
     aiGskLoginBtn: 'Bei Genspark anmelden',
-<<<<<<< HEAD
-    aiUndelivered: 'Nicht zugestellt — diese Nachricht wurde nicht verarbeitet',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Nicht gesendet',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'KI-Assistenten öffnen',
     aiSummarizeBtn: 'KI-Zusammenfassung',
     aiSummarizePrompt: 'Fasse den Hauptinhalt und die Kernpunkte dieses Dokuments zusammen',
@@ -697,13 +672,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Pulir todo el documento para un tono más profesional',
     aiStarterContinue: 'Continúa escribiendo desde donde termina el documento',
     aiGskLoginBtn: 'Iniciar sesión en Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'No entregado: este mensaje no tuvo efecto',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'No enviado',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Abrir el asistente de IA',
     aiSummarizeBtn: 'Resumen IA',
     aiSummarizePrompt: 'Resume el contenido principal y los puntos clave de este documento',
@@ -814,13 +784,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'ขัดเกลาทั้งเอกสารให้น้ำเสียงเป็นมืออาชีพยิ่งขึ้น',
     aiStarterContinue: 'เขียนต่อจากเนื้อหาที่มีอยู่',
     aiGskLoginBtn: 'ลงชื่อเข้าใช้ Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'ส่งไม่สำเร็จ — ข้อความนี้ไม่มีผล',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'ส่งไม่สำเร็จ',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'เปิดผู้ช่วย AI',
     aiSummarizeBtn: 'สรุปด้วย AI',
     aiSummarizePrompt: 'สรุปเนื้อหาหลักและประเด็นสำคัญของเอกสารนี้',
@@ -929,13 +894,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Perhalus seluruh dokumen agar nadanya lebih profesional',
     aiStarterContinue: 'Lanjutkan menulis dari bagian akhir dokumen',
     aiGskLoginBtn: 'Masuk ke Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Tidak terkirim — pesan ini tidak diproses',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Tidak terkirim',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Buka asisten AI',
     aiSummarizeBtn: 'Ringkasan AI',
     aiSummarizePrompt: 'Ringkas isi utama dan poin-poin penting dokumen ini',
@@ -1044,13 +1004,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Отшлифуй весь документ, сделав тон более профессиональным',
     aiStarterContinue: 'Продолжи текст с того места, где он обрывается',
     aiGskLoginBtn: 'Войти в Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Не доставлено — это сообщение не было обработано',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Не отправлено',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Открыть ИИ-помощника',
     aiSummarizeBtn: 'ИИ-резюме',
     aiSummarizePrompt: 'Кратко изложите основное содержание и ключевые моменты этого документа',
@@ -1160,13 +1115,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'حسّن صياغة المستند كاملًا بنبرة أكثر احترافية',
     aiStarterContinue: 'تابع الكتابة من حيث انتهى المستند',
     aiGskLoginBtn: 'تسجيل الدخول إلى Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'لم يتم الإرسال — لم يُعالَج هذا الطلب',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'لم يتم الإرسال',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'فتح مساعد الذكاء الاصطناعي',
     aiSummarizeBtn: 'تلخيص AI',
     aiSummarizePrompt: 'لخّص المحتوى الرئيسي والنقاط الأساسية لهذا المستند',
@@ -1275,13 +1225,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Aprimore o documento inteiro com um tom mais profissional',
     aiStarterContinue: 'Continue escrevendo de onde o documento parou',
     aiGskLoginBtn: 'Entrar no Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Não entregue — esta mensagem não teve efeito',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Não enviado',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Abrir assistente de IA',
     aiSummarizeBtn: 'Resumo IA',
     aiSummarizePrompt: 'Resuma o conteúdo principal e os pontos-chave deste documento',
@@ -1392,13 +1337,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: "Rifinisci l'intero documento con un tono più professionale",
     aiStarterContinue: 'Continua a scrivere da dove il documento si interrompe',
     aiGskLoginBtn: 'Accedi a Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Non recapitato — questo messaggio non ha avuto effetto',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Non inviato',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: "Apri l'assistente IA",
     aiSummarizeBtn: 'Riassunto IA',
     aiSummarizePrompt: 'Riassumi il contenuto principale e i punti chiave di questo documento',
@@ -1511,13 +1451,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Dopracuj cały dokument, nadając mu bardziej profesjonalny ton',
     aiStarterContinue: 'Kontynuuj pisanie od miejsca, w którym kończy się dokument',
     aiGskLoginBtn: 'Zaloguj się do Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Niedostarczone — ta wiadomość nie została przetworzona',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Nie wysłano',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Otwórz asystenta AI',
     aiSummarizeBtn: 'Podsumowanie AI',
     aiSummarizePrompt: 'Podsumuj główną treść i kluczowe punkty tego dokumentu',
@@ -1627,13 +1562,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Werk het hele document bij naar een professionelere toon',
     aiStarterContinue: 'Schrijf verder waar het document ophoudt',
     aiGskLoginBtn: 'Aanmelden bij Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Niet afgeleverd — dit bericht is niet verwerkt',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Niet verzonden',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI-assistent openen',
     aiSummarizeBtn: 'AI-samenvatting',
     aiSummarizePrompt: 'Vat de hoofdinhoud en kernpunten van dit document samen',
@@ -1743,13 +1673,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'Perhalusi keseluruhan dokumen dengan nada lebih profesional',
     aiStarterContinue: 'Teruskan menulis dari bahagian akhir dokumen',
     aiGskLoginBtn: 'Log masuk ke Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Tidak dihantar — mesej ini tidak diproses',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Tidak dihantar',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Buka pembantu AI',
     aiSummarizeBtn: 'Ringkasan AI',
     aiSummarizePrompt: 'Ringkaskan kandungan utama dan perkara penting dokumen ini',
@@ -1858,13 +1783,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'לטש את כל המסמך לטון מקצועי יותר',
     aiStarterContinue: 'המשך לכתוב מהנקודה שבה המסמך נעצר',
     aiGskLoginBtn: 'התחבר ל-Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'לא נמסר — הודעה זו לא עובדה',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'לא נשלח',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'פתיחת עוזר ה-AI',
     aiSummarizeBtn: 'סיכום AI',
     aiSummarizePrompt: 'סכם את התוכן העיקרי ואת הנקודות המרכזיות של מסמך זה',
@@ -1970,13 +1890,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: 'पूरे दस्तावेज़ को अधिक पेशेवर लहजे में निखारें',
     aiStarterContinue: 'दस्तावेज़ जहाँ रुका है वहाँ से आगे लिखें',
     aiGskLoginBtn: 'Genspark में साइन इन करें',
-<<<<<<< HEAD
-    aiUndelivered: 'नहीं भेजा गया — इस संदेश का कोई प्रभाव नहीं पड़ा',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'भेजा नहीं गया',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI सहायक खोलें',
     aiSummarizeBtn: 'AI सारांश',
     aiSummarizePrompt: 'इस दस्तावेज़ की मुख्य सामग्री और प्रमुख बिंदुओं का सारांश दें',
@@ -2085,13 +2000,8 @@ export const aiStrings = defineStrings({
     aiStarterPolishAll: '潤飾全文,使語氣更專業',
     aiStarterContinue: '接著現有內容往下寫',
     aiGskLoginBtn: '登入 Genspark',
-<<<<<<< HEAD
-    aiUndelivered: '未送達,本則不會生效',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: '未傳送成功',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: '開啟 AI 助手',
     aiSummarizeBtn: 'AI 總結',
     aiSummarizePrompt: '總結這篇文件的主要內容和要點',

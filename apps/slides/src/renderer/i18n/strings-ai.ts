@@ -21,7 +21,7 @@ export const aiStrings = defineStrings({
     aiQcCapped: '其余 {count} 页未检查(单次上限)',
     aiGskLoginBtn: '登录 Genspark',
     aiUndelivered: '未发送成功',
-    aiPanelTitle: 'Genspark AI',
+    aiPanelTitle: 'Genspark',
     aiOpenAssistant: '打开 AI 助手',
     aiFactCheckBtn: 'AI 事实核查',
     aiFactCheckPrompt: '核查这份幻灯片的内容:检查数据、日期、名称和论断是否属实,指出并纠正错误',
@@ -216,13 +216,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Layout check stopped',
     aiQcCapped: '{count} more page(s) not checked (per-run cap)',
     aiGskLoginBtn: 'Sign in to Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Not delivered — this message had no effect',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Not sent',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Open AI assistant',
     aiFactCheckBtn: 'AI Fact Check',
     aiFactCheckPrompt:
@@ -424,13 +419,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'レイアウトチェックを停止しました',
     aiQcCapped: '残り {count} ページは未チェック(1回の上限)',
     aiGskLoginBtn: 'Genspark にサインイン',
-<<<<<<< HEAD
-    aiUndelivered: '未送信 — このメッセージは反映されていません',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: '送信できませんでした',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI アシスタントを開く',
     aiFactCheckBtn: 'AI ファクトチェック',
     aiFactCheckPrompt:
@@ -631,13 +621,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: '레이아웃 검사를 중지했습니다',
     aiQcCapped: '나머지 {count}페이지는 검사하지 않음(회당 상한)',
     aiGskLoginBtn: 'Genspark 로그인',
-<<<<<<< HEAD
-    aiUndelivered: '전송되지 않음 — 이 메시지는 적용되지 않았습니다',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: '전송되지 않았습니다',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI 도우미 열기',
     aiFactCheckBtn: 'AI 팩트체크',
     aiFactCheckPrompt:
@@ -839,13 +824,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Vérification de la mise en page arrêtée',
     aiQcCapped: '{count} page(s) restante(s) non vérifiée(s) (limite par exécution)',
     aiGskLoginBtn: 'Se connecter à Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Non envoyé — ce message n’a pas été pris en compte',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Non envoyé',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: "Ouvrir l'assistant IA",
     aiFactCheckBtn: 'Vérification IA',
     aiFactCheckPrompt:
@@ -1050,13 +1030,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Layoutprüfung gestoppt',
     aiQcCapped: '{count} weitere Seite(n) nicht geprüft (Limit pro Lauf)',
     aiGskLoginBtn: 'Bei Genspark anmelden',
-<<<<<<< HEAD
-    aiUndelivered: 'Nicht zugestellt — diese Nachricht wurde nicht verarbeitet',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Nicht gesendet',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'KI-Assistenten öffnen',
     aiFactCheckBtn: 'KI-Faktencheck',
     aiFactCheckPrompt:
@@ -1259,13 +1234,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Comprobación de diseño detenida',
     aiQcCapped: '{count} página(s) más sin comprobar (límite por ejecución)',
     aiGskLoginBtn: 'Iniciar sesión en Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'No entregado: este mensaje no tuvo efecto',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'No enviado',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Abrir el asistente de IA',
     aiFactCheckBtn: 'Verificación IA',
     aiFactCheckPrompt:
@@ -1469,13 +1439,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'หยุดการตรวจสอบเลย์เอาต์แล้ว',
     aiQcCapped: 'อีก {count} หน้าไม่ได้ตรวจสอบ (ขีดจำกัดต่อครั้ง)',
     aiGskLoginBtn: 'ลงชื่อเข้าใช้ Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'ส่งไม่สำเร็จ — ข้อความนี้ไม่มีผล',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'ส่งไม่สำเร็จ',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'เปิดผู้ช่วย AI',
     aiFactCheckBtn: 'ตรวจสอบข้อเท็จจริง AI',
     aiFactCheckPrompt:
@@ -1675,13 +1640,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Pemeriksaan tata letak dihentikan',
     aiQcCapped: '{count} halaman lagi tidak diperiksa (batas per proses)',
     aiGskLoginBtn: 'Masuk ke Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Tidak terkirim — pesan ini tidak diproses',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Tidak terkirim',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Buka asisten AI',
     aiFactCheckBtn: 'Cek Fakta AI',
     aiFactCheckPrompt:
@@ -1884,13 +1844,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Проверка макета остановлена',
     aiQcCapped: 'Ещё {count} стр. не проверено (лимит за один запуск)',
     aiGskLoginBtn: 'Войти в Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Не доставлено — это сообщение не было обработано',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Не отправлено',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Открыть ИИ-помощника',
     aiFactCheckBtn: 'ИИ-фактчекинг',
     aiFactCheckPrompt:
@@ -2093,13 +2048,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'تم إيقاف فحص التخطيط',
     aiQcCapped: '{count} صفحة أخرى لم تُفحص (حد لكل تشغيل)',
     aiGskLoginBtn: 'تسجيل الدخول إلى Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'لم يتم الإرسال — لم يُعالَج هذا الطلب',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'لم يتم الإرسال',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'فتح مساعد الذكاء الاصطناعي',
     aiFactCheckBtn: 'تدقيق حقائق AI',
     aiFactCheckPrompt:
@@ -2299,13 +2249,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Verificação de layout interrompida',
     aiQcCapped: 'Mais {count} página(s) não verificada(s) (limite por execução)',
     aiGskLoginBtn: 'Entrar no Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Não entregue — esta mensagem não teve efeito',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Não enviado',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Abrir assistente de IA',
     aiFactCheckBtn: 'Checagem IA',
     aiFactCheckPrompt:
@@ -2508,13 +2453,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Controllo del layout interrotto',
     aiQcCapped: 'Altre {count} pagina/e non controllate (limite per esecuzione)',
     aiGskLoginBtn: 'Accedi a Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Non recapitato — questo messaggio non ha avuto effetto',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Non inviato',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: "Apri l'assistente IA",
     aiFactCheckBtn: 'Fact-check IA',
     aiFactCheckPrompt:
@@ -2717,13 +2657,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Sprawdzanie układu zatrzymane',
     aiQcCapped: 'Pozostałe {count} stron(y) nie sprawdzono (limit na uruchomienie)',
     aiGskLoginBtn: 'Zaloguj się do Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Niedostarczone — ta wiadomość nie została przetworzona',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Nie wysłano',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Otwórz asystenta AI',
     aiFactCheckBtn: 'Weryfikacja AI',
     aiFactCheckPrompt:
@@ -2926,13 +2861,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Lay-outcontrole gestopt',
     aiQcCapped: 'Nog {count} pagina(’s) niet gecontroleerd (limiet per run)',
     aiGskLoginBtn: 'Aanmelden bij Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Niet afgeleverd — dit bericht is niet verwerkt',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Niet verzonden',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI-assistent openen',
     aiFactCheckBtn: 'AI-factcheck',
     aiFactCheckPrompt:
@@ -3136,13 +3066,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'Semakan susun atur dihentikan',
     aiQcCapped: '{count} halaman lagi tidak disemak (had setiap larian)',
     aiGskLoginBtn: 'Log masuk ke Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'Tidak dihantar — mesej ini tidak diproses',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'Tidak dihantar',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'Buka pembantu AI',
     aiFactCheckBtn: 'Semak Fakta AI',
     aiFactCheckPrompt:
@@ -3345,13 +3270,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'בדיקת הפריסה הופסקה',
     aiQcCapped: 'עוד {count} עמודים לא נבדקו (מגבלה לכל הרצה)',
     aiGskLoginBtn: 'התחבר ל-Genspark',
-<<<<<<< HEAD
-    aiUndelivered: 'לא נמסר — הודעה זו לא עובדה',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'לא נשלח',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'פתיחת עוזר ה-AI',
     aiFactCheckBtn: 'בדיקת עובדות AI',
     aiFactCheckPrompt:
@@ -3550,13 +3470,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: 'लेआउट जाँच रोक दी गई',
     aiQcCapped: 'शेष {count} पेज नहीं जाँचे गए (प्रति रन सीमा)',
     aiGskLoginBtn: 'Genspark में साइन इन करें',
-<<<<<<< HEAD
-    aiUndelivered: 'नहीं भेजा गया — इस संदेश का कोई प्रभाव नहीं पड़ा',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: 'भेजा नहीं गया',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: 'AI सहायक खोलें',
     aiFactCheckBtn: 'AI तथ्य जाँच',
     aiFactCheckPrompt:
@@ -3758,13 +3673,8 @@ export const aiStrings = defineStrings({
     aiQcStopped: '版式檢查已停止',
     aiQcCapped: '其餘 {count} 頁未檢查(單次上限)',
     aiGskLoginBtn: '登入 Genspark',
-<<<<<<< HEAD
-    aiUndelivered: '未送達,本則不會生效',
-    aiPanelTitle: 'Genspark AI',
-=======
     aiUndelivered: '未傳送成功',
     aiPanelTitle: 'Genspark',
->>>>>>> upstream/main
     aiOpenAssistant: '開啟 AI 助手',
     aiFactCheckBtn: 'AI 事實核查',
     aiFactCheckPrompt: '核查這份簡報的內容:檢查數據、日期、名稱和論斷是否屬實,指出並糾正錯誤',
