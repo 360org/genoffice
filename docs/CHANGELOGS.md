@@ -3,6 +3,18 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-08-18
+
+### Added & Upstream Sync
+- **Đồng bộ toàn diện Upstream Engine (`genspark-ai/genoffice` ➔ `main`)**:
+  - **VuaOffice Docs**: Nâng cấp bộ phân tích và hiển thị DOCX (Metafile render, WMF/EMF conversion, SmartArt/WordArt VML, Page note areas, Paragraph border merge, Table handle selection).
+  - **VuaOffice Sheets**: Tích hợp Rust sidecar engine thế hệ mới, thanh công cụ Formula Audit, Workbook Search, Goal Seek Dialog, Page Break Preview, Range Protection và Theme engine.
+  - **VuaOffice Slides**: Thêm Format Background Pane, điều khiển màu sắc chi tiết, hỗ trợ cover-crop và nhận diện hệ thống phông chữ tài liệu.
+  - **Shared UI**: Bổ sung bộ chọn màu chuyên sâu và Popover dismiss trong `@genoffice/ui`.
+- **Bảo toàn cơ chế Whitelabel Config-Driven**:
+  - Đảm bảo 100% luật song ánh qua `npm run brand:gate` trên toàn bộ 470 tệp workspace.
+  - Loại bỏ hoàn toàn mọi xung đột mã nguồn mà vẫn giữ nguyên nhận diện thương hiệu VuaOffice và hệ thống Gateway AI 360 CORP.
+
 ## [1.0.0] - 2026-08-17
 
 ### Added
