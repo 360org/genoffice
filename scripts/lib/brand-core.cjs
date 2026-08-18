@@ -76,6 +76,13 @@ function walkFiles(cfg) {
       for (const sub of includeDirs) collect(path.join(ROOT, root, app.name, sub))
     }
   }
+
+  // Tệp lẻ nằm ngoài cây includeDirs nhưng vẫn sinh chuỗi người dùng thấy
+  // (điển hình: cấu hình đóng gói đặt tên tệp cài đặt).
+  for (const rel of cfg.scan.extraFiles || []) {
+    const full = path.join(ROOT, rel)
+    if (fs.existsSync(full)) out.push(full)
+  }
   return out
 }
 

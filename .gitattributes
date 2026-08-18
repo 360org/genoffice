@@ -15,3 +15,19 @@
 *.otf binary
 *.woff binary
 *.woff2 binary
+
+# ── Whitelabel: tài sản thương hiệu 360 CORP ───────────────────────────────
+# Luôn giữ phiên bản của chúng ta khi hợp nhất từ upstream genspark-ai/genoffice.
+#
+# BẮT BUỘC chạy `npm run upstream:setup` một lần trên mỗi máy — Git KHÔNG tự
+# kích hoạt merge driver khi clone, và nếu chưa đăng ký thì các dòng dưới đây
+# IM LẶNG không có tác dụng.
+whitelabel/**                       merge=ours
+scripts/whitelabel.js               merge=ours
+scripts/lib/brand-core.cjs          merge=ours
+scripts/upstream-setup.js           merge=ours
+tools/check-brand.mjs               merge=ours
+docs/WHITELABEL_STRATEGY.md         merge=ours
+docs/RELEASE_PROTOCOL.md            merge=ours
+apps/shell/electron-builder.cjs     merge=ours
+.github/workflows/release.yml       merge=ours

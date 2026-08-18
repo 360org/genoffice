@@ -25,7 +25,9 @@
     "roots": ["apps"],
     "includeDirs": ["src/renderer", "src/main", "src/shared", "src/preload"],
     "extensions": [".ts", ".tsx", ".html", ".css"],
-    "excludeDirs": ["node_modules", "dist", "out", "build", ".build", "release", "target"]
+    "excludeDirs": ["node_modules", "dist", "out", "build", ".build", "release", "target"],
+    "_extraFilesDoc": "Tệp nằm ngoài cây includeDirs nhưng vẫn sinh ra chuỗi NGƯỜI DÙNG THẤY. Thiếu mục này, cấu hình đóng gói là ĐIỂM MÙ của cổng kiểm tra: tên tệp cài đặt rpm đã mang thương hiệu upstream (genoffice-<v>.rpm) suốt nhiều bản phát hành mà không cổng nào phát hiện.",
+    "extraFiles": ["apps/shell/electron-builder.cjs"]
   },
 
   "replacements": [
@@ -146,6 +148,10 @@
     {
       "pattern": "genspark-ai/genoffice",
       "reason": "Slug kho mã upstream. Xuất hiện ngoài chú thích nghĩa là app đang trỏ về hạ tầng upstream."
+    },
+    {
+      "pattern": "genoffice[-_]\\$\\{version\\}",
+      "reason": "Tên tệp cài đặt mang thương hiệu upstream (vd `genoffice-${version}.${arch}.rpm`). Đây là chuỗi CHỮ THƯỜNG nên mọi quy tắc phân biệt hoa/thường khác đều bỏ lọt — trong khi người dùng nhìn thấy nó ngay trên tên tệp họ tải về. Bản `deb` từng được sửa còn `rpm` bị bỏ sót đúng theo cách này."
     }
   ],
 

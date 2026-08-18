@@ -3,7 +3,7 @@
 > **Tài liệu Hướng dẫn Triển khai, Đóng gói & Phát hành Sản phẩm (Deployment & Build Guide)**  
 > **Tham chiếu từ**: [REQUIREMENTS.md](REQUIREMENTS.md) và [ARCH.md](ARCH.md)  
 > **Chủ quản**: 360 CORP  
-> **Phiên bản**: v0.6.7+
+> **Phiên bản**: v1.0.0+
 
 ---
 
@@ -61,6 +61,11 @@ npm run dev:mail        # Chạy riêng VuaMail Client
 Trước khi commit mã nguồn hoặc kích hoạt quy trình phát hành, bắt buộc chạy các lệnh kiểm tra:
 
 ```bash
+# 0. CỔNG THƯƠNG HIỆU — bắt buộc, chạy đầu tiên.
+#    selftest (luật song ánh) + status (đã apply đủ) + check-brand (0 rò rỉ).
+#    Báo đỏ → DỪNG, xử lý theo docs/WHITELABEL_STRATEGY.md §8.
+npm run brand:gate
+
 # 1. Kiểm tra định dạng code (Prettier)
 npm run format:check
 
@@ -89,96 +94,131 @@ node tools/check-theme-colors.mjs
 # Biên dịch và đóng gói bộ cài đặt .dmg và .zip cho macOS
 npm run dist:mac
 ```
-*Artifacts được tạo tại thư mục `/Volumes/DATA/DEV/vuaoffice/apps/shell/dist/`:*
-- `VuaOffice-0.6.7-macOS-Apple-Silicon.dmg` (cho kiến trúc ARM64)
-- `VuaOffice-0.6.7-macOS-Intel.dmg` (cho kiến trúc x64)
+*Artifacts được tạo tại thư mục `apps/shell/dist/`:*
+- `VuaOffice-${version}-macOS-arm64.dmg` / `.zip` (Apple Silicon)
+- `VuaOffice-${version}-macOS-x64.dmg` / `.zip` (Intel)
 
 ### 4.2 Đóng gói cho Windows (Setup EXE & Portable)
 ```bash
 # Biên dịch và đóng gói trình cài đặt NSIS Setup cho Windows
 npm run dist:win
 ```
-*Artifacts được tạo tại `/Volumes/DATA/DEV/vuaoffice/apps/shell/dist/`:*
-- `VuaOffice-0.6.7-Windows-x64-Setup.exe`
-- `VuaOffice-0.6.7-Windows-x86-Setup.exe`
+*Artifacts được tạo tại `apps/shell/dist/`:*
+- `VuaOffice-${version}-Windows-x64-Setup.exe`
+- `VuaOffice-${version}-Windows-ia32-Setup.exe`
+- `VuaOffice-${version}-Windows-Setup.exe` (bản gộp hai kiến trúc)
 
 ### 4.3 Đóng gói cho Linux (AppImage & DEB)
 ```bash
 # Biên dịch và đóng gói cho Linux
 npm run dist:linux
 ```
-*Artifacts được tạo tại `/Volumes/DATA/DEV/vuaoffice/apps/shell/dist/`:*
-- `VuaOffice-0.6.7.AppImage`
-- `vuaoffice_0.6.7_amd64.deb`
+*Artifacts được tạo tại `apps/shell/dist/`:*
+- `VuaOffice-${version}.AppImage`
+- `vuaoffice_${version}_amd64.deb`
+- `vuaoffice-${version}.x86_64.rpm`
 
 ---
 
 ## 5. Quy chuẩn Đặt tên File Phát hành (Release Artifact Naming Convention)
 
-Để tránh gây nhầm lẫn cho người dùng cuối trên mọi nền tảng, tên tệp phát hành **BẮT BUỘC** tuân thủ định dạng chuẩn:
+> **Nguồn chân lý là các khóa `artifactName` trong `apps/shell/electron-builder.cjs`.**
+> Bảng dưới là ảnh chụp đúng những gì cấu hình đó sinh ra, đã đối chiếu với tài sản
+> thực tế của bản phát hành v0.7.0 và v1.0.0. Ghi chú đầy đủ: [`RELEASE_PROTOCOL.md`](./RELEASE_PROTOCOL.md) §2.
 
-| Hệ điều hành | Kiến trúc Phần cứng | Tên Tệp Phân phối Chính thức |
+| Hệ điều hành | Kiến trúc Phần cứng | Tên Tệp Phân phối Thực tế |
 |---|---|---|
-| **macOS** | Apple Silicon (M1/M2/M3/M4) | `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip` |
-| **macOS** | Intel (Core i5/i7/i9/Xeon) | `VuaOffice-${version}-macOS-Intel.dmg` / `.zip` |
+| **macOS** | Apple Silicon (M1/M2/M3/M4) | `VuaOffice-${version}-macOS-arm64.dmg` / `.zip` |
+| **macOS** | Intel (Core i5/i7/i9/Xeon) | `VuaOffice-${version}-macOS-x64.dmg` / `.zip` |
 | **Windows** | 64-bit (x64) | `VuaOffice-${version}-Windows-x64-Setup.exe` |
-| **Windows** | 32-bit (x86) | `VuaOffice-${version}-Windows-x86-Setup.exe` |
+| **Windows** | 32-bit (ia32) | `VuaOffice-${version}-Windows-ia32-Setup.exe` |
+| **Windows** | gộp hai kiến trúc | `VuaOffice-${version}-Windows-Setup.exe` |
 | **Linux** | 64-bit AppImage | `VuaOffice-${version}.AppImage` |
 | **Linux** | 64-bit Debian Package | `vuaoffice_${version}_amd64.deb` |
+| **Linux** | 64-bit RPM Package | `vuaoffice-${version}.x86_64.rpm` |
 
 ---
 
 ## 6. Quy trình Phát hành Sản phẩm Chính thức (Release & Publish Workflow)
 
-Quy trình phát hành bản phân phối mới tuân thủ nghiêm ngặt theo chỉ đạo của Sếp:
+> 📕 **Quy chế bắt buộc, đầy đủ: [`RELEASE_PROTOCOL.md`](./RELEASE_PROTOCOL.md)**
+> Bảng kiểm 9 bước, 6 điều cấm và mẫu báo cáo nằm ở đó. Phần dưới chỉ tóm tắt kỹ thuật.
 
 1. **Tuyệt đối KHÔNG tự động build khi commit/push lên `main`**: Mọi commit đẩy lên nhánh `main` chỉ lưu trữ lịch sử mã nguồn.
-2. **Quy trình Release CHỈ kích hoạt khi Sếp yêu cầu tạo Release**:
-   - **Bước 1**: Đồng bộ nâng version ở cả 2 tệp:
-     - Root: `/Volumes/DATA/DEV/vuaoffice/package.json`
-     - Shell: `/Volumes/DATA/DEV/vuaoffice/apps/shell/package.json`
-   - **Bước 2**: Chạy `npm run whitelabel:apply` để cập nhật các định danh.
-   - **Bước 3**: Commit thay đổi version với thông điệp `feat(release): bump version to x.y.z`.
-   - **Bước 4**: Tạo Git Tag phiên bản tương ứng:
+2. **🛑 Release CHỈ kích hoạt khi Sếp yêu cầu trực tiếp và rõ ràng.** Vừa xong tính năng,
+   CI đang xanh, hay commit đã lên `main` đều **KHÔNG** phải lệnh phát hành. Không chắc → HỎI LẠI.
+3. **Trình tự bắt buộc, không được bỏ bước:**
+   - **Bước 1 — Nhánh sạch**: đang ở `main`, `git status --porcelain` rỗng.
+   - **Bước 2 — CỔNG THƯƠNG HIỆU** (báo đỏ là DỪNG phát hành):
      ```bash
-     git tag v0.6.7
+     npm run brand:gate      # selftest + status + check-brand
      ```
-   - **Bước 5**: Đẩy code và tag đồng thời lên cả GitLab và GitHub:
+   - **Bước 3 — Cổng chất lượng**:
      ```bash
-     # Đẩy lên GitLab Private
-     git push origin main && git push origin v0.6.7
+     npm run lint && npm run typecheck && npm test
+     ```
+   - **Bước 4 — Bump version đồng bộ ở CẢ hai tệp** (đường dẫn tương đối gốc kho mã):
+     - `package.json`
+     - `apps/shell/package.json`
 
-     # Đồng bộ bản phân phối sạch sang GitHub Public (qua bộ lọc bảo mật)
-     bash /Volumes/DATA/DEV/SKILLS/git-sync-skills/scripts/git-sync-publish.sh
-     git push github v0.6.7
+     > ⚠️ `release.yml` xác thực tag khớp **chính xác** `apps/shell/package.json`.
+     > Lệch nhau là build hỏng ngay job đầu tiên.
+   - **Bước 5 — Commit**: `chore(release): bump version to vX.Y.Z`
+   - **Bước 6 — Tạo và đẩy tag**:
+     ```bash
+     git tag vX.Y.Z
+     git push origin main && git push origin vX.Y.Z
+     # Nếu kho mã cấu hình đa remote, đẩy tag lên cả remote `github`.
      ```
-   - **Bước 6**: GitHub Actions (`.github/workflows/release.yml`) tự động kích hoạt tiến trình đóng gói đa nền tảng và xuất bản trực tiếp lên mục [GitHub Releases](https://github.com/360org/vuaoffice/releases).
+   - **Bước 7 — Theo dõi build tới khi kết thúc.** Tag `v*` kích hoạt `release.yml` với 6 job
+     song song. Cấm đẩy tag rồi bỏ đó; build đỏ phải báo cáo Sếp kèm log lỗi.
+   - **Bước 8 — Xác minh tên artifact** đúng quy ước tại
+     [GitHub Releases](https://github.com/360org/vuaoffice/releases).
+4. **Cấm tag lại cùng một số phiên bản.** Build hỏng → sửa lỗi, bump số mới, tag mới —
+   người dùng có thể đã tải bản cũ.
 
 ---
 
 ## 7. Quy trình Đồng bộ với Upstream (Upstream Synchronization)
 
+> 📕 **Quy chế bắt buộc, đầy đủ: [`WHITELABEL_STRATEGY.md`](./WHITELABEL_STRATEGY.md) §7**
+
+**Bước 0 — Thiết lập máy (CHẠY MỘT LẦN duy nhất mỗi máy):**
+
+```bash
+npm run upstream:setup
+```
+
+> ⚠️ **CỰC KỲ QUAN TRỌNG**: lệnh này thêm remote `upstream` và **đăng ký merge driver `ours`**.
+> Git **KHÔNG** tự kích hoạt merge driver khi clone. Thiếu bước này, toàn bộ khai báo
+> `merge=ours` trong `.gitattributes` **IM LẶNG không có tác dụng** — trong khi cả nhóm
+> tin rằng thương hiệu đang được bảo vệ.
+
 Khi upstream `genspark-ai/genoffice` có các cải tiến công nghệ mới:
 
-1. **Khôi phục Codebase Gốc (Restore Clean Codebase)**:
+1. **Khôi phục Codebase Gốc** để Git merge 3 chiều tối ưu:
    ```bash
    npm run whitelabel:restore
    ```
-2. **Kéo mã nguồn mới từ Upstream**:
+2. **Kéo mã nguồn mới qua NHÁNH ĐỒNG BỘ RIÊNG** — 🚫 **CẤM merge thẳng vào `main`**:
    ```bash
    git fetch upstream
+   git checkout -b sync/upstream-$(date +%Y%m%d)
    git merge upstream/main
    ```
 3. **Áp dụng lại Thương hiệu VuaOffice**:
    ```bash
    npm run whitelabel:apply
    ```
-4. **Kiểm thử Tính toàn vẹn**:
+4. **Kiểm thử Tính toàn vẹn** — cổng thương hiệu chạy TRƯỚC:
    ```bash
-   npm run typecheck
-   npm test
+   npm run brand:gate       # bắt rò rỉ + chuỗi upstream mới chưa khai báo
+   npm run typecheck && npm test
    ```
-5. **Commit và đẩy lên hệ thống GitLab/GitHub**.
+   > `brand:check` Tầng 2 báo chuỗi mới là **bình thường** sau mỗi lần đồng bộ — upstream vừa
+   > thêm chuỗi thương hiệu mà `brand-config.json` chưa biết. Phân loại theo cây quyết định
+   > `WHITELABEL_STRATEGY.md §4`, rồi thêm vào `replacements` hoặc `protected` (kèm `reason`).
+5. **Mở Pull Request để rà soát.** Không tự merge vào `main`.
 
 ---
 

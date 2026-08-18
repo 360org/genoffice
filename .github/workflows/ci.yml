@@ -78,6 +78,12 @@ jobs:
           fi
           npm run check:theme-colors
 
+      # Cổng thương hiệu: chặn chuỗi upstream lọt ra bề mặt người dùng sau mỗi
+      # lần đồng bộ upstream. `brand:gate` = selftest (song ánh) + status (đã
+      # apply đầy đủ) + check-brand (không rò rỉ). Xem docs/WHITELABEL_STRATEGY.md
+      - name: Check brand integrity
+        run: npm run brand:gate
+
       - name: Lint
         run: npm run lint
 

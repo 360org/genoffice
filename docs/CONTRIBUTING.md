@@ -2,7 +2,7 @@
 
 > **Tài liệu Hướng dẫn Dành cho Cộng đồng & Nhà phát triển (Contribution Guidelines)**  
 > **Chủ quản**: 360 CORP  
-> **Phiên bản**: v0.6.7+
+> **Phiên bản**: v1.0.0+
 
 ---
 
@@ -50,7 +50,12 @@ npm run fixtures
 # 3. Áp dụng nhận diện thương hiệu VuaOffice
 npm run whitelabel:apply
 
-# 4. Khởi chạy toàn bộ ứng dụng và Shell chính với Vite Dev Server
+# 4. Cấu hình đồng bộ upstream (CHẠY MỘT LẦN mỗi máy).
+#    Git KHÔNG tự kích hoạt merge driver `ours` khi clone — thiếu bước này thì
+#    khai báo merge=ours trong .gitattributes IM LẶNG không có tác dụng.
+npm run upstream:setup
+
+# 5. Khởi chạy toàn bộ ứng dụng và Shell chính với Vite Dev Server
 npm run dev
 ```
 
@@ -61,6 +66,11 @@ npm run dev
 Mọi thay đổi trước khi tạo PR hoặc commit vào hệ thống bắt buộc phải vượt qua các bài kiểm tra tự động:
 
 ```bash
+# 0. CỔNG THƯƠNG HIỆU — bắt buộc, chạy đầu tiên vì nhanh nhất và chặn lỗi nặng nhất.
+#    Gồm: selftest (luật song ánh) + status (đã apply đủ) + check-brand (0 rò rỉ).
+#    Báo đỏ → DỪNG, xử lý theo docs/WHITELABEL_STRATEGY.md §8. Cấm vô hiệu hóa.
+npm run brand:gate
+
 # 1. Kiểm tra định dạng code (Prettier)
 npm run format:check
 

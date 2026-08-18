@@ -2,7 +2,7 @@
 
 > **Tài liệu Kiến trúc Kỹ thuật (Technical Architecture Document)**  
 > **Áp dụng cho**: Bộ ứng dụng VuaOffice Desktop Suite & Hạ tầng AI Gateway 360 CORP  
-> **Phiên bản**: v0.6.7+
+> **Phiên bản**: v1.0.0+
 
 ---
 
@@ -123,10 +123,21 @@ Module `apps/shell/src/main/diagnostic-report.ts` chịu trách nhiệm thu th�
 Để giải quyết bài toán đồng bộ liên tục với upstream `genspark-ai/genoffice` mà không làm mất tùy biến của 360 CORP:
 
 1. **Cấu hình Tập trung (`whitelabel/brand-config.json`)**: Định nghĩa toàn bộ chuỗi ký tự, URL Gateway, bundle ID và tài nguyên đồ họa.
-2. **Whitelabel Script (`scripts/whitelabel.js`)**:
-   - `apply`: Tự động vá cấu hình electron-builder, cập nhật package.json, đồng bộ logo/icon và áp dụng regex thay thế từ khóa.
-   - `restore`: Sử dụng `git checkout` để hoàn tác mã nguồn về trạng thái sạch gốc trước khi thực hiện pull/merge.
-3. **Quy trình Git Sync 2 Remote**:
+2. **Whitelabel Engine (`scripts/whitelabel.js` + `scripts/lib/brand-core.cjs`)**:
+   Zero-dependency (chỉ dùng module lõi Node) nên chạy được **trước** `npm ci`. Mọi quy tắc
+   đọc từ `brand-config.json` — engine không hardcode bất kỳ chuỗi thương hiệu nào.
+   - `apply`: vá cấu hình electron-builder + package.json, đồng bộ logo/icon, và thay thế
+     chuỗi hiển thị trên `apps/*/src/{renderer,main,shared,preload}`.
+   - `restore`: áp **bộ quy tắc thay thế ngược** (VuaOffice → upstream) để Git thực hiện
+     merge 3 chiều tối ưu. **KHÔNG dùng `git checkout`** — engine chỉ biến đổi văn bản, nên
+     mọi thay đổi chưa commit của lập trình viên vẫn được giữ nguyên.
+   - `status`: báo cáo, không ghi tệp, exit 1 nếu chưa apply đầy đủ.
+   - `selftest`: kiểm chứng bất biến `apply(restore(apply(x))) === apply(x)`.
+   - **Vùng loại trừ**: chú thích mã nguồn, định danh kỹ thuật, ghi công giấy phép và
+     tham chiếu dịch vụ Genspark thật đều được `protected` giữ nguyên.
+3. **Brand Gate (`tools/check-brand.mjs`)**: cổng CI hai tầng — Tầng 1 bắt chuỗi upstream đã
+   khai báo, Tầng 2 phát hiện **trôi dạt** khi upstream thêm chuỗi thương hiệu mới.
+4. **Quy trình Git Sync 2 Remote**:
    - **GitLab (`origin`)**: Lưu trữ private đầy đủ lịch sử phát triển.
    - **GitHub (`github`)**: Lưu trữ bản phân phối công khai, lọc tự động các file nhạy cảm theo `.githubignore` qua `git-sync-publish.sh`.
 

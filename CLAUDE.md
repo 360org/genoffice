@@ -45,26 +45,99 @@ system mode).
   launch.
 - `useI18n()`'s `t` is not referentially stable; never put it in a hook
   dependency array. Store the key and translate at render time.
-## Release & Whitelabel Rules (mandatory)
+## Whitelabel Rules (mandatory)
 
-1. **Tuyệt đối KHÔNG tự động build khi commit/push lên `main`**: Mọi commit đẩy lên `main` chỉ để lưu lịch sử mã nguồn. CI/Build runner tuyệt đối KHÔNG được phép tự động chạy trừ khi Sếp yêu cầu trực tiếp.
-2. **Quy trình Release CHỈ thực hiện khi Sếp yêu cầu rõ ràng**: Chỉ khi Sếp gõ lệnh/yêu cầu trực tiếp (VD: *"tag & release"*, *"release cho anh version 0.6.4"*, *"tạo release v0.6.4"*), em mới tiến hành các bước:
-   - Bump version ở `package.json` & `apps/shell/package.json`.
-   - Commit code thay đổi version.
-   - Tạo release tag `v*` và push tag lên remote (`git tag v0.6.4 && git push github v0.6.4`).
-   - GitHub Actions mới được kích hoạt để build release artifacts đóng gói sản phẩm.
-3. **Release artifact naming**: File names must clearly specify platform and architecture so users are never confused:
-   - macOS Apple Silicon: `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip`
-   - macOS Intel: `VuaOffice-${version}-macOS-Intel.dmg` / `.zip` (không thêm x64 vào tên macOS)
-   - Windows x64: `VuaOffice-${version}-Windows-x64-Setup.exe`
-   - Windows x86: `VuaOffice-${version}-Windows-x86-Setup.exe`
+> 📕 **Quy chế đầy đủ, bắt buộc đọc: [`docs/WHITELABEL_STRATEGY.md`](docs/WHITELABEL_STRATEGY.md)**
+> Phần dưới chỉ là bản rút gọn. Khi có mâu thuẫn, tài liệu quy chế là chuẩn.
+
+VuaOffice là bản phái sinh whitelabel của dự án mã nguồn mở `genspark-ai/genoffice`.
+Nguyên tắc nền tảng:
+
+> **Thương hiệu là DỮ LIỆU CẤU HÌNH, không phải mã nguồn.**
+> Mọi thay đổi thương hiệu đi qua `whitelabel/brand-config.json`. Không có ngoại lệ.
+
+1. **KHÔNG hardcode chuỗi thương hiệu vào mã nguồn.** Không sửa tay
+   `'GenOffice Docs'` → `'VuaOffice Docs'` trong `.ts`/`.tsx`/`.html`. Thay vào
+   đó thêm cặp vào `replacements` trong `brand-config.json` rồi chạy
+   `npm run whitelabel:apply`.
+2. **`whitelabel/brand-config.json` là nguồn chân lý DUY NHẤT.** Cấm hardcode
+   quy tắc thương hiệu trong `scripts/whitelabel.js`, `tools/check-brand.mjs`
+   hay bất kỳ đâu khác. (Đây chính là khiếm khuyết đã giết chết cơ chế cũ.)
+3. **KHÔNG đổi tên định danh kỹ thuật.** `@genoffice/*` (299 tệp import), alias
+   font (`GenOffice Sans KR`…), tên tệp font trên đĩa, khóa từ điển PDF
+   (`GenOfficeFormField`), thư mục `~/.genoffice`. Đổi chúng gây thiệt hại lớn
+   hơn nhiều so với lợi ích thương hiệu — xem quy chế §5.
+4. **KHÔNG sửa ghi công giấy phép.** Chuỗi `Copyright`, `Original Work`,
+   `licenseNotice` là nghĩa vụ pháp lý theo Apache License 2.0 §4. ⚖️
+5. **Quy luật phân biệt nhanh**: `GenOffice` **liền chữ** = định danh kỹ thuật
+   (miễn trừ) · `GenOffice` **có dấu cách/dấu câu ngay sau** = chữ hiển thị
+   (phải whitelabel). Chú thích mã nguồn luôn được miễn trừ.
+6. **Genspark là nhà cung cấp AI hợp lệ.** Các chuỗi như `Sign in to Genspark`,
+   `genspark.ai/pricing` nói về **dịch vụ có thật** — đổi thành "VuaOffice" là
+   nói dối người dùng. Chỉ whitelabel chỗ sản phẩm **tự xưng** sai thương hiệu.
+7. **Luật song ánh**: `apply(restore(apply(x))) === apply(x)`. Mọi mẫu
+   `protected` chặn một chiều PHẢI có cặp đối xứng. Sau mọi thay đổi config,
+   bắt buộc chạy `npm run whitelabel:selftest`.
+8. **Trước mọi commit**: `npm run brand:gate` phải ĐẠT (selftest + status +
+   check-brand). Cấm vô hiệu hóa cổng, cấm `continue-on-error`, cấm `--no-verify`.
+9. **Đồng bộ upstream**: chạy `npm run upstream:setup` một lần mỗi máy (Git
+   KHÔNG tự kích hoạt merge driver `ours` khi clone — thiếu bước này thì
+   `.gitattributes` im lặng vô tác dụng). Luôn merge qua nhánh
+   `sync/upstream-YYYYMMDD` + Pull Request, **cấm merge thẳng vào `main`**.
+   Quy trình đầy đủ: quy chế §7.
+10. **Branding assets**: Nguồn logo là `whitelabel/Logo/` (**chữ `L` hoa**) — đây là
+    thư mục `brand-config.json` sao chép vào `apps/shell/src/renderer/src/assets/` và
+    là tệp app thực sự import: `vuaoffice-logo.svg` (lockup, dùng ở Home) và
+    `vuaoffice-icon.svg` (icon 28x28px, dùng ở Onboarding). Thư mục
+    `whitelabel/logo/` chữ thường **không được mã nguồn nào tham chiếu** — sửa tệp
+    trong đó không có tác dụng gì.
+
+### Lệnh whitelabel
+
+| Lệnh | Tác dụng |
+| :--- | :--- |
+| `npm run whitelabel:apply` | upstream → VuaOffice |
+| `npm run whitelabel:restore` | VuaOffice → upstream (trước khi merge) |
+| `npm run whitelabel:status` | Báo cáo, không ghi tệp, exit 1 nếu chưa sạch |
+| `npm run whitelabel:selftest` | Kiểm chứng luật song ánh |
+| `npm run brand:check` | Cổng phát hiện rò rỉ (2 tầng) |
+| `npm run brand:gate` | Gộp cả ba cổng — chạy trước mọi commit |
+| `npm run upstream:setup` | Cấu hình remote upstream + merge driver |
+
+## Release Rules (mandatory)
+
+> 📕 **Quy chế đầy đủ, bắt buộc đọc: [`docs/RELEASE_PROTOCOL.md`](docs/RELEASE_PROTOCOL.md)**
+> Bảng kiểm 9 bước, mẫu báo cáo và danh sách điều cấm nằm trong tài liệu đó.
+
+1. **Tuyệt đối KHÔNG tự động build khi commit/push lên `main`**: Mọi commit đẩy
+   lên `main` chỉ để lưu lịch sử mã nguồn. CI/Build runner tuyệt đối KHÔNG được
+   phép tự động chạy trừ khi Sếp yêu cầu trực tiếp.
+2. **🛑 Release CHỈ thực hiện khi Sếp yêu cầu trực tiếp và rõ ràng** (VD: *"tag &
+   release"*, *"release cho anh version 0.7.1"*). Việc vừa xong tính năng, CI
+   đang xanh, hay commit đã lên `main` **KHÔNG** phải là lệnh phát hành. Không
+   chắc chắn → **HỎI LẠI**, không tự chạy.
+3. **Bảng kiểm 9 bước bắt buộc, không được bỏ bước** (chi tiết: quy chế §1):
+   xác nhận quyền → nhánh sạch → **cổng thương hiệu** → cổng chất lượng
+   (lint/typecheck/test) → bump version đồng bộ → commit → tag & push → theo dõi
+   build tới khi xong → xác minh tên artifact. Phải báo cáo kết quả từng bước.
+4. **Synchronized version bumping**: Luôn bump version ở CẢ `package.json` VÀ
+   `apps/shell/package.json`. Workflow xác thực tag khớp chính xác
+   `apps/shell/package.json`; lệch nhau là build hỏng ngay job đầu.
+5. **Release artifact naming**: Tên tệp phải nêu rõ nền tảng và kiến trúc:
+   Nguồn chân lý là các khóa `artifactName` trong `apps/shell/electron-builder.cjs`;
+   bảng đầy đủ và ghi chú ở `docs/RELEASE_PROTOCOL.md` §2.
+   - macOS: `VuaOffice-${version}-macOS-arm64.dmg` / `-macOS-x64.dmg` (kèm `.zip`)
+   - Windows: `VuaOffice-${version}-Windows-x64-Setup.exe` / `-Windows-ia32-Setup.exe`
+     (và bản gộp `-Windows-Setup.exe`)
    - Linux: `VuaOffice-${version}.AppImage` / `vuaoffice_${version}_amd64.deb`
-4. **Synchronized version bumping**: Always bump version in BOTH root `package.json` AND `apps/shell/package.json` before creating release tag. The GitHub Actions release workflow validates that tag version matches `apps/shell/package.json` exactly.
-5. **Dual-remote Git push**: Always push commits and tags to both `origin` (GitLab) and `github` (GitHub). Never use `--no-verify` to bypass `.git/hooks/pre-push` unless executing the authorized publish flow.
-6. **Branding & Whitelabel integrity**:
-   - Sidebar logo: Use standalone icon `/whitelabel/logo/VuaOffice_Icon.svg` (28x28px) next to crisp brand text "VuaOffice", not co-axial stretched logo lockups.
-   - AI Panel & Ribbon titles: Must use "VuaOffice AI" title and badge, not legacy "Genspark" text or sparkle icons.
-   - Run `npm run whitelabel:apply` before every release build to ensure whitelabel transformation rules are clean.
-7. **AI Settings & Provider Modes**:
-   - Normal Mode: Connects directly via 360 CORP Gateway (`vuahethong.net` / `OmiRouter`).
-   - Developer Mode: Supports multi-endpoint selection including Hermes Agent (`https://hermes.vuahethong.com/v1`).
+     / `vuaoffice-${version}.x86_64.rpm`
+6. **Dual-remote Git push**: Đẩy commit và tag lên cả `origin` và `github` nếu
+   kho mã cấu hình đa remote. Không dùng `--no-verify` để bỏ qua
+   `.git/hooks/pre-push` trừ khi đang thực hiện luồng publish được ủy quyền.
+7. **Cấm tag lại cùng một số phiên bản.** Build hỏng → sửa lỗi, bump số mới, tag
+   mới. Người dùng có thể đã tải bản cũ.
+
+## AI Settings & Provider Modes
+
+- Normal Mode: Kết nối trực tiếp qua 360 CORP Gateway (`vuahethong.net` / `OmiRouter`).
+- Developer Mode: Hỗ trợ chọn đa endpoint, gồm Hermes Agent (`https://hermes.vuahethong.com/v1`).

@@ -344,7 +344,7 @@ const config = {
   // latest-linux.yml keeps listing exactly what the CDN pipeline uploads
   // (AppImage + deb) and the promote workflow needs no rpm alias.
   rpm: {
-    artifactName: 'genoffice-${version}.${arch}.rpm',
+    artifactName: 'vuaoffice-${version}.${arch}.rpm',
     packageName: 'vuaoffice',
     publish: null,
   },

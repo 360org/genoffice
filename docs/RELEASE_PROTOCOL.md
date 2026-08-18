@@ -122,18 +122,34 @@ Kiểm tra artifact phát hành đúng quy ước đặt tên (§2). Sai tên �
 
 ## §2. Quy ước Tên Artifact — Bắt buộc
 
-Tên tệp phải nêu rõ nền tảng và kiến trúc để người dùng không bao giờ tải nhầm.
+> **Nguồn chân lý DUY NHẤT của tên tệp là `apps/shell/electron-builder.cjs`**
+> (các khóa `artifactName`). Bảng dưới là ảnh chụp đúng những gì cấu hình đó
+> sinh ra — đã đối chiếu với tài sản thực tế của bản phát hành v0.7.0 và v1.0.0.
+> Bước 9 xác minh tên tệp **so với bảng này**; muốn đổi tên thì sửa
+> `electron-builder.cjs` trước, rồi cập nhật bảng.
 
-| Nền tảng | Tên tệp |
+| Nền tảng | Tên tệp thực tế |
 | :--- | :--- |
-| macOS Apple Silicon | `VuaOffice-${version}-macOS-Apple-Silicon.dmg` / `.zip` |
-| macOS Intel | `VuaOffice-${version}-macOS-Intel.dmg` / `.zip` |
-| Windows x64 | `VuaOffice-${version}-Windows-x64-Setup.exe` |
-| Windows x86 | `VuaOffice-${version}-Windows-x86-Setup.exe` |
+| macOS Apple Silicon | `VuaOffice-${version}-macOS-arm64.dmg` / `.zip` |
+| macOS Intel | `VuaOffice-${version}-macOS-x64.dmg` / `.zip` |
+| Windows 64-bit | `VuaOffice-${version}-Windows-x64-Setup.exe` |
+| Windows 32-bit | `VuaOffice-${version}-Windows-ia32-Setup.exe` |
+| Windows gộp 2 kiến trúc | `VuaOffice-${version}-Windows-Setup.exe` |
 | Linux AppImage | `VuaOffice-${version}.AppImage` |
 | Linux deb | `vuaoffice_${version}_amd64.deb` |
+| Linux rpm | `vuaoffice-${version}.x86_64.rpm` |
 
-> ⚠️ Tên macOS **không** thêm hậu tố `x64` — dùng `macOS-Intel` cho rõ nghĩa với người dùng phổ thông.
+> ⚠️ **Lưu ý cho người rà soát**: bảng này từng ghi `macOS-Apple-Silicon`,
+> `macOS-Intel`, `Windows-x86` — những tên **chưa bao giờ được build sinh ra**.
+> Sai lệch đó biến Bước 9 thành bước luôn-luôn-trượt, và hệ quả là nó bị bỏ qua.
+> Nếu Sếp muốn dùng bộ tên thân thiện hơn (`Apple-Silicon` / `Intel` / `x86`),
+> đó là thay đổi **một dòng** trong `electron-builder.cjs` cho mỗi nền tảng —
+> nhưng phải là quyết định có chủ đích, vì nó đổi tên tệp người dùng tải về và
+> mọi liên kết trỏ tới bản phát hành cũ.
+>
+> Riêng `VuaOffice-${version}-Windows-Setup.exe` (bản gộp, ~249 MB) không nêu
+> kiến trúc. Người dùng Windows nhìn thấy **ba** tệp `.exe` cùng lúc — đây là
+> điểm dễ gây nhầm lẫn, nên cân nhắc bỏ bản gộp hoặc đặt tên rõ hơn.
 
 ---
 

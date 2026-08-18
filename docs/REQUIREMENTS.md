@@ -3,7 +3,7 @@
 > **Tài liệu Yêu cầu Sản phẩm & Kỹ thuật (Product & Technical Requirements Document)**  
 > **Truy nguồn từ**: [IDEA.md](IDEA.md)  
 > **Chủ quản**: 360 CORP  
-> **Phiên bản**: v0.6.7+
+> **Phiên bản**: v1.0.0+
 
 ---
 
@@ -118,8 +118,9 @@
 
 | ID | Hạng mục Yêu cầu | Phương pháp Nghiệm thu | Trạng thái |
 |---|---|---|---|
-| **FR-01** | Áp dụng Whitelabel thương hiệu VuaOffice | Chạy `npm run whitelabel:apply`, kiểm tra hiển thị Logo, Icon và cấu hình electron-builder | Đạt |
-| **FR-02** | Khôi phục Codebase gốc sạch sẽ | Chạy `npm run whitelabel:restore`, `git status` trả về trạng thái sạch | Đạt |
+| **FR-01** | Áp dụng Whitelabel thương hiệu VuaOffice | Chạy `npm run whitelabel:apply`, sau đó `npm run whitelabel:status` báo SẠCH và `npm run brand:check` ĐẠT | Đạt |
+| **FR-02** | Khôi phục Codebase gốc sạch sẽ | Chạy `npm run whitelabel:restore` (mã nguồn trở về dạng upstream — `git status` sẽ báo BẨN, vì trạng thái đã commit mang thương hiệu VuaOffice). Nghiệm thu bằng `npm run whitelabel:selftest`: bất biến `apply(restore(apply(x))) === apply(x)` phải ĐẠT | Đạt |
+| **FR-02b** | Chống ghi đè khi đồng bộ upstream | `npm run upstream:setup` cấu hình remote + merge driver `ours`; `.gitattributes` bảo vệ tài sản thương hiệu; `npm run brand:gate` chặn rò rỉ sau merge | Đạt |
 | **FR-03** | Tích hợp OmiRouter, 9Router, Hermes | Chạy typecheck và kiểm tra dropdown AI Settings trong ứng dụng | Đạt |
 | **FR-04** | Toggle Developer Mode qua Menu Help | Kiểm tra checkbox trong `Help > Troubleshooting > Enable Developer Mode` | Đạt |
 | **FR-05** | Kiểm tra cập nhật thủ công & tự động | Kiểm tra menu `Check for Updates…` và Account dropdown menu | Đạt |
