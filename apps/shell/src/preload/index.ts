@@ -328,6 +328,11 @@ const tabsApi: TabsApi = {
   async notifyChromePressed() {
     await ipcRenderer.invoke(TABS_CHANNELS.chromePressed)
   },
+  onChromePressed(handler) {
+    const listener = () => handler()
+    ipcRenderer.on('app:chrome-pressed', listener)
+    return () => ipcRenderer.removeListener('app:chrome-pressed', listener)
+  },
 }
 
 contextBridge.exposeInMainWorld('aiOfficeTabs', tabsApi)

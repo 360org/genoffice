@@ -48,6 +48,7 @@ Mọi cấu hình thương hiệu VuaOffice được lưu tập trung tại `whi
 Khi cần đồng bộ code mới nhất từ upstream:
 
 ```bash
+<<<<<<< HEAD
 # Bước 1: Khai báo upstream (nếu chưa có) và fetch code mới nhất
 git remote add upstream https://github.com/genspark-ai/genoffice.git 2>/dev/null || true
 git fetch upstream main
@@ -85,6 +86,75 @@ VuaOffice hỗ trợ kết nối trực tiếp đến các AI Gateway của 360 
 ---
 
 ## 🛠️ Hướng dẫn Phát triển Local (Development)
+=======
+sudo apt install ./genoffice_0.7.204_amd64.deb
+```
+
+On Fedora / RHEL-family / openSUSE, install the rpm instead:
+
+```bash
+sudo dnf install ./genoffice-0.7.204.x86_64.rpm     # Fedora / RHEL family
+sudo zypper install ./genoffice-0.7.204.x86_64.rpm  # openSUSE
+```
+
+The AppImage instead runs in place: install the FUSE 2 runtime
+(`sudo apt install libfuse2`; on Ubuntu 24.04 the package is `libfuse2t64`),
+make the file executable, then run it:
+
+```bash
+chmod +x GenOffice-0.7.204.AppImage
+./GenOffice-0.7.204.AppImage
+```
+
+## Apps
+
+| App             | Product                | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/docs`     | **GenOffice Docs**     | `.docx` word processor. Byte-preserving round trip: only dirty paragraphs are regenerated (paragraph patch), everything else in the original file is kept byte-for-byte, so opening and saving never breaks layout in Word. Paginated view whose line metrics reproduce the original document's layout, tracked changes, comments, styles, equations, ink.                                                                                                                                                                                                      |
+| `apps/sheets`   | **GenOffice Sheets**   | `.xlsx` spreadsheet. UI built on the open-source [Univer](https://github.com/dream-num/univer) core (Apache-2.0) with a large layer of in-house extensions; `.xlsx` import/export runs through an in-house Rust sidecar (calamine + IronCalc), charts are rendered in-house (Konva), plus pivot tables, slicers, conditional formatting, and formula tracing.                                                                                                                                                                                                   |
+| `apps/slides`   | **GenOffice Slides**   | `.pptx` presentations. In-house `.pptx` parse/render/edit engine with masters, charts, cropping, ink, and text shaping (HarfBuzz metrics).                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `apps/pdf`      | **GenOffice PDF**      | `.pdf` viewer/editor on [pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0) + [pdf-lib](https://github.com/Hopding/pdf-lib) (MIT): annotations, forms, outlines, stamps, signatures, page operations, and printing support. True text editing — paragraph selection with in-block reflow, alignment restoration, original-font preservation — and content-stream image insert/edit, all rewriting page content streams through [PDFium](https://pdfium.googlesource.com/pdfium/) wasm (BSD-3-Clause) with subset-embedded fonts — no cover-up annotations. |
+| `apps/markdown` | **GenOffice Markdown** | `.md` / `.markdown` editor: Tiptap block editor over plain Markdown files — headings, lists, tables, images, code blocks — saved back as plain Markdown, hosted in shell tabs.                                                                                                                                                                                                                                                                                                                                                                                  |
+| `apps/shell`    | **GenOffice**          | The suite shell: home screen, tabbed hosting of the five editors, light/dark/system theme, auto-update.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+Every app embeds the same AI panel: block-granular AI editing with version
+snapshots and diffs in docs, a tool-calling agent over workbook/slide/PDF
+state in the others.
+
+The whole suite ships light / dark / system UI themes built on shared design
+tokens (`packages/ui`), with a CI guard that keeps chrome colors on the token
+system. Document surfaces stay light in dark mode — Word-style dark chrome
+around white paper — so files render and export identically in both themes.
+
+**AI backend (Genspark).** The apps sign in to a Genspark account through a
+device-code flow; no model API key is entered or stored by the user. Model
+calls route through the Genspark proxy (Claude, GPT, and Gemini families).
+The same account also unlocks the Genspark ("gsk") tool endpoints the agents
+build on — web and image search, image generation and editing,
+image/audio/video analysis, and audio transcription — all reachable through
+`packages/ai-search` for anyone extending the agent layer.
+
+## Engine packages
+
+All pure TypeScript, no Electron dependency, unit-tested (except the UI kit):
+
+- `packages/docx-engine` — docx parsing → block tree (with `docxIndex`
+  anchors and passthrough), OOXML fragment generation, byte-level paragraph
+  patching.
+- `packages/pptx-engine` / `packages/pptx-render` — pptx model and rendering.
+- `packages/file-parse` — text extraction for AI attachments (office formats,
+  text formats).
+- `packages/agent-core` — the AI agent loop and skill composition shared by
+  every app.
+- `packages/ai-provider` — provider abstraction and streaming for the model
+  backends.
+- `packages/ai-search` — Genspark auth + web/image search tools.
+- `packages/i18n`, `packages/ui`, `packages/project-store`,
+  `packages/electron-utils` — shared i18n core, React UI kit, recent-files
+  store, and Electron main-process helpers.
+
+## Development
+>>>>>>> upstream/main
 
 ```bash
 # Cài đặt phụ thuộc
