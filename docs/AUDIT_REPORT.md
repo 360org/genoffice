@@ -262,7 +262,12 @@ Các hằng số nội bộ vẫn dùng tên `GENSPARK_LLM_BASE_URLS`, `GENSPARK
 
 ## 8. Tài liệu Liên quan
 
-- [`docs/SECURITY.md`](./SECURITY.md) — Chính sách bảo mật hệ thống *(cần cập nhật theo mục 3.1)*
-- [`docs/ARCH.md`](./ARCH.md) — Kiến trúc tổng thể
-- [`docs/CONTRIBUTING.md`](./CONTRIBUTING.md) — Hướng dẫn đóng góp
-- [`CLAUDE.md`](../CLAUDE.md) — Quy tắc bắt buộc cho AI agent & lập trình viên
+- [`docs/SECURITY.md`](/Volumes/DATA/DEV/vuaoffice/docs/SECURITY.md) — Chính sách bảo mật hệ thống
+- [`docs/ARCH.md`](/Volumes/DATA/DEV/vuaoffice/docs/ARCH.md) — Kiến trúc tổng thể
+- [`docs/CONTRIBUTING.md`](/Volumes/DATA/DEV/vuaoffice/docs/CONTRIBUTING.md) — Hướng dẫn đóng góp
+- [`docs/WHITELABEL_STRATEGY.md`](/Volumes/DATA/DEV/vuaoffice/docs/WHITELABEL_STRATEGY.md) — Quy chế Bắt buộc về Whitelabel & Đồng bộ Upstream
+- [`docs/RELEASE_PROTOCOL.md`](/Volumes/DATA/DEV/vuaoffice/docs/RELEASE_PROTOCOL.md) — Quy chế Phát hành VuaOffice
+- [`docs/REQUIREMENTS.md`](/Volumes/DATA/DEV/vuaoffice/docs/REQUIREMENTS.md) — Đặc tả Yêu cầu Hệ thống
+- [`docs/SPEC.md`](/Volumes/DATA/DEV/vuaoffice/docs/SPEC.md) — Đặc tả Kỹ thuật
+- [`docs/CHANGELOGS.md`](/Volumes/DATA/DEV/vuaoffice/docs/CHANGELOGS.md) — Nhật ký Phát triển VuaOffice Whitelabel
+- [`CLAUDE.md`](/Volumes/DATA/DEV/vuaoffice/CLAUDE.md) — Quy tắc cốt lõi cho AI agent & lập trình viên

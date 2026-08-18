@@ -66,7 +66,11 @@ export function ommlToMathML(ommlXml: string): string {
     const root = parsed.find((n) => nameOf(n) === 'm:oMath')
     if (!root) continue
     const body = mmlChildren(childrenOf(root))
-    if (body) parts.push(`<math display="block"><mrow>${body}</mrow></math>`)
+    if (body) {
+      // MathML Core only: sanitize to reject foreign tags / inline scripts
+      const sanitized = body.replace(/<\/?(script|iframe|object|embed|form|input|button|svg)[\s\S]*?>/gi, '')
+      parts.push(`<math display="block"><mrow>${sanitized}</mrow></math>`)
+    }
   }
   return parts.join('')
 }

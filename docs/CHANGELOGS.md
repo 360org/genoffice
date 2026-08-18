@@ -14,6 +14,14 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
   - Bộ máy Whitelabel & Brand Gate Config-Driven chuẩn mực theo `/Volumes/DATA/DEV/vuaoffice/docs/WHITELABEL_STRATEGY.md`, đảm bảo 100% luật song ánh.
   - Thông điệp Onboarding đầu tiên chuẩn hóa: "The first All in One Free, AI-native office suite".
 
+### Security & Hardening (Priority Roadmap Remediation)
+- **Cô lập XSS Renderer Email trong VuaMail**: Render toàn bộ nội dung HTML email người gửi trong `<iframe sandbox="allow-same-origin">` (`EmailHtmlFrame.tsx`).
+- **Làm sạch MathML & HTML trong VuaOffice Docs**: Loại bỏ triệt để các thẻ nguy hiểm (`<script>`, `<iframe>`, `<object>`, `<embed>`, `<form>`, `<input>`, `<button>`, `<svg>`), thuộc tính sự kiện inline (`on*`) và giao thức `javascript:` trong pipeline chuyển đổi OOXML OMML (`math.ts`), `DocInlineMath`, `buildProtectedDom`, và view `splitHtml`.
+- **Kiểm soát ranh giới đường dẫn IPC Shell**: Thiết lập hàm xác thực an toàn `assertSafeUserPath()` so khớp thư mục người dùng (`home`, `documents`, `downloads`, `desktop`, `temp`, `defaultSaveDir` và các tệp gần đây/đã đánh dấu sao) ngăn chặn triệt để path traversal đối với các IPC handlers tệp tin.
+- **Chuẩn hóa Semantic UI Tokens cho Mail Theme**: Đồng bộ toàn diện `mail-theme.css` sang hệ thống biến CSS Design Tokens ngữ nghĩa (`--accent`, `--surface`, `--hover`, `--border`), hỗ trợ đầy đủ Light/Dark mode.
+- **Cơ chế Retry Exponential Backoff cho AI Provider**: Bổ sung tự động thử lại khi gặp lỗi tạm thời (HTTP 429, 502, 503, 504) kèm jitter và xử lý header `Retry-After`.
+- **Bổ sung Dark Theme Tokens cho Màu Lỗi**: Bổ sung `--color-error` (`#f87171`) và `--color-error-hover` (`#ef4444`) trong cả hai khối `[data-theme='dark']` và `@media (prefers-color-scheme: dark)` tại `packages/ui/src/tokens.css`.
+
 ## [0.7.0] - 2026-08-16
 
 ### Added

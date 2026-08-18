@@ -8,7 +8,7 @@ import {
   renameSync,
   writeFileSync,
 } from 'node:fs'
-import { basename, dirname, extname, join } from 'node:path'
+import { basename, dirname, extname, isAbsolute, join, resolve } from 'node:path'
 import {
   BrowserWindow,
   Menu,
@@ -1948,8 +1948,33 @@ function startQueuedWorkbookNudge(): void {
 
 // ---- home IPC ----
 
+function isPathInside(childPath: string, parentDir: string): boolean {
+  const rel = resolve(childPath)
+  const root = resolve(parentDir)
+  return rel === root || (rel.startsWith(root) && rel.charAt(root.length) === '/')
+}
+
+function assertSafeUserPath(targetPath: string): boolean {
+  if (typeof targetPath !== 'string' || !targetPath.trim()) return false
+  if (!isAbsolute(targetPath)) return false
+
+  const home = app.getPath('home')
+  const docs = app.getPath('documents')
+  const downloads = app.getPath('downloads')
+  const desktop = app.getPath('desktop')
+  const temp = app.getPath('temp')
+  const defaultSave = defaultSaveDir()
+
+  // Allowed roots: user profile subtrees, standard desktop folders, default save directory, or current recents/starred list
+  const allowedRoots = [home, docs, downloads, desktop, temp, defaultSave]
+  if (allowedRoots.some((root) => isPathInside(targetPath, root))) return true
+
+  const knownFiles = new Set([...readRecentFiles(), ...readStarredFiles()])
+  return knownFiles.has(targetPath)
+}
+
 function statEntries(paths: string[]): RecentEntry[] {
-  return statExistingPaths(paths, new Set(readStarredFiles()))
+  return statExistingPaths(paths.filter(assertSafeUserPath), new Set(readStarredFiles()))
 }
 
 function registerHomeIpc(): void {
@@ -2017,7 +2042,7 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.openPath, (_event, path: unknown) => {
-    if (typeof path === 'string') openDocumentPath(path)
+    if (typeof path === 'string' && assertSafeUserPath(path)) openDocumentPath(path)
   })
 
   ipcMain.handle(HOME_CHANNELS.browse, async (event) => {
@@ -2075,13 +2100,15 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.revealPath, (_event, path: unknown) => {
-    if (typeof path === 'string' && existsSync(path)) shell.showItemInFolder(path)
+    if (typeof path === 'string' && existsSync(path) && assertSafeUserPath(path)) shell.showItemInFolder(path)
   })
 
   ipcMain.handle(
     HOME_CHANNELS.renameFile,
     (_event, path: unknown, newName: unknown): RenameResult => {
       if (typeof path !== 'string' || typeof newName !== 'string')
+        return { ok: false, error: tm('errBadArgs') }
+      if (!assertSafeUserPath(path))
         return { ok: false, error: tm('errBadArgs') }
       const name = newName.trim()
       if (!name || /[\\/:]/.test(name)) return { ok: false, error: tm('errBadName') }
@@ -2112,7 +2139,7 @@ function registerHomeIpc(): void {
   )
 
   ipcMain.handle(HOME_CHANNELS.duplicateFile, (_event, path: unknown) => {
-    if (typeof path !== 'string' || !existsSync(path)) return
+    if (typeof path !== 'string' || !existsSync(path) || !assertSafeUserPath(path)) return
     const ext = extname(path)
     const base = basename(path, ext)
     const dir = dirname(path)
@@ -2126,7 +2153,7 @@ function registerHomeIpc(): void {
   })
 
   ipcMain.handle(HOME_CHANNELS.deleteFiles, async (_event, paths: unknown) => {
-    const list = stringPaths(paths)
+    const list = stringPaths(paths).filter(assertSafeUserPath)
     for (const p of list) {
       try {
         await shell.trashItem(p)

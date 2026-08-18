@@ -210,12 +210,15 @@ function posFromAnchor(view: Editor['view'], anchor: LineAnchor): number | undef
   }
 }
 
-/** Clean pasted Word/web HTML: mso conditional comments, <o:p>, and unwrapping <li><p>x</p></li> */
+/** Clean pasted Word/web HTML: mso conditional comments, <o:p>, unwrapping <li><p>x</p></li>, and strip script/dangerous elements */
 function cleanPastedHtml(html: string): string {
   return html
     .replace(/<!--\[if[\s\S]*?<!\[endif\]-->/g, '')
     .replace(/<o:p>[\s\S]*?<\/o:p>/g, '')
     .replace(/<li([^>]*)>\s*<p[^>]*>([\s\S]*?)<\/p>\s*<\/li>/g, '<li$1>$2</li>')
+    .replace(/<\/?(script|iframe|object|embed|form|input|button)[\s\S]*?>/gi, '')
+    .replace(/\son\w+\s*=\s*(["'][^"']*["']|[^\s>]+)/gi, '')
+    .replace(/javascript:/gi, '')
 }
 
 /** All runs a footnote/endnote reference may live in: paragraph runs, plus table
@@ -800,7 +803,7 @@ export function App() {
   // Split pane: keep the read-only bottom copy in sync with the editor (debounced)
   useEffect(() => {
     if (!splitView || !editor) return
-    const sync = () => setSplitHtml(editor.getHTML())
+    const sync = () => setSplitHtml(cleanPastedHtml(editor.getHTML()))
     sync()
     let timer = 0
     const onUpdate = () => {

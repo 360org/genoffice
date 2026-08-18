@@ -530,6 +530,15 @@ export const DocInlineImage = Node.create({
   },
 })
 
+function sanitizeMathMlMarkup(raw: string): string {
+  if (!raw) return ''
+  // Strip dangerous tags and event handlers to prevent XSS in innerHTML
+  return raw
+    .replace(/<\/?(script|iframe|object|embed|form|input|button|svg|link|meta|style)[\s\S]*?>/gi, '')
+    .replace(/\son\w+\s*=\s*(["'][^"']*["']|[^\s>]+)/gi, '')
+    .replace(/javascript:/gi, '')
+}
+
 /**
  * Atomic inline formula flowing with the text. `omml` is the exact <m:oMath>
  * fragment that saves verbatim; `mathml` renders natively in Chromium;
@@ -568,7 +577,7 @@ export const DocInlineMath = Node.create({
           dom.setAttribute(key, value)
         }
         const mathml = String(currentNode.attrs.mathml ?? '')
-        if (mathml) dom.innerHTML = mathml
+        if (mathml) dom.innerHTML = sanitizeMathMlMarkup(mathml)
         else dom.textContent = String(currentNode.attrs.text ?? '')
       }
       render()
@@ -2130,7 +2139,7 @@ export function buildProtectedDom(node: PmNode): HTMLElement {
   const el = dom as HTMLElement
   const mathml = (node.attrs.formulaDisplay as FormulaDisplay | null)?.mathml
   const mathHost = el.querySelector?.('.doc-formula-math')
-  if (mathml && mathHost) mathHost.innerHTML = mathml
+  if (mathml && mathHost) mathHost.innerHTML = sanitizeMathMlMarkup(mathml)
   return el
 }
 
