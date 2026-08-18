@@ -1,5 +1,6 @@
 import React from 'react'
 import type { EmailBody, EmailMessage } from '../../../../shared/types'
+import { EmailHtmlFrame } from './EmailHtmlFrame'
 
 interface ReadingPaneProps {
   email: EmailMessage | null
@@ -76,7 +77,11 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
       {isLoadingBody ? (
         <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Loading content...</div>
       ) : body?.html ? (
-        <div className="reading-body" dangerouslySetInnerHTML={{ __html: body.html }} />
+        // Nội dung do người gửi kiểm soát: BẮT BUỘC đi qua iframe sandbox.
+        // Tuyệt đối không quay lại dangerouslySetInnerHTML — xem EmailHtmlFrame.tsx.
+        <div className="reading-body">
+          <EmailHtmlFrame html={body.html} title={email.subject || 'Nội dung email'} />
+        </div>
       ) : (
         <div className="reading-body">{body?.plainText || email.snippet}</div>
       )}
