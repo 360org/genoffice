@@ -109,7 +109,7 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
   },
   {
     id: 'ninerouter',
-    label: 'vuaofficerouter',
+    label: 'VuaAi Provider',
     models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'deepseek-chat'],
     defaultModel: 'vuaai-daily',
     keyPlaceholder: 'sk-or-...',

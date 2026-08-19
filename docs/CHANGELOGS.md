@@ -7,7 +7,7 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
 
 ### Fixed
 - **Luồng Đăng nhập 360 CORP Web-to-Desktop**: Chuyển hướng callback đăng nhập qua endpoint landing trung gian `/vuaoffice/auth/desktop_callback` trên server Odoo (`vuahethong.net`) để tự động bắn custom protocol scheme `vuaoffice://auth/callback` chuyển quyền đăng nhập về Desktop app mượt mà và hiển thị trạng thái đăng nhập thành công.
-- **AI Provider mặc định vuaofficerouter**: Chuẩn hóa provider mặc định trên cấu hình 9Router thành hiển thị `vuaofficerouter`, Base URL `https://ai-router.vuahethong.com/v1` và custom model `vuaai-daily` theo cấu hình whitelabel; chuẩn API vẫn giữ tương thích 9Router/OpenAI-compatible.
+- **AI Provider mặc định VuaAi Provider**: Chuẩn hóa provider mặc định là `VuaAi Provider` (`ninerouter`), Base URL `https://ai-router.vuahethong.com/v1` và model `vuaai-daily`. Gỡ bỏ hardcode ép provider sang `genspark` trong các IPC handler `ai:get-settings` (`docs-main.ts`, `sheets-main.ts`, `ai-ipc.ts`). Ẩn danh sách vendor trong modal Cài đặt AI khi ở Normal Mode và chỉ hiển thị khi bật Developer Mode.
 - **Manual Update Check**: Hiển thị popup `You are up to date, no update available.` khi người dùng kiểm tra thủ công và app đã ở bản mới nhất.
 - **macOS Auto Update Install Fallback**: Khi `quitAndInstall(true, true)` hoặc lỗi Squirrel.Mac apply/signing fail, UI chuyển sang chế độ cài đặt thủ công thay vì im lặng sau khi tải xong.
 - **Manual Download URL**: Fallback manual page trỏ về `https://vuahethong.net/#download-desktop-app`, không trỏ GitHub release page.
