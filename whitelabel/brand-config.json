@@ -75,6 +75,16 @@
       "reason": "Nhãn Ribbon, tiêu đề AI Panel, badge — CLAUDE.md quy tắc 6"
     },
     {
+      "from": "aiPanelTitle: 'Genspark'",
+      "to": "aiPanelTitle: 'VuaOffice AI'",
+      "reason": "Tiêu đề panel AI trong Docs và Slides i18n (19 ngôn ngữ)"
+    },
+    {
+      "from": "Genspark\n        </span>",
+      "to": "VuaOffice AI\n        </span>",
+      "reason": "Tiêu đề panel AI trực tiếp trong Sheets, PDF, Markdown"
+    },
+    {
       "from": "GenOffice",
       "to": "VuaOffice",
       "reason": "Quy tắc BAO TRÙM — phải đặt CUỐI CÙNG. Bắt mọi trường hợp sản phẩm tự xưng còn lại (lời mời Star trên GitHub, tác giả chú thích PDF, system prompt của AI). An toàn vì engine sắp xếp chuỗi dài trước, và mọi định danh kỹ thuật/ghi công giấy phép đã được `protected` che chắn."

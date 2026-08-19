@@ -5,6 +5,13 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
 
 ## [1.0.2] - 2026-08-19
 
+### Changed & Whitelabel
+- **Chuẩn hóa Header Sidebar AI trên Toàn bộ 5 Ứng dụng (Docs, Sheets, Slides, PDF, Markdown)**:
+  - Bổ sung cấu hình thay thế song ánh vào nguồn chân lý duy nhất `/Volumes/DATA/DEV/vuaoffice/whitelabel/brand-config.json` theo đúng `/Volumes/DATA/DEV/vuaoffice/docs/WHITELABEL_STRATEGY.md`.
+  - Thay thế chuỗi `aiPanelTitle` trong i18n của Docs và Slides trên 19 ngôn ngữ thành `VuaOffice AI`.
+  - Chuẩn hóa span tiêu đề `.ai-panel-title` trong Sheets, PDF và Markdown hiển thị đồng bộ `VuaOffice AI`.
+  - Vượt qua 100% cổng kiểm tra thương hiệu `npm run brand:gate` và toàn bộ test suites.
+
 ### Fixed
 - **Luồng Đăng nhập 360 CORP Web-to-Desktop**: Chuyển hướng callback đăng nhập qua endpoint landing trung gian `/vuaoffice/auth/desktop_callback` trên server Odoo (`vuahethong.net`) để tự động bắn custom protocol scheme `vuaoffice://auth/callback` chuyển quyền đăng nhập về Desktop app mượt mà và hiển thị trạng thái đăng nhập thành công.
 - **AI Provider mặc định VuaAi Provider**: Chuẩn hóa provider mặc định là `VuaAi Provider` (`ninerouter`), Base URL `https://ai-router.vuahethong.com/v1` và model `vuaai-daily`. Gỡ bỏ hardcode ép provider sang `genspark` trong các IPC handler `ai:get-settings` (`docs-main.ts`, `sheets-main.ts`, `ai-ipc.ts`). Ẩn danh sách vendor trong modal Cài đặt AI khi ở Normal Mode và chỉ hiển thị khi bật Developer Mode.
