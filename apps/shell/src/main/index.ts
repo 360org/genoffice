@@ -1995,7 +1995,7 @@ function registerHomeIpc(): void {
   let pendingLoginUrl = ''
   ipcMain.handle(HOME_CHANNELS.accountLogin, async (event) => {
     const sender = event.sender
-    const loginUrl = 'https://vuahethong.net/web/login?redirect_uri=vuaoffice://auth/callback'
+    const loginUrl = 'https://vuahethong.net/web/login?redirect=/vuaoffice/auth/desktop_callback'
     pendingLoginUrl = loginUrl
     const send = (payload: AccountLoginEvent) => {
       if (!sender.isDestroyed()) sender.send(HOME_CHANNELS.accountLoginEvent, payload)

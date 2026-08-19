@@ -149,11 +149,11 @@ Hệ thống xác thực tài khoản VuaOffice hoạt động theo mô hình x�
 
 1. **Khởi chạy Đăng nhập (Sign In Flow)**:
    - Người dùng bấm "Sign in with 360 CORP" trên ứng dụng Desktop.
-   - Electron Main process mở trình duyệt mặc định tới `https://vuahethong.net/web/login?redirect_uri=vuaoffice://auth/callback`.
+   - Electron Main process mở trình duyệt mặc định tới `https://vuahethong.net/web/login?redirect=/vuaoffice/auth/desktop_callback`.
 2. **Xác thực Đa kênh trên Web**:
    - Người dùng đăng nhập hoặc đăng ký tài khoản (qua Email / Số điện thoại) trên hệ thống `vuahethong.net`.
 3. **Phản hồi Deep Link (Revert back Callback)**:
-   - Web điều hướng trở lại Desktop qua Custom Scheme: `vuaoffice://auth/callback?token=...&email=...&name=...`.
+   - Web điều hướng tới trang đệm `/vuaoffice/auth/desktop_callback` và tự động kích hoạt chuyển tiếp Custom Scheme về Desktop: `vuaoffice://auth/callback?token=...&email=...&name=...`.
    - **macOS**: Bắt sự kiện `app.on('open-url')` hoặc biến `pendingProtocolUrl` khi app khởi động từ trạng thái tắt.
    - **Windows / Linux**: Bắt qua `app.requestSingleInstanceLock()` và `app.on('second-instance')` (xử lý trực tiếp `argv`).
 4. **Lưu trữ Phiên & Đồng bộ IPC**:
