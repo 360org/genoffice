@@ -1,7 +1,7 @@
 ### Codegraph cục bộ
 
-- Nguồn: 1771 tệp mã; 2641 liên kết import cục bộ.
-- Hiển thị: 20/2641 liên kết theo thứ tự ổn định.
+- Nguồn: 1845 tệp mã; 2800 liên kết import cục bộ.
+- Hiển thị: 20/2800 liên kết theo thứ tự ổn định.
 - Phạm vi: chỉ import resolve được trong project; package ngoài không được đưa vào context.
 
 ```mermaid
@@ -26,5 +26,5 @@ graph TD
   n_617070732f646f63732f7372632f72656e64657265722f61692f416950616e656c2e747378["apps/docs/src/renderer/ai/AiPanel.tsx"] --> n_617070732f646f63732f7372632f72656e64657265722f656469746f722f7265766973696f6e732e7473["apps/docs/src/renderer/editor/revisions.ts"]
   n_617070732f646f63732f7372632f72656e64657265722f61692f416950616e656c2e747378["apps/docs/src/renderer/ai/AiPanel.tsx"] --> n_617070732f646f63732f7372632f72656e64657265722f6931386e2f6c6f63616c652e747378["apps/docs/src/renderer/i18n/locale.tsx"]
   n_617070732f646f63732f7372632f72656e64657265722f61692f416950616e656c2e747378["apps/docs/src/renderer/ai/AiPanel.tsx"] --> n_617070732f646f63732f7372632f7368617265642f6970632e7473["apps/docs/src/shared/ipc.ts"]
-  more["… 2621 liên kết đã lược bỏ"]
+  more["… 2780 liên kết đã lược bỏ"]
 ```

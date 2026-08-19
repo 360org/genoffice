@@ -843,7 +843,7 @@ const OPENAI_COMPATIBLE_BASE_URLS: Record<Extract<AiProviderId, 'deepseek' | 'op
   openai: 'https://api.openai.com/v1',
   openrouter: 'https://openrouter.ai/api/v1',
   omirouter: 'https://api.omirouter.com/v1',
-  ninerouter: 'https://api.9router.com/v1',
+  ninerouter: 'https://ai-router.vuahethong.com/v1',
 }
 
 /** route a streaming, tool-calling-capable turn by provider id */

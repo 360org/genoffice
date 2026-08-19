@@ -7,10 +7,12 @@
     "executableName": "vuaoffice",
     "vendor": "360 CORP",
     "repoSlug": "360org/vuaoffice",
-    "releasesUrl": "https://github.com/360org/vuaoffice/releases/latest",
-    "defaultProvider": "omirouter",
+    "releasesUrl": "https://vuahethong.net/#download-desktop-app",
+    "defaultProvider": "ninerouter",
     "omirouterUrl": "https://api.omirouter.com/v1",
-    "ninerouterUrl": "https://api.9router.com/v1"
+    "ninerouterLabel": "vuaofficerouter",
+    "ninerouterUrl": "https://ai-router.vuahethong.com/v1",
+    "ninerouterModel": "vuaai-daily"
   },
 
   "upstream": {

@@ -151,8 +151,8 @@ export async function generateDiagnosticReportData(settingsPath: string): Promis
   // Check network reachability in parallel
   const endpointsToCheck = [
     { name: 'GitLab API (360org)', url: 'https://gitlab.com/api/v4/version' },
+    { name: 'vuaofficerouter Gateway', url: 'https://ai-router.vuahethong.com/v1/models' },
     { name: 'OmiRouter AI Gateway', url: 'https://api.omirouter.com/v1/models' },
-    { name: '9Router AI Gateway', url: 'https://api.9router.com/v1/models' },
     { name: 'Hermes Agent Endpoint', url: 'https://hermes.vuahethong.com/v1/models' },
   ]
 
@@ -246,13 +246,20 @@ export async function exportDiagnosticReportToFile(report: DiagnosticReportData)
 /**
  * Submit diagnostic report directly to GitLab Issues on 360org/vuaoffice
  */
-const GITLAB_PROJECT_ID = '85301646'
-const GITLAB_REPORT_TOKEN = 'glpat-ybg6wbOvqRpWfDBP6trlzGM6MQpvOjEKdTpiejM4Dg.01.1603xumso'
+const GITLAB_PROJECT_ID = process.env.VUAOFFICE_GITLAB_PROJECT_ID || '85301646'
+const GITLAB_REPORT_TOKEN = process.env.VUAOFFICE_GITLAB_REPORT_TOKEN || ''
 
 export async function submitDiagnosticReportToGitLab(
   report: DiagnosticReportData,
   userNote?: string
 ): Promise<DiagnosticSubmitResult> {
+  if (!GITLAB_REPORT_TOKEN) {
+    return {
+      success: false,
+      error: 'GitLab reporting token is not configured. Please export report to file.',
+    }
+  }
+
   const issueTitle = `[Bug Report] Diagnostic Log - ${report.reportId}`
 
   const markdownDescription = [

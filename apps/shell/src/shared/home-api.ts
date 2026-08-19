@@ -127,6 +127,8 @@ export interface HomeApi {
   openCreditUsage(): Promise<void>
   /** open the public GitHub repository in the default browser */
   openGitHubRepo(): Promise<void>
+  /** open the VuaOffice website in the default browser */
+  openVuaOfficeWebsite(): Promise<void>
   /** current stargazer count of the public repo (null while offline / rate-limited) */
   githubStars(): Promise<number | null>
   /** whether the one-time "star us" prompt should show now (show:true also counts as shown);
@@ -341,6 +343,7 @@ export const HOME_CHANNELS = {
   setTheme: 'home:set-theme',
   openGenTeam: 'home:open-genteam',
   openGitHubRepo: 'home:open-github-repo',
+  openVuaOfficeWebsite: 'home:open-vuaoffice-website',
   githubStars: 'home:github-stars',
   starPromptShouldShow: 'home:star-prompt-should-show',
   starPromptAction: 'home:star-prompt-action',

@@ -109,9 +109,9 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
   },
   {
     id: 'ninerouter',
-    label: '9Router AI',
+    label: 'vuaofficerouter',
     models: ['claude-3-5-sonnet', 'gpt-4o', 'gemini-1.5-pro', 'deepseek-chat'],
-    defaultModel: 'claude-3-5-sonnet',
+    defaultModel: 'vuaai-daily',
     keyPlaceholder: 'sk-or-...',
     needsBaseUrl: true,
   },
@@ -128,9 +128,10 @@ export const AI_PROVIDERS: AiProviderMeta[] = [
 /** preset endpoints for providers whose baseUrl has a known default */
 const DEFAULT_BASE_URLS: Partial<Record<AiProviderId, string>> = {
   omirouter: 'https://api.omirouter.com/v1',
-  ninerouter: 'https://api.9router.com/v1',
+  ninerouter: 'https://ai-router.vuahethong.com/v1',
   hermes: 'https://hermes.vuahethong.com/v1',
 }
+const LEGACY_NINEROUTER_BASE_URL = 'https://api.9router.com/v1'
 
 /**
  * Fresh settings with every provider's default model and an empty key,
@@ -149,7 +150,7 @@ export function defaultAiSettings(
       baseUrl: meta.needsBaseUrl ? (DEFAULT_BASE_URLS[meta.id] ?? '') : undefined,
     }
   }
-  return { provider: 'omirouter', providers }
+  return { provider: 'ninerouter', providers }
 }
 
 /**
@@ -172,9 +173,17 @@ export function resolveAiSettings(
     }
     return defaults
   }
+  const providers = { ...defaults.providers, ...stored.providers }
+  if (providers.ninerouter.baseUrl === LEGACY_NINEROUTER_BASE_URL) {
+    providers.ninerouter = {
+      ...providers.ninerouter,
+      baseUrl: DEFAULT_BASE_URLS.ninerouter,
+      model: providers.ninerouter.model === 'claude-3-5-sonnet' ? 'vuaai-daily' : providers.ninerouter.model,
+    }
+  }
   return {
     provider: stored.provider ?? defaults.provider,
-    providers: { ...defaults.providers, ...stored.providers },
+    providers,
     developerMode: stored.developerMode ?? defaults.developerMode,
   }
 }

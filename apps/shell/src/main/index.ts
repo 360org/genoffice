@@ -315,6 +315,7 @@ const GENTEAM_URL = 'https://genoffice.ai/join'
 // 360 CORP credit-usage page opened from the account menu's credits row.
 // Kept main-side so the renderer never supplies the URL.
 const CREDIT_USAGE_URL = 'https://www.genspark.ai/credit-usage'
+const VUAOFFICE_WEBSITE_URL = 'https://vuahethong.net'
 
 // ---- "star us on GitHub" prompt (see star-prompt.ts for the rules) ----
 
@@ -2255,6 +2256,12 @@ function registerHomeIpc(): void {
 
   ipcMain.handle(HOME_CHANNELS.openGitHubRepo, () => {
     shell.openExternal(GITHUB_REPO_URL).catch(() => {
+      // no browser handler available; nothing actionable for the user here
+    })
+  })
+
+  ipcMain.handle(HOME_CHANNELS.openVuaOfficeWebsite, () => {
+    shell.openExternal(VUAOFFICE_WEBSITE_URL).catch(() => {
       // no browser handler available; nothing actionable for the user here
     })
   })

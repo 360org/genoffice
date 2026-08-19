@@ -3,6 +3,18 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-08-19
+
+### Fixed
+- **AI Provider mặc định vuaofficerouter**: Chuẩn hóa provider mặc định trên cấu hình 9Router thành hiển thị `vuaofficerouter`, Base URL `https://ai-router.vuahethong.com/v1` và custom model `vuaai-daily` theo cấu hình whitelabel; chuẩn API vẫn giữ tương thích 9Router/OpenAI-compatible.
+- **Manual Update Check**: Hiển thị popup `You are up to date, no update available.` khi người dùng kiểm tra thủ công và app đã ở bản mới nhất.
+- **macOS Auto Update Install Fallback**: Khi `quitAndInstall(true, true)` hoặc lỗi Squirrel.Mac apply/signing fail, UI chuyển sang chế độ cài đặt thủ công thay vì im lặng sau khi tải xong.
+- **Manual Download URL**: Fallback manual page trỏ về `https://vuahethong.net/#download-desktop-app`, không trỏ GitHub release page.
+- **Onboarding Star CTA**: Welcome/Onboarding hiển thị `If you like VuaOffice, give us a star on Vua Office.` và mở `https://vuahethong.net` qua IPC main-side cố định.
+
+### Security
+- **Gỡ hardcoded GitLab report token**: Token GitLab API trong diagnostic-report.ts chuyển sang đọc từ biến môi trường `VUAOFFICE_GITLAB_REPORT_TOKEN`; nếu chưa cấu hình thì trả lỗi rõ ràng thay vì gửi với token rỗng.
+
 ## [1.0.1] - 2026-08-18
 
 ### Added & Upstream Sync

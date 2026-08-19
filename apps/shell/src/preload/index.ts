@@ -180,6 +180,9 @@ const homeApi: HomeApi = {
   async openGitHubRepo() {
     await ipcRenderer.invoke(HOME_CHANNELS.openGitHubRepo)
   },
+  async openVuaOfficeWebsite() {
+    await ipcRenderer.invoke(HOME_CHANNELS.openVuaOfficeWebsite)
+  },
   async githubStars() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.githubStars)
     return typeof result === 'number' && Number.isFinite(result) ? result : null

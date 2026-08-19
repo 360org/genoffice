@@ -4,11 +4,15 @@ import { AI_PROVIDERS, defaultAiSettings, resolveAiSettings } from '../src/provi
 describe('defaultAiSettings', () => {
   it('gives every provider its default model and an empty key by default', () => {
     const settings = defaultAiSettings()
-    expect(settings.provider).toBe('omirouter')
+    expect(settings.provider).toBe('ninerouter')
     for (const meta of AI_PROVIDERS) {
       expect(settings.providers[meta.id].apiKey).toBe('')
       expect(settings.providers[meta.id].model).toBe(meta.defaultModel)
     }
+    expect(settings.providers.ninerouter).toMatchObject({
+      baseUrl: 'https://ai-router.vuahethong.com/v1',
+      model: 'vuaai-daily',
+    })
     expect(settings.providers.custom.baseUrl).toBe('')
     expect(settings.providers.anthropic.baseUrl).toBeUndefined()
   })
@@ -61,5 +65,26 @@ describe('resolveAiSettings', () => {
     expect(resolved.providers.gemini).toEqual({ apiKey: 'stored-gemini-key', model: 'gemini-2.5-pro' })
     // provider not mentioned in stored.providers keeps the computed default
     expect(resolved.providers.anthropic.apiKey).toBe('preset-key')
+  })
+
+  it('migrates the legacy 9Router endpoint to the vuaofficerouter gateway', () => {
+    const resolved = resolveAiSettings(
+      {
+        provider: 'ninerouter',
+        providers: {
+          ninerouter: {
+            apiKey: 'stored-key',
+            model: 'claude-3-5-sonnet',
+            baseUrl: 'https://api.9router.com/v1',
+          },
+        } as never,
+      },
+      defaultAiSettings(),
+    )
+    expect(resolved.providers.ninerouter).toEqual({
+      apiKey: 'stored-key',
+      model: 'vuaai-daily',
+      baseUrl: 'https://ai-router.vuahethong.com/v1',
+    })
   })
 })

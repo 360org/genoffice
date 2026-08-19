@@ -17,7 +17,7 @@ interface Slide {
   bodyKey?: StringKey
   /** render the body in the dimmer footnote gray (slide 3's credits disclaimer) */
   bodyDim?: boolean
-  /** closing slide shows the "star us on GitHub" hint */
+  /** closing slide shows the VuaOffice website hint */
   showStar?: boolean
   art: 'logo' | 'gift' | 'check'
 }
@@ -153,7 +153,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
                   <p className="onb-star-hint">{t('onbStarHint')}</p>
                   <button
                     className="onb-star-btn"
-                    onClick={() => void window.aiOffice.openGitHubRepo()}
+                    onClick={() => void window.aiOffice.openVuaOfficeWebsite()}
                   >
                     <svg
                       width="13"
@@ -164,7 +164,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
                     >
                       <path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9L12 2.5z" />
                     </svg>
-                    {t('starOnGitHub')}
+                    {t('onbStarButton')}
                   </button>
                 </div>
               )}

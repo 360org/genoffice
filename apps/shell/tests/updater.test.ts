@@ -10,6 +10,7 @@ import type { UpdateUiState } from '../src/shared/update-api'
 const appState = { isPackaged: true }
 
 const openExternal = vi.hoisted(() => vi.fn())
+const showMessageBox = vi.hoisted(() => vi.fn(() => Promise.resolve()))
 const existsSyncMock = vi.hoisted(() => vi.fn<(...args: unknown[]) => boolean>(() => true))
 const readFileSyncMock = vi.hoisted(() => vi.fn<(...args: unknown[]) => string>())
 
@@ -22,6 +23,9 @@ vi.mock('electron', () => ({
   },
   shell: {
     openExternal: (url: string) => openExternal(url),
+  },
+  dialog: {
+    showMessageBox: (...args: unknown[]) => showMessageBox(...args),
   },
 }))
 
@@ -92,11 +96,13 @@ const showUpdateWindow =
   vi.fn<(parent: unknown, state: UpdateUiState, actions: UpdateActions) => void>()
 const pushUpdateState = vi.fn<(patch: Partial<UpdateUiState>) => void>()
 const closeUpdateWindow = vi.fn()
+const isUpdateWindowOpen = vi.fn(() => false)
 
 vi.mock('../src/main/update-window', () => ({
   showUpdateWindow: (...args: [unknown, UpdateUiState, UpdateActions]) => showUpdateWindow(...args),
   pushUpdateState: (patch: Partial<UpdateUiState>) => pushUpdateState(patch),
   closeUpdateWindow: () => closeUpdateWindow(),
+  isUpdateWindowOpen: () => isUpdateWindowOpen(),
 }))
 
 const FIRST_CHECK_DELAY_MS = 15_000
@@ -148,6 +154,7 @@ beforeEach(() => {
   pushUpdateState.mockClear()
   closeUpdateWindow.mockClear()
   openExternal.mockClear()
+  showMessageBox.mockClear()
   readFileSyncMock.mockReset()
   readFileSyncMock.mockImplementation(() => {
     throw new Error('no app-update.yml')
@@ -278,6 +285,55 @@ describe('initAutoUpdater', () => {
     // a newer version prompts again
     available({ version: '0.3.0' })
     expect(showUpdateWindow).toHaveBeenCalledTimes(2)
+  })
+
+  it('prompts even for a dismissed version when triggered via manual check', async () => {
+    const { initAutoUpdater, checkForUpdatesManual } = await loadUpdater()
+    initAutoUpdater(() => null)
+    const available = updaterState.listeners.get('update-available')!
+    available({ version: '0.2.0' })
+    expect(showUpdateWindow).toHaveBeenCalledTimes(1)
+    lastShownActions().onLater()
+    expect(closeUpdateWindow).toHaveBeenCalledTimes(1)
+
+    // Periodic check ignores dismissed version
+    available({ version: '0.2.0' })
+    expect(showUpdateWindow).toHaveBeenCalledTimes(1)
+
+    // User manual check forces update window to open
+    checkForUpdatesManual()
+    available({ version: '0.2.0' })
+    expect(showUpdateWindow).toHaveBeenCalledTimes(2)
+  })
+
+  it('shows an up-to-date popup when a manual check finds no update', async () => {
+    const { initAutoUpdater, checkForUpdatesManual } = await loadUpdater()
+    initAutoUpdater(() => null)
+    checkForUpdatesManual()
+    updaterState.listeners.get('update-not-available')!({ version: '0.1.0' })
+    expect(showMessageBox).toHaveBeenCalledWith(
+      null,
+      expect.objectContaining({ message: 'You are up to date, no update available.' }),
+    )
+  })
+
+  it('falls back to manual install when quitAndInstall fails', async () => {
+    quitAndInstall.mockImplementation(() => {
+      throw new Error('Could not locate update bundle')
+    })
+    const { initAutoUpdater } = await loadUpdater()
+    initAutoUpdater(() => null)
+    updaterState.listeners.get('update-available')!({ version: '0.2.0' })
+    updaterState.listeners.get('update-downloaded')!({ version: '0.2.0' })
+
+    lastShownActions().onInstall()
+    vi.advanceTimersByTime(0)
+
+    expect(showUpdateWindow).toHaveBeenLastCalledWith(
+      null,
+      expect.objectContaining({ phase: 'manual', version: '0.2.0' }),
+      expect.any(Object),
+    )
   })
 
   it('swallows background check failures', async () => {
@@ -413,7 +469,7 @@ describe('manual download fallback', () => {
     const actions = await failTwiceIntoManual(macFiles)
     actions.onOpenDownload()
     expect(openExternal).toHaveBeenCalledWith(
-      'https://github.com/360org/vuaoffice/releases/latest',
+      'https://vuahethong.net/#download-desktop-app',
     )
   })
 
@@ -424,7 +480,7 @@ describe('manual download fallback', () => {
     ])
     actions.onOpenDownload()
     expect(openExternal).toHaveBeenCalledWith(
-      'https://github.com/360org/vuaoffice/releases/latest',
+      'https://vuahethong.net/#download-desktop-app',
     )
   })
 })

@@ -322,7 +322,7 @@ const RECHECK_INTERVAL_MS = 4 * 60 * 60 * 1000
 // on every retry while the error looks like a download failure to the user.
 const MANUAL_FALLBACK_AFTER = 2
 const DEFAULT_UPDATE_URL = 'https://github.com/360org/vuaoffice/releases/latest/download'
-const DOWNLOAD_PAGE_URL = 'https://github.com/360org/vuaoffice/releases/latest'
+const DOWNLOAD_PAGE_URL = 'https://vuahethong.net/#download-desktop-app'
 
 /// Trusted HTTPS base URL baked into resources/app-update.yml. Manual download
 /// links are always rebuilt from this base rather than trusting URLs supplied
@@ -491,12 +491,20 @@ export function initAutoUpdater(
   // paths funnel into failDownload() and the in-flight flag dedupes them
   let failedAttempts = 0
   let downloadInFlight = false
+  let installInFlight = false
 
   const failDownload = (): void => {
     if (!downloadInFlight) return
     downloadInFlight = false
     failedAttempts += 1
     pushUpdateState({ phase: failedAttempts >= MANUAL_FALLBACK_AFTER ? 'manual' : 'error' })
+  }
+
+  const failInstall = (): void => {
+    if (!installInFlight) return
+    installInFlight = false
+    failedAttempts = MANUAL_FALLBACK_AFTER
+    showUpdateWindow(getWindow(), { ...initialState(latestSeenVersion ?? app.getVersion()), phase: 'manual' }, actions)
   }
 
   const actions = {
@@ -510,8 +518,16 @@ export function initAutoUpdater(
     },
     onInstall: () => {
       closeUpdateWindow()
+      installInFlight = true
       // let the window fully close before tearing the app down
-      setImmediate(() => autoUpdater.quitAndInstall(true, true))
+      setImmediate(() => {
+        try {
+          autoUpdater.quitAndInstall(true, true)
+        } catch (err) {
+          log('install failed:', err instanceof Error ? err.message : err)
+          failInstall()
+        }
+      })
     },
     onLater: () => {
       dismissedVersion = latestSeenVersion
@@ -540,6 +556,7 @@ export function initAutoUpdater(
       }).catch(() => {})
     }
     failDownload()
+    failInstall()
   })
 
   autoUpdater.on('update-not-available', (info) => {
@@ -550,7 +567,7 @@ export function initAutoUpdater(
       dialog.showMessageBox(win as any, {
         type: 'info',
         title: tUpd(getUiLang(), 'updTitle'),
-        message: 'VuaOffice is up to date',
+        message: 'You are up to date, no update available.',
         detail: `You are using the latest version (v${app.getVersion()}).`,
         buttons: ['OK'],
       }).catch(() => {})
@@ -558,8 +575,10 @@ export function initAutoUpdater(
   })
 
   autoUpdater.on('update-available', (info: UpdateInfo) => {
+    const wasManual = isManualCheck
     isManualCheck = false
-    if (info.version === dismissedVersion) return
+    if (info.version === dismissedVersion && !wasManual) return
+    dismissedVersion = null
     const sameVersionRecheck = info.version === latestSeenVersion
     if (!sameVersionRecheck) failedAttempts = 0
     latestSeenVersion = info.version
@@ -569,7 +588,7 @@ export function initAutoUpdater(
     // shows must not reset its phase to 'available' — that would wipe an
     // in-progress download or a terminal 'manual' fallback back to the
     // "Update Now" offer
-    if (sameVersionRecheck && isUpdateWindowOpen()) return
+    if (sameVersionRecheck && isUpdateWindowOpen() && !wasManual) return
     showUpdateWindow(getWindow(), initialState(info.version), actions)
   })
 
