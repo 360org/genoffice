@@ -275,6 +275,9 @@ jobs:
         uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           path: artifacts
+      - name: Merge multi-arch macOS update feed
+        run: |
+          node scripts/merge-mac-feed.js artifacts
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -284,6 +287,13 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            artifacts/**/*
+            artifacts/merged-feed/latest-mac.yml
+            artifacts/windows-x64/latest.yml
+            artifacts/linux-x64/latest-linux.yml
+            artifacts/**/*.dmg
+            artifacts/**/*.zip
+            artifacts/**/*.exe
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

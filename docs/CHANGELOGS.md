@@ -3,6 +3,13 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-08-19
+
+### Fixed
+- **Hợp nhất Feed Cập nhật Đa Kiến trúc macOS (`latest-mac.yml`)**:
+  - Khắc phục lỗi `Update download failed. Check your network and try again` trên macOS Intel (`x86_64`) do artifact `latest-mac.yml` bị ghi đè bởi job build Apple Silicon (`arm64`).
+  - Bổ sung công cụ [`scripts/merge-mac-feed.js`](/Volumes/DATA/DEV/vuaoffice/scripts/merge-mac-feed.js) trong pipeline GitHub Actions release để hợp nhất danh sách phân phối của cả hai kiến trúc (`arm64` và `x64`) vào một file `latest-mac.yml` chuẩn duy nhất.
+
 ## [1.0.3] - 2026-08-19
 
 ### Changed & Whitelabel
