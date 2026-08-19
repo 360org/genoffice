@@ -3,6 +3,14 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-08-19
+
+### Changed & Whitelabel
+- **Tự động hóa Cơ chế Whitelabel ("Một lần và mãi mãi")**:
+  - Bổ sung cấu hình pre-hooks (`predev`, `prebuild`, `prebuild:all`, `predist:mac`, `predist:mac:x64`, `predist:mac:arm64`, `predist:all`, `predist:win`, `predist:linux`) vào `/Volumes/DATA/DEV/vuaoffice/package.json` để tự động thực thi `npm run whitelabel:apply` trước mọi lượt build/run.
+  - Đồng bộ nhận diện thương hiệu Icon, Logo VuaOffice chính thức của 360 CORP trên toàn bộ hệ thống packaging và UI.
+  - Vượt qua 100% cổng kiểm tra thương hiệu `npm run brand:gate` (selftest + status + check-brand).
+
 ## [1.0.2] - 2026-08-19
 
 ### Changed & Whitelabel

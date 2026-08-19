@@ -1,6 +1,6 @@
 {
   "name": "genoffice",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "AI-native office suite (docs, sheets, slides, pdf)",
   "license": "Apache-2.0",
@@ -18,6 +18,15 @@
   ],
   "scripts": {
     "postinstall": "install-electron",
+    "predev": "npm run whitelabel:apply",
+    "prebuild": "npm run whitelabel:apply",
+    "prebuild:all": "npm run whitelabel:apply",
+    "predist:mac": "npm run whitelabel:apply",
+    "predist:mac:x64": "npm run whitelabel:apply",
+    "predist:mac:arm64": "npm run whitelabel:apply",
+    "predist:all": "npm run whitelabel:apply",
+    "predist:win": "npm run whitelabel:apply",
+    "predist:linux": "npm run whitelabel:apply",
     "whitelabel:apply": "node scripts/whitelabel.js apply",
     "whitelabel:restore": "node scripts/whitelabel.js restore",
     "whitelabel:status": "node scripts/whitelabel.js status",
