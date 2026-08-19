@@ -1579,16 +1579,24 @@ export function Home() {
   const [showAbout, setShowAbout] = useState(false)
   const [showDiagnosticReport, setShowDiagnosticReport] = useState(false)
   const [appVersion, setAppVersion] = useState('')
+  const [isDevMode, setIsDevMode] = useState(false)
 
   useEffect(() => {
     void window.aiOffice.getAppVersion?.().then((v) => {
       if (v) setAppVersion(v)
+    })
+    void window.aiOffice.getAiSettings?.().then((s) => {
+      if (s?.developerMode !== undefined) setIsDevMode(!!s.developerMode)
+    })
+    const unsubDev = window.aiOffice.onDeveloperModeChanged?.((dev) => {
+      setIsDevMode(dev)
     })
     const unsubDiag = window.aiOffice.onOpenDiagnosticReport?.(() => {
       setShowDiagnosticReport(true)
     })
     return () => {
       unsubDiag?.()
+      unsubDev?.()
     }
   }, [])
   // name in the greeting; omitted when logged out
@@ -1997,27 +2005,40 @@ export function Home() {
   }
 
   const handleNewMail = () => {
+    if (!isDevMode) return
     void window.aiOffice.newMail()
   }
 
   const NEW_ITEMS = [
-    { ext: 'docx', title: t('newDoc'), sub: '.docx', action: handleNewDoc },
-    { ext: 'xlsx', title: t('newSheet'), sub: '.xlsx', action: handleNewSheet },
-    { ext: 'pptx', title: t('newSlide'), sub: '.pptx', action: handleNewSlide },
-    { ext: 'md', title: t('newMarkdown'), sub: '.md', action: handleNewMarkdown },
-    { ext: 'eml', title: t('newMail'), sub: 'Outlook UI', action: handleNewMail },
+    { ext: 'docx', title: t('newDoc'), sub: '.docx', action: handleNewDoc, badge: 'AI', disabled: false },
+    { ext: 'xlsx', title: t('newSheet'), sub: '.xlsx', action: handleNewSheet, badge: 'AI', disabled: false },
+    { ext: 'pptx', title: t('newSlide'), sub: '.pptx', action: handleNewSlide, badge: 'AI', disabled: false },
+    { ext: 'md', title: t('newMarkdown'), sub: '.md', action: handleNewMarkdown, badge: 'AI', disabled: false },
+    {
+      ext: 'eml',
+      title: t('newMail'),
+      sub: isDevMode ? 'Outlook UI' : 'Coming Soon',
+      action: handleNewMail,
+      badge: 'Soon',
+      disabled: !isDevMode,
+    },
   ]
 
   function renderQuickCards() {
     return (
       <div className="quick-cards">
         {NEW_ITEMS.map((item) => (
-          <button key={item.ext} className="quick-card" onClick={() => void item.action()}>
+          <button
+            key={item.ext}
+            className={`quick-card${item.disabled ? ' is-disabled' : ''}`}
+            onClick={() => void item.action()}
+            title={item.disabled ? 'Available in Developer Mode' : undefined}
+          >
             <FileBadge ext={item.ext} size={30} />
             <span className="quick-text">
               <span className="quick-title-row">
                 <span className="quick-title">{item.title}</span>
-                <span className="ai-chip">AI</span>
+                <span className={item.badge === 'Soon' ? 'soon-chip' : 'ai-chip'}>{item.badge}</span>
               </span>
               <span className="quick-sub">{item.sub}</span>
             </span>

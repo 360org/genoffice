@@ -3,7 +3,20 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-08-19
+
+### Changed
+- **Chuẩn hóa nhãn & Điều kiện truy cập AI Mail**:
+  - Đổi tên hiển thị từ "Vua Mail" / "VuaMail" thành "AI Mail" đồng bộ trên 19 ngôn ngữ trong strings i18n (`newMail`).
+  - Gắn badge ribbon "Soon" màu hổ phách và hiển thị phụ đề "Coming Soon" khi ở chế độ người dùng bình thường.
+  - Khóa truy cập click vào thẻ AI Mail, chỉ cho phép mở khi kích hoạt Developer Mode (`isDevMode` = true).
+
 ## [1.0.4] - 2026-08-19
+- **Chuẩn hóa nhãn & Điều kiện truy cập AI Mail**:
+  - Đổi tên hiển thị từ "Vua Mail" / "VuaMail" thành "AI Mail" đồng bộ trên 19 ngôn ngữ trong strings i18n (`newMail`).
+  - Gắn badge ribbon "Soon" màu hổ phách và hiển thị phụ đề "Coming Soon" khi ở chế độ người dùng bình thường.
+  - Khóa truy cập click vào thẻ AI Mail, chỉ cho phép mở khi kích hoạt Developer Mode (`isDevMode` = true).
+
 
 ### Fixed
 - **Hợp nhất Feed Cập nhật Đa Kiến trúc macOS (`latest-mac.yml`)**:
