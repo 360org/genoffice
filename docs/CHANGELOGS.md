@@ -3,6 +3,14 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2026-08-19
+
+### Fixed & Packaging
+- **Tích hợp & Đóng gói Phân hệ AI Mail vào Bộ Cài Đặt**:
+  - Bổ sung cấu hình đóng gói `modules/mail` (`../mail/out` ➔ `modules/mail`) vào `extraResources` trong `apps/shell/electron-builder.cjs`.
+  - Khai báo dependency `@genoffice/mail` trong `apps/shell/package.json`.
+  - Khắc phục lỗi không mở được AI Mail khi kích hoạt Developer Mode trên bản đóng gói.
+
 ## [1.0.6] - 2026-08-19
 
 ### Changed & Assets

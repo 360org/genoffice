@@ -93,6 +93,7 @@ function assertModuleTreesPresent() {
     '../slides/out',
     '../pdf/out',
     '../markdown/out',
+    '../mail/out',
   ]) {
     if (!existsSync(join(__dirname, rel))) {
       throw new Error(
@@ -149,6 +150,10 @@ const config = {
     {
       from: '../markdown/out',
       to: 'modules/markdown',
+    },
+    {
+      from: '../mail/out',
+      to: 'modules/mail',
     },
     // PDF text editing engines: the bundled main resolves these under
     // Resources/wasm when node_modules is absent (apps/pdf/src/main/wasm-path.ts)

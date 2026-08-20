@@ -1,7 +1,7 @@
 {
   "name": "@genoffice/shell",
   "productName": "GenOffice",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "license": "Apache-2.0",
   "homepage": "https://github.com/360org/vuaoffice",
   "private": true,
@@ -46,7 +46,8 @@
     "react-dom": "^19.2.4",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "@genoffice/mail": "*"
   },
   "author": "360 CORP"
 }
