@@ -5,6 +5,10 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
 
 ## [1.0.7] - 2026-08-19
 
+### Changed
+- **Chuẩn hóa phụ đề định dạng AI Mail**:
+  - Cập nhật định dạng phụ đề của thẻ AI Mail từ "Outlook UI" thành ".pst" đồng bộ với các ứng dụng khác (.docx, .xlsx, .pptx, .md).
+
 ### Fixed & Packaging
 - **Tích hợp & Đóng gói Phân hệ AI Mail vào Bộ Cài Đặt**:
   - Bổ sung cấu hình đóng gói `modules/mail` (`../mail/out` ➔ `modules/mail`) vào `extraResources` trong `apps/shell/electron-builder.cjs`.

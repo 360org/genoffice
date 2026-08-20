@@ -2017,7 +2017,7 @@ export function Home() {
     {
       ext: 'eml',
       title: t('newMail'),
-      sub: isDevMode ? 'Outlook UI' : 'Coming Soon',
+      sub: isDevMode ? '.pst' : 'Coming Soon',
       action: handleNewMail,
       badge: 'Soon',
       disabled: !isDevMode,
