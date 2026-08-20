@@ -259,7 +259,7 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
             </div>
           )}
 
-          {currentMeta.needsBaseUrl && (
+          {(isDeveloperMode && currentMeta.needsBaseUrl) && (
             <div className="ai-settings-group">
               <label htmlFor="ai-base-url-input">{loc.baseUrl}</label>
               <input
