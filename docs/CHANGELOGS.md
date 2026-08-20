@@ -3,6 +3,16 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2026-08-20
+
+### Changed & Whitelabel
+- **Đồng bộ biểu tượng thương hiệu VuaOffice SVG chính thức**:
+  - Tích hợp vector SVG từ `whitelabel/Logo/icon/icon.svg` vào component `GensparkMark` tại toàn bộ 5 ứng dụng (Docs, Sheets, Slides, PDF, Markdown).
+  - Cập nhật tài sản `vuaoffice-icon.svg` tại `apps/shell/src/renderer/src/assets/`.
+- **Hoàn thiện tên thương hiệu macOS Application Menu**:
+  - Gán `app.name = "VuaOffice"` trong `apps/shell/src/main/index.ts` để hiển thị chính xác "About VuaOffice", "Hide VuaOffice", "Quit VuaOffice" trên menu native của macOS.
+  - Đồng bộ `productName: "VuaOffice"` tại toàn bộ cấu hình `package.json`.
+
 ## [1.0.7] - 2026-08-19
 
 ### Changed

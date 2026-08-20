@@ -1,7 +1,7 @@
 {
   "name": "@genoffice/markdown",
-  "productName": "GenOffice Markdown",
-  "version": "0.1.0",
+  "productName": "VuaOffice Markdown",
+  "version": "1.0.8",
   "license": "Apache-2.0",
   "private": true,
   "description": "Markdown editor module: TipTap block editor over plain .md files, hosted by shell tabs",

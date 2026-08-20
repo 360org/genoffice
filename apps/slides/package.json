@@ -1,7 +1,7 @@
 {
   "name": "@genoffice/slides",
-  "productName": "GenOffice Slides",
-  "version": "0.6.1",
+  "productName": "VuaOffice Slides",
+  "version": "1.0.8",
   "license": "Apache-2.0",
   "private": true,
   "description": "AI-native pptx editor: byte-fidelity open + high-fidelity Konva render + element-patch save",
@@ -48,7 +48,7 @@
   "author": "GenOffice",
   "build": {
     "appId": "com.genoffice.slides",
-    "productName": "GenOffice Slides",
+    "productName": "VuaOffice Slides",
     "electronVersion": "43.3.0",
     "directories": {
       "output": "release"

@@ -1,7 +1,7 @@
 {
   "name": "@genoffice/docs",
-  "productName": "GenOffice Docs",
-  "version": "0.6.1",
+  "productName": "VuaOffice Docs",
+  "version": "1.0.8",
   "license": "Apache-2.0",
   "private": true,
   "description": "AI-native streaming docx editor with paragraph-patch save",
@@ -49,7 +49,7 @@
   "author": "GenOffice",
   "build": {
     "appId": "com.genoffice.docs",
-    "productName": "GenOffice Docs",
+    "productName": "VuaOffice Docs",
     "electronVersion": "43.3.0",
     "artifactName": "AIDocx-${version}-${arch}.${ext}",
     "directories": {
