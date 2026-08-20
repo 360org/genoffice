@@ -2005,7 +2005,6 @@ export function Home() {
   }
 
   const handleNewMail = () => {
-    if (!isDevMode) return
     void window.aiOffice.newMail()
   }
 
@@ -2017,10 +2016,10 @@ export function Home() {
     {
       ext: 'eml',
       title: t('newMail'),
-      sub: isDevMode ? '.pst' : 'Coming Soon',
+      sub: '.pst',
       action: handleNewMail,
-      badge: 'Soon',
-      disabled: !isDevMode,
+      badge: 'AI',
+      disabled: false,
     },
   ]
 

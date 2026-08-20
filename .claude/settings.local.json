@@ -4,6 +4,9 @@
       "Bash(git branch *)",
       "Bash(gh pr *)",
       "Bash(gh repo *)"
+    ],
+    "additionalDirectories": [
+      "/Volumes/DATA/DEV/vuaoffice"
     ]
   }
 }
