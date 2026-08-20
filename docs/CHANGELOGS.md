@@ -3,6 +3,12 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-08-19
+
+### Changed & Assets
+- **Cập nhật Bộ Icon Thương hiệu VuaOffice Mới**:
+  - Chuyển đổi và đồng bộ icon vector chính thức sang toàn bộ định dạng đóng gói: macOS (`icon.icns`, `app.icns`), Windows (`icon.ico`, `app.ico`), Linux (`icon.png`) và updater modal asset (`app-icon.png`).
+
 ## [1.0.5] - 2026-08-19
 
 ### Changed
