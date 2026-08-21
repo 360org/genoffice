@@ -1,74 +1,131 @@
-import Database from 'better-sqlite3'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { app } from 'electron'
-import * as path from 'node:path'
-import * as fs from 'node:fs'
 import { SQLITE_SCHEMA } from './schema'
 import type { EmailAccount, EmailBody, EmailMessage, MailFolder } from '../../shared/types'
 
+interface StorageData {
+  accounts: EmailAccount[]
+  folders: MailFolder[]
+  emails: EmailMessage[]
+  bodies: Record<string, { html: string; plainText: string }>
+}
+
 export class SQLiteMailStorage {
-  private db: Database.Database | null = null
+  private filePath: string
+  private data: StorageData
 
   constructor(customPath?: string) {
     const dbDir = customPath ?? (app ? app.getPath('userData') : '/tmp')
-    if (!fs.existsSync(dbDir)) {
-      fs.mkdirSync(dbDir, { recursive: true })
+    if (!existsSync(dbDir)) {
+      mkdirSync(dbDir, { recursive: true })
     }
-    const dbFilePath = path.join(dbDir, 'vuamail-local.db')
-    this.db = new Database(dbFilePath)
-    this.db.pragma('journal_mode = WAL')
-    this.db.pragma('synchronous = NORMAL')
-    this.initSchema()
-    this.seedDemoDataIfEmpty()
+    this.filePath = join(dbDir, 'vuamail-local.json')
+    this.data = this.load()
+    if (this.data.accounts.length === 0) {
+      this.seedDemoData()
+      this.save()
+    }
   }
 
-  private initSchema(): void {
-    if (!this.db) return
-    this.db.exec(SQLITE_SCHEMA)
+  private load(): StorageData {
+    try {
+      if (existsSync(this.filePath)) {
+        const content = readFileSync(this.filePath, 'utf-8')
+        return JSON.parse(content)
+      }
+    } catch (e) {
+      console.error('[MailStorage] Failed to load JSON storage, resetting:', e)
+    }
+    return {
+      accounts: [],
+      folders: [],
+      emails: [],
+      bodies: {},
+    }
   }
 
-  private seedDemoDataIfEmpty(): void {
-    if (!this.db) return
-    const count = (this.db.prepare('SELECT COUNT(*) as c FROM accounts').get() as { c: number }).c
-    if (count > 0) return
+  private save(): void {
+    try {
+      writeFileSync(this.filePath, JSON.stringify(this.data, null, 2), 'utf-8')
+    } catch (e) {
+      console.error('[MailStorage] Failed to save JSON storage:', e)
+    }
+  }
 
+  private seedDemoData(): void {
     const accountId = 'acc_primary'
     const now = Date.now()
 
-    this.db.prepare(`
-      INSERT INTO accounts (id, email, name, provider, is_default, created_at)
-      VALUES (?, ?, ?, ?, 1, ?)
-    `).run(accountId, 'chau.le@360.org.vn', 'Châu Lê', 'google', now)
-
-    const folders = [
-      { id: 'f_inbox', name: 'Inbox', kind: 'inbox', icon: 'Inbox', unread: 2, total: 12, fav: 1 },
-      { id: 'f_drafts', name: 'Drafts', kind: 'drafts', icon: 'Drafts', unread: 0, total: 2, fav: 1 },
-      { id: 'f_sent', name: 'Sent Items', kind: 'sent', icon: 'Send', unread: 0, total: 25, fav: 1 },
-      { id: 'f_archive', name: 'Archive', kind: 'archive', icon: 'Archive', unread: 0, total: 40, fav: 0 },
-      { id: 'f_trash', name: 'Deleted Items', kind: 'trash', icon: 'Delete', unread: 0, total: 5, fav: 0 },
+    this.data.accounts = [
+      {
+        id: accountId,
+        email: 'chau.le@360.org.vn',
+        name: 'Châu Lê',
+        provider: 'google',
+        isDefault: true,
+      },
     ]
 
-    const folderStmt = this.db.prepare(`
-      INSERT INTO email_folders (id, account_id, name, kind, icon_name, unread_count, total_count, is_favorite)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `)
+    this.data.folders = [
+      { id: 'f_inbox', accountId, name: 'Inbox', kind: 'inbox', iconName: 'Inbox', unreadCount: 2, totalCount: 12, isFavorite: true },
+      { id: 'f_drafts', accountId, name: 'Drafts', kind: 'drafts', iconName: 'Drafts', unreadCount: 0, totalCount: 2, isFavorite: true },
+      { id: 'f_sent', accountId, name: 'Sent Items', kind: 'sent', iconName: 'Send', unreadCount: 0, totalCount: 25, isFavorite: true },
+      { id: 'f_archive', accountId, name: 'Archive', kind: 'archive', iconName: 'Archive', unreadCount: 0, totalCount: 40, isFavorite: false },
+      { id: 'f_trash', accountId, name: 'Deleted Items', kind: 'trash', iconName: 'Delete', unreadCount: 0, totalCount: 5, isFavorite: false },
+    ]
 
-    for (const f of folders) {
-      folderStmt.run(f.id, accountId, f.name, f.kind, f.icon, f.unread, f.total, f.fav)
-    }
-
-    const demoEmails = [
+    this.data.emails = [
       {
         id: 'msg_1',
+        accountId,
         folderId: 'f_inbox',
         senderName: '360 CORP Team',
         senderEmail: 'support@360.org.vn',
+        recipientEmails: ['chau.le@360.org.vn'],
         subject: 'Chào mừng Sếp đến với VuaMail trong hệ sinh thái VuaOffice Suite',
         snippet: 'VuaMail tích hợp AI Smart Summary, Smart Reply và Offline SQLite Sync hoàn toàn mới...',
         dateIso: new Date(now - 1000 * 60 * 30).toISOString(),
-        isRead: 0,
-        isStarred: 1,
+        isRead: false,
+        isStarred: true,
+        hasAttachments: false,
         category: 'focused',
-        bodyHtml: `
+      },
+      {
+        id: 'msg_2',
+        accountId,
+        folderId: 'f_inbox',
+        senderName: 'VuaOffice AI Agent',
+        senderEmail: 'ai@vuahethong.com',
+        recipientEmails: ['chau.le@360.org.vn'],
+        subject: 'Báo cáo tổng kết tuần & Lịch họp rà soát tính năng mới',
+        snippet: 'AI Agent đã chuẩn bị xong báo cáo tuần cho toàn bộ module Docs, Sheets, Slides và Mail...',
+        dateIso: new Date(now - 1000 * 60 * 60 * 3).toISOString(),
+        isRead: false,
+        isStarred: false,
+        hasAttachments: false,
+        category: 'focused',
+      },
+      {
+        id: 'msg_3',
+        accountId,
+        folderId: 'f_inbox',
+        senderName: 'GitHub Notifications',
+        senderEmail: 'notifications@github.com',
+        recipientEmails: ['chau.le@360.org.vn'],
+        subject: '[360org/vuaoffice] Release v0.6.6 published successfully',
+        snippet: 'Branch main release v0.6.6 with updated updater URL is now live...',
+        dateIso: new Date(now - 1000 * 60 * 60 * 24).toISOString(),
+        isRead: true,
+        isStarred: false,
+        hasAttachments: false,
+        category: 'other',
+      },
+    ]
+
+    this.data.bodies = {
+      msg_1: {
+        html: `
           <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
             <h2 style="color: #0078d4;">Chào mừng đến với VuaMail — VuaOffice Suite</h2>
             <p>Kính gửi Sếp Châu,</p>
@@ -81,20 +138,10 @@ export class SQLiteMailStorage {
             <p>Trân trọng,<br/><strong>360 CORP Engineering Team</strong></p>
           </div>
         `,
-        plainText: 'Chào mừng Sếp đến với VuaMail trong hệ sinh thái VuaOffice Suite...'
+        plainText: 'Chào mừng Sếp đến với VuaMail trong hệ sinh thái VuaOffice Suite...',
       },
-      {
-        id: 'msg_2',
-        folderId: 'f_inbox',
-        senderName: 'VuaOffice AI Agent',
-        senderEmail: 'ai@vuahethong.com',
-        subject: 'Báo cáo tổng kết tuần & Lịch họp rà soát tính năng mới',
-        snippet: 'AI Agent đã chuẩn bị xong báo cáo tuần cho toàn bộ module Docs, Sheets, Slides và Mail...',
-        dateIso: new Date(now - 1000 * 60 * 60 * 3).toISOString(),
-        isRead: 0,
-        isStarred: 0,
-        category: 'focused',
-        bodyHtml: `
+      msg_2: {
+        html: `
           <div style="font-family: sans-serif; line-height: 1.6;">
             <h3>Báo cáo tuần & Tính năng mới</h3>
             <p>Chào Sếp,</p>
@@ -102,203 +149,104 @@ export class SQLiteMailStorage {
             <p>Các tài liệu kiến trúc (ARCH.md, SPEC.md, REQUIREMENTS.md) đã được cập nhật đồng bộ.</p>
           </div>
         `,
-        plainText: 'Báo cáo tổng kết tuần & Lịch họp rà soát tính năng mới...'
+        plainText: 'Báo cáo tổng kết tuần & Lịch họp rà soát tính năng mới...',
       },
-      {
-        id: 'msg_3',
-        folderId: 'f_inbox',
-        senderName: 'GitHub Notifications',
-        senderEmail: 'notifications@github.com',
-        subject: '[360org/vuaoffice] Release v0.6.6 published successfully',
-        snippet: 'Branch main release v0.6.6 with updated updater URL is now live...',
-        dateIso: new Date(now - 1000 * 60 * 60 * 24).toISOString(),
-        isRead: 1,
-        isStarred: 0,
-        category: 'other',
-        bodyHtml: '<p>Release v0.6.6 is live on GitHub Releases.</p>',
-        plainText: 'Release v0.6.6 is live on GitHub Releases.'
-      }
-    ]
-
-    const emailStmt = this.db.prepare(`
-      INSERT INTO emails (
-        id, account_id, folder_id, sender_name, sender_email, recipient_emails,
-        subject, snippet, date_iso, is_read, is_starred, category, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
-
-    const bodyStmt = this.db.prepare(`
-      INSERT INTO email_bodies (email_id, html, plain_text)
-      VALUES (?, ?, ?)
-    `)
-
-    for (const m of demoEmails) {
-      emailStmt.run(
-        m.id,
-        accountId,
-        m.folderId,
-        m.senderName,
-        m.senderEmail,
-        'chau.le@360.org.vn',
-        m.subject,
-        m.snippet,
-        m.dateIso,
-        m.isRead,
-        m.isStarred,
-        m.category,
-        now
-      )
-      bodyStmt.run(m.id, m.bodyHtml, m.plainText)
+      msg_3: {
+        html: '<p>Release v0.6.6 is live on GitHub Releases.</p>',
+        plainText: 'Release v0.6.6 is live on GitHub Releases.',
+      },
     }
   }
 
   getAccounts(): EmailAccount[] {
-    if (!this.db) return []
-    const rows = this.db.prepare('SELECT * FROM accounts ORDER BY is_default DESC').all() as Array<{
-      id: string
-      email: string
-      name: string
-      provider: string
-      avatar_url?: string
-      is_default: number
-    }>
-    return rows.map((r) => ({
-      id: r.id,
-      email: r.email,
-      name: r.name,
-      provider: r.provider as 'google' | 'microsoft' | 'custom_imap',
-      avatarUrl: r.avatar_url,
-      isDefault: Boolean(r.is_default),
-    }))
+    return this.data.accounts
   }
 
   getFolders(accountId: string): MailFolder[] {
-    if (!this.db) return []
-    const rows = this.db.prepare('SELECT * FROM email_folders WHERE account_id = ?').all(accountId) as Array<{
-      id: string
-      account_id: string
-      name: string
-      kind: string
-      icon_name: string
-      unread_count: number
-      total_count: number
-      is_favorite: number
-    }>
-    return rows.map((r) => ({
-      id: r.id,
-      accountId: r.account_id,
-      name: r.name,
-      kind: r.kind as any,
-      iconName: r.icon_name,
-      unreadCount: r.unread_count,
-      totalCount: r.total_count,
-      isFavorite: Boolean(r.is_favorite),
-    }))
+    return this.data.folders.filter((f) => f.accountId === accountId)
   }
 
   getEmails(folderId: string, category?: 'focused' | 'other'): EmailMessage[] {
-    if (!this.db) return []
-    let query = 'SELECT * FROM emails WHERE folder_id = ?'
-    const params: any[] = [folderId]
-
-    if (category) {
-      query += ' AND category = ?'
-      params.push(category)
-    }
-    query += ' ORDER BY date_iso DESC'
-
-    const rows = this.db.prepare(query).all(...params) as Array<{
-      id: string
-      account_id: string
-      folder_id: string
-      sender_name: string
-      sender_email: string
-      recipient_emails: string
-      subject: string
-      snippet: string
-      date_iso: string
-      is_read: number
-      is_starred: number
-      has_attachments: number
-      category: string
-    }>
-
-    return rows.map((r) => ({
-      id: r.id,
-      accountId: r.account_id,
-      folderId: r.folder_id,
-      senderName: r.sender_name,
-      senderEmail: r.sender_email,
-      recipientEmails: [r.recipient_emails],
-      subject: r.subject,
-      snippet: r.snippet,
-      dateIso: r.date_iso,
-      isRead: Boolean(r.is_read),
-      isStarred: Boolean(r.is_starred),
-      hasAttachments: Boolean(r.has_attachments),
-      category: r.category as 'focused' | 'other',
-    }))
+    return this.data.emails
+      .filter((e) => e.folderId === folderId && (!category || e.category === category))
+      .sort((a, b) => new Date(b.dateIso).getTime() - new Date(a.dateIso).getTime())
   }
 
   getEmailBody(emailId: string): EmailBody | null {
-    if (!this.db) return null
-    const row = this.db.prepare('SELECT * FROM email_bodies WHERE email_id = ?').get(emailId) as
-      | { email_id: string; html: string; plain_text: string }
-      | undefined
-    if (!row) return null
+    const body = this.data.bodies[emailId]
+    if (!body) return null
     return {
-      emailId: row.email_id,
-      html: row.html,
-      plainText: row.plain_text,
+      emailId,
+      html: body.html,
+      plainText: body.plainText,
     }
   }
 
   markRead(emailId: string, isRead: boolean): void {
-    if (!this.db) return
-    this.db.prepare('UPDATE emails SET is_read = ? WHERE id = ?').run(isRead ? 1 : 0, emailId)
+    const email = this.data.emails.find((e) => e.id === emailId)
+    if (email) {
+      email.isRead = isRead
+      this.save()
+    }
   }
 
   toggleStarred(emailId: string): boolean {
-    if (!this.db) return false
-    const row = this.db.prepare('SELECT is_starred FROM emails WHERE id = ?').get(emailId) as { is_starred: number } | undefined
-    const newVal = row && row.is_starred === 1 ? 0 : 1
-    this.db.prepare('UPDATE emails SET is_starred = ? WHERE id = ?').run(newVal, emailId)
-    return newVal === 1
+    const email = this.data.emails.find((e) => e.id === emailId)
+    if (email) {
+      email.isStarred = !email.isStarred
+      this.save()
+      return email.isStarred
+    }
+    return false
   }
 
   deleteEmail(emailId: string): void {
-    if (!this.db) return
-    this.db.prepare('DELETE FROM emails WHERE id = ?').run(emailId)
+    this.data.emails = this.data.emails.filter((e) => e.id !== emailId)
+    delete this.data.bodies[emailId]
+    this.save()
   }
 
   archiveEmail(emailId: string): void {
-    if (!this.db) return
-    this.db.prepare("UPDATE emails SET folder_id = 'f_archive' WHERE id = ?").run(emailId)
+    const email = this.data.emails.find((e) => e.id === emailId)
+    if (email) {
+      email.folderId = 'f_archive'
+      this.save()
+    }
   }
 
   sendEmail(draft: {
     accountId: string
     to: string[]
+    cc?: string[]
+    bcc?: string[]
     subject: string
     bodyHtml: string
+    bodyPlain: string
   }): { success: boolean; emailId?: string } {
-    if (!this.db) return { success: false }
-    const id = `msg_${Date.now()}`
-    const nowIso = new Date().toISOString()
-    const snippet = draft.bodyHtml.replace(/<[^>]*>?/gm, '').slice(0, 100)
+    const newId = `msg_${Date.now()}`
+    const newEmail: EmailMessage = {
+      id: newId,
+      accountId: draft.accountId,
+      folderId: 'f_sent',
+      senderName: 'Châu Lê',
+      senderEmail: 'chau.le@360.org.vn',
+      recipientEmails: draft.to,
+      subject: draft.subject,
+      snippet: draft.bodyPlain.slice(0, 100),
+      dateIso: new Date().toISOString(),
+      isRead: true,
+      isStarred: false,
+      hasAttachments: false,
+      category: 'focused',
+    }
 
-    this.db.prepare(`
-      INSERT INTO emails (
-        id, account_id, folder_id, sender_name, sender_email, recipient_emails,
-        subject, snippet, date_iso, is_read, is_starred, category, created_at
-      ) VALUES (?, ?, 'f_sent', 'Châu Lê', 'chau.le@360.org.vn', ?, ?, ?, ?, 1, 0, 'focused', ?)
-    `).run(id, draft.accountId, draft.to.join(','), draft.subject, snippet, nowIso, Date.now())
+    this.data.emails.unshift(newEmail)
+    this.data.bodies[newId] = {
+      html: draft.bodyHtml,
+      plainText: draft.bodyPlain,
+    }
+    this.save()
 
-    this.db.prepare(`
-      INSERT INTO email_bodies (email_id, html, plain_text)
-      VALUES (?, ?, ?)
-    `).run(id, draft.bodyHtml, snippet)
-
-    return { success: true, emailId: id }
+    return { success: true, emailId: newId }
   }
 }

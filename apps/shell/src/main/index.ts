@@ -156,6 +156,7 @@ import {
   setMarkdownDocxExportedHook,
   setMarkdownFileSavedHook,
 } from '../../../markdown/src/main/markdown-main'
+import { configureMailRuntime } from '../../../mail/src/main/mail-main'
 import type {
   AccountLoginEvent,
   AccountStatus,
@@ -228,6 +229,9 @@ const PDF_OUT = app.isPackaged
 const MARKDOWN_OUT = app.isPackaged
   ? join(process.resourcesPath, 'modules', 'markdown')
   : join(APPS_ROOT, 'markdown', 'out')
+const MAIL_OUT = app.isPackaged
+  ? join(process.resourcesPath, 'modules', 'mail')
+  : join(APPS_ROOT, 'mail', 'out')
 const SIDECAR_BIN = app.isPackaged
   ? join(process.resourcesPath, 'native', SIDECAR_EXE)
   : join(APPS_ROOT, 'sheets', 'native', 'xlsx-engine', 'target', 'release', SIDECAR_EXE)
@@ -258,6 +262,11 @@ configureMarkdownRuntime({
   preloadPath: join(MARKDOWN_OUT, 'preload', 'index.js'),
   rendererUrl: process.env.MARKDOWN_RENDERER_URL,
   rendererFile: join(MARKDOWN_OUT, 'renderer', 'index.html'),
+})
+configureMailRuntime({
+  preloadPath: join(MAIL_OUT, 'preload', 'index.js'),
+  rendererUrl: process.env.MAIL_RENDERER_URL,
+  rendererFile: join(MAIL_OUT, 'renderer', 'index.html'),
 })
 
 // ---- UI language ----
