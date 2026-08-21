@@ -20,7 +20,7 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
   if (!email) {
     return (
       <div
-        className="vuamail-reading"
+        className="mail-reading"
         style={{ alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}
       >
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -35,7 +35,7 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
   const initial = (email.senderName || email.senderEmail || 'U').charAt(0).toUpperCase()
 
   return (
-    <div className="vuamail-reading">
+    <div className="mail-reading">
       <div className="reading-header">
         <div className="reading-subject">{email.subject || '(No subject)'}</div>
         <div className="reading-meta">

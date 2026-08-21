@@ -17,7 +17,7 @@ Hầu hết các giải pháp văn phòng trên thị trường hiện nay gặp
 ## 2. Tầm nhìn Sản phẩm (Product Vision)
 Xây dựng **VuaOffice** trở thành **Bộ ứng dụng văn phòng AI-Native 100% miễn phí bản quyền, hoàn toàn làm chủ hạ tầng AI & bảo mật dữ liệu** dành cho cộng đồng và doanh nghiệp:
 
-- **Bộ ứng dụng toàn diện (All-in-One Office Suite)**: Tích hợp đầy đủ Docs (Soạn thảo văn bản), Sheets (Bảng tính phân tích dữ liệu), Slides (Thuyết trình sáng tạo), PDF (Xem & Ghi chú thông minh), Markdown (Soạn thảo kỹ thuật) và VuaMail (Quản lý Email & Lịch thay thế Outlook).
+- **Bộ ứng dụng toàn diện (All-in-One Office Suite)**: Tích hợp đầy đủ Docs (Soạn thảo văn bản), Sheets (Bảng tính phân tích dữ liệu), Slides (Thuyết trình sáng tạo), PDF (Xem & Ghi chú thông minh), Markdown (Soạn thảo kỹ thuật) và Mail (Quản lý Email & Lịch thay thế Outlook).
 - **Làm chủ Trí tuệ Nhân tạo (AI Gateway Independence)**: Tích hợp trực tiếp với mạng lưới AI Gateway của 360 CORP (**OmiRouter**, **9Router**, **Hermes Agent**) cùng khả năng tùy biến Custom Endpoint tương thích OpenAI API.
 - **Hệ thống Whitelabel & Sync Upstream thông minh**: Duy trì 100% bản quyền thương hiệu **VuaOffice by 360 CORP**, đồng thời tự động cập nhật mọi cải tiến công nghệ từ upstream mà không bị xung đột mã nguồn.
 
@@ -55,7 +55,7 @@ Xây dựng **VuaOffice** trở thành **Bộ ứng dụng văn phòng AI-Native
 ## 5. Lộ trình Phát triển (Product Roadmap)
 - **Giai đoạn 1 (v0.1.0 - v0.6.0)**: Thiết lập nền tảng Whitelabel tự động, tích hợp OmiRouter/9Router, chuẩn hoá nhận diện thương hiệu VuaOffice.
 - **Giai đoạn 2 (v0.6.1 - v0.6.7)**: Tích hợp Hermes Agent, chuyển đổi Developer Mode sang System Menu, bổ sung Manual Check for Updates, nâng cấp bộ icon/logo vector chính thức.
-- **Giai đoạn 3 (v0.7.0+)**: Ra mắt chính thức VuaMail (Email & Calendar), hoàn thiện hệ thống Agentic Office Automation và đồng bộ đám mây riêng tư.
+- **Giai đoạn 3 (v0.7.0+)**: Ra mắt chính thức AI Mail (Email & Calendar), hoàn thiện hệ thống Agentic Office Automation và đồng bộ đám mây riêng tư.
 
 ---
 

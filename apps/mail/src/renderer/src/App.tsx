@@ -26,13 +26,13 @@ export const App: React.FC = () => {
   // Load initial accounts & folders
   useEffect(() => {
     async function loadInitial() {
-      if (!window.vuaMail) return
-      const accList = await window.vuaMail.getAccounts()
+      if (!window.mailApi) return
+      const accList = await window.mailApi.getAccounts()
       setAccounts(accList)
       if (accList.length > 0) {
         const primary = accList[0]
         setActiveAccount(primary)
-        const fList = await window.vuaMail.getFolders(primary.id)
+        const fList = await window.mailApi.getFolders(primary.id)
         setFolders(fList)
       }
     }
@@ -42,8 +42,8 @@ export const App: React.FC = () => {
   // Load emails when folder or category changes
   useEffect(() => {
     async function loadEmails() {
-      if (!window.vuaMail) return
-      const list = await window.vuaMail.getEmails(activeFolderId, categoryTab)
+      if (!window.mailApi) return
+      const list = await window.mailApi.getEmails(activeFolderId, categoryTab)
       setEmails(list)
       if (list.length > 0) {
         setSelectedEmailId(list[0].id)
@@ -58,14 +58,14 @@ export const App: React.FC = () => {
   // Load email body when selection changes
   useEffect(() => {
     async function loadBody() {
-      if (!window.vuaMail || !selectedEmailId) {
+      if (!window.mailApi || !selectedEmailId) {
         setActiveBody(null)
         setAiSummary(null)
         return
       }
       setIsLoadingBody(true)
       setAiSummary(null)
-      const body = await window.vuaMail.getEmailBody(selectedEmailId)
+      const body = await window.mailApi.getEmailBody(selectedEmailId)
       setActiveBody(body)
       setIsLoadingBody(false)
     }
@@ -85,15 +85,15 @@ export const App: React.FC = () => {
   })
 
   const handleDelete = async () => {
-    if (!window.vuaMail || !selectedEmailId) return
-    await window.vuaMail.deleteEmail(selectedEmailId)
+    if (!window.mailApi || !selectedEmailId) return
+    await window.mailApi.deleteEmail(selectedEmailId)
     setEmails((prev) => prev.filter((e) => e.id !== selectedEmailId))
     setSelectedEmailId(null)
   }
 
   const handleArchive = async () => {
-    if (!window.vuaMail || !selectedEmailId) return
-    await window.vuaMail.archiveEmail(selectedEmailId)
+    if (!window.mailApi || !selectedEmailId) return
+    await window.mailApi.archiveEmail(selectedEmailId)
     setEmails((prev) => prev.filter((e) => e.id !== selectedEmailId))
     setSelectedEmailId(null)
   }
@@ -101,13 +101,13 @@ export const App: React.FC = () => {
   const handleTriggerAiSummary = () => {
     if (!selectedEmail) return
     setAiSummary(
-      `📌 Tóm tắt nội dung chính:\n• Email thông báo tiến độ cập nhật và vận hành của hệ thống VuaMail.\n• Đã kết nối thành công SQLite Engine và giao diện Fluent UI Outlook 365.\n• Đề xuất Sếp kiểm tra lại và duyệt release.`
+      `📌 Tóm tắt nội dung chính:\n• Email thông báo tiến độ cập nhật và vận hành của hệ thống Mail.\n• Đã kết nối thành công SQLite Engine và giao diện Fluent UI Outlook 365.\n• Đề xuất Sếp kiểm tra lại và duyệt release.`
     )
   }
 
   const handleSendDraft = async (draft: { to: string[]; subject: string; bodyHtml: string }) => {
-    if (!window.vuaMail || !activeAccount) return
-    await window.vuaMail.sendEmail({
+    if (!window.mailApi || !activeAccount) return
+    await window.mailApi.sendEmail({
       accountId: activeAccount.id,
       to: draft.to,
       subject: draft.subject,
@@ -116,10 +116,10 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="vuamail-app">
+    <div className="mail-app">
       {/* Outlook Top Header */}
-      <div className="vuamail-header">
-        <div className="vuamail-brand">
+      <div className="mail-header">
+        <div className="mail-brand">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
@@ -127,7 +127,7 @@ export const App: React.FC = () => {
           <span>VuaOffice Mail</span>
         </div>
 
-        <div className="vuamail-search">
+        <div className="mail-search">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -156,7 +156,7 @@ export const App: React.FC = () => {
       />
 
       {/* 3-Column Outlook Main View */}
-      <div className="vuamail-body">
+      <div className="mail-body">
         <AppRail activeTab={activeRailTab} onTabChange={setActiveRailTab} />
 
         <FolderTree

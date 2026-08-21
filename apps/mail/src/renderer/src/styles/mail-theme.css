@@ -1,4 +1,4 @@
-/* VuaMail Outlook UI theme styling — complies with VuaOffice tokens.css */
+/* Mail Outlook UI theme styling — complies with VuaOffice tokens.css */
 
 :root {
   --mail-blue: #0078d4;
@@ -29,7 +29,7 @@
   }
 }
 
-.vuamail-app {
+.mail-app {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -42,7 +42,7 @@
 }
 
 /* Outlook Top Header */
-.vuamail-header {
+.mail-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,7 +54,7 @@
   flex-shrink: 0;
 }
 
-.vuamail-brand {
+.mail-brand {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -62,7 +62,7 @@
   font-size: 16px;
 }
 
-.vuamail-search {
+.mail-search {
   flex: 1;
   max-width: 480px;
   display: flex;
@@ -73,7 +73,7 @@
   gap: 8px;
 }
 
-.vuamail-search input {
+.mail-search input {
   border: none;
   background: transparent;
   color: var(--color-btn-primary-text);
@@ -82,12 +82,12 @@
   font-size: 13px;
 }
 
-.vuamail-search input::placeholder {
+.mail-search input::placeholder {
   color: rgba(255, 255, 255, 0.7);
 }
 
 /* Outlook Ribbon Toolbar */
-.vuamail-ribbon {
+.mail-ribbon {
   display: flex;
   align-items: center;
   height: 44px;
@@ -135,14 +135,14 @@
 }
 
 /* 3-Column Outlook Main Body */
-.vuamail-body {
+.mail-body {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
 /* Column 0: App Rail */
-.vuamail-apprail {
+.mail-apprail {
   width: 48px;
   background-color: var(--surface-subtle);
   border-right: 1px solid var(--border);
@@ -190,7 +190,7 @@
 }
 
 /* Column 1: Folder Tree */
-.vuamail-folders {
+.mail-folders {
   width: 220px;
   background-color: var(--surface);
   border-right: 1px solid var(--border);
@@ -242,7 +242,7 @@
 }
 
 /* Column 2: Message List */
-.vuamail-msglist {
+.mail-msglist {
   width: 340px;
   background-color: var(--surface);
   border-right: 1px solid var(--border);
@@ -341,7 +341,7 @@
 }
 
 /* Column 3: Reading Pane */
-.vuamail-reading {
+.mail-reading {
   flex: 1;
   background-color: var(--surface);
   display: flex;

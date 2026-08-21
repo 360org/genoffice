@@ -17,7 +17,7 @@ export const MailList: React.FC<MailListProps> = ({
   onCategoryChange,
 }) => {
   return (
-    <div className="vuamail-msglist">
+    <div className="mail-msglist">
       <div className="msglist-header">
         <div className="msglist-tabs">
           <div

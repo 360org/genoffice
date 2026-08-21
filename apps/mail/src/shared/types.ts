@@ -63,7 +63,7 @@ export interface MailOp {
   createdAt: number
 }
 
-export interface VuaMailApi {
+export interface MailApi {
   getAccounts: () => Promise<EmailAccount[]>
   getFolders: (accountId: string) => Promise<MailFolder[]>
   getEmails: (folderId: string, category?: 'focused' | 'other') => Promise<EmailMessage[]>
@@ -84,6 +84,6 @@ export interface VuaMailApi {
 
 declare global {
   interface Window {
-    vuaMail?: VuaMailApi
+    mailApi?: MailApi
   }
 }

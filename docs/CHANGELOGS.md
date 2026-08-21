@@ -7,9 +7,10 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
 
 ### Fixed & Core
 - **Khắc phục triệt để lỗi không mở được thẻ AI Mail**:
-  - Chuyển đổi engine lưu trữ `SQLiteMailStorage` từ native C++ binary sang Pure JS JSON (`vuamail-local.json`) tránh crash native binding khi đóng gói app.
+  - Chuyển đổi engine lưu trữ `SQLiteMailStorage` từ native C++ binary sang Pure JS JSON (`mail-local.json`) tránh crash native binding khi đóng gói app.
   - Cấu hình đầy đủ `configureMailRuntime` và `MAIL_OUT` trong `apps/shell/src/main/index.ts` đồng bộ đường dẫn preload và renderer với các phân hệ Docs/Sheets/Slides/PDF/Markdown.
   - Kích hoạt sự kiện click trực tiếp thẻ AI Mail trên màn hình Home.
+  - Đồng bộ toàn bộ định danh, interface, IPC channel và CSS class từ `vuamail` / `VuaMail` sang `mail` / `Mail` / `mailApi` / `MAIL_IPC` đồng nhất với kiến trúc của VuaOffice Suite.
 
 ### Changed & Whitelabel
 - **Đồng bộ biểu tượng thương hiệu VuaOffice SVG chính thức**:

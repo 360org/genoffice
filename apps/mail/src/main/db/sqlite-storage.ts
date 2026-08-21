@@ -20,7 +20,7 @@ export class SQLiteMailStorage {
     if (!existsSync(dbDir)) {
       mkdirSync(dbDir, { recursive: true })
     }
-    this.filePath = join(dbDir, 'vuamail-local.json')
+    this.filePath = join(dbDir, 'mail-local.json')
     this.data = this.load()
     if (this.data.accounts.length === 0) {
       this.seedDemoData()
@@ -83,8 +83,8 @@ export class SQLiteMailStorage {
         senderName: '360 CORP Team',
         senderEmail: 'support@360.org.vn',
         recipientEmails: ['chau.le@360.org.vn'],
-        subject: 'Chào mừng Sếp đến với VuaMail trong hệ sinh thái VuaOffice Suite',
-        snippet: 'VuaMail tích hợp AI Smart Summary, Smart Reply và Offline SQLite Sync hoàn toàn mới...',
+        subject: 'Chào mừng Sếp đến với Mail trong hệ sinh thái VuaOffice Suite',
+        snippet: 'Mail tích hợp AI Smart Summary, Smart Reply và Offline SQLite Sync hoàn toàn mới...',
         dateIso: new Date(now - 1000 * 60 * 30).toISOString(),
         isRead: false,
         isStarred: true,
@@ -127,9 +127,9 @@ export class SQLiteMailStorage {
       msg_1: {
         html: `
           <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
-            <h2 style="color: #0078d4;">Chào mừng đến với VuaMail — VuaOffice Suite</h2>
+            <h2 style="color: #0078d4;">Chào mừng đến với Mail — VuaOffice Suite</h2>
             <p>Kính gửi Sếp Châu,</p>
-            <p>Ứng dụng <strong>VuaMail</strong> đã được khởi tạo thành công với kiến trúc kết hợp:</p>
+            <p>Ứng dụng <strong>Mail</strong> đã được khởi tạo thành công với kiến trúc kết hợp:</p>
             <ul>
               <li><strong>Local Engine</strong>: SQLite Storage siêu tốc, đồng bộ Op-Queue offline.</li>
               <li><strong>Giao diện Microsoft Outlook</strong>: Ribbon Fluent UI 3 cột chuẩn Microsoft 365.</li>
@@ -138,14 +138,14 @@ export class SQLiteMailStorage {
             <p>Trân trọng,<br/><strong>360 CORP Engineering Team</strong></p>
           </div>
         `,
-        plainText: 'Chào mừng Sếp đến với VuaMail trong hệ sinh thái VuaOffice Suite...',
+        plainText: 'Chào mừng Sếp đến với Mail trong hệ sinh thái VuaOffice Suite...',
       },
       msg_2: {
         html: `
           <div style="font-family: sans-serif; line-height: 1.6;">
             <h3>Báo cáo tuần & Tính năng mới</h3>
             <p>Chào Sếp,</p>
-            <p>Tiến độ tích hợp VuaMail vào VuaOffice Shell đang diễn ra đúng kế hoạch.</p>
+            <p>Tiến độ tích hợp Mail vào VuaOffice Shell đang diễn ra đúng kế hoạch.</p>
             <p>Các tài liệu kiến trúc (ARCH.md, SPEC.md, REQUIREMENTS.md) đã được cập nhật đồng bộ.</p>
           </div>
         `,

@@ -24,7 +24,7 @@ graph TD
         SlidesApp["apps/slides<br/>(PowerPoint/Pptx)"]
         PdfApp["apps/pdf<br/>(PDF Reader & Annotator)"]
         MdApp["apps/markdown<br/>(Tiptap GFM Notes)"]
-        MailApp["apps/mail<br/>(VuaMail Client)"]
+        MailApp["apps/mail<br/>(AI Mail Client)"]
     end
 
     subgraph "Core Engine & Shared Libraries Layer (packages/*)"

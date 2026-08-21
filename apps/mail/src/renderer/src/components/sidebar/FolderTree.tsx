@@ -18,7 +18,7 @@ export const FolderTree: React.FC<FolderTreeProps> = ({
   const allFolders = folders
 
   return (
-    <div className="vuamail-folders">
+    <div className="mail-folders">
       {favorites.length > 0 && (
         <>
           <div className="folder-group-title">Favorites</div>

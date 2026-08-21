@@ -23,7 +23,7 @@ export const MailRibbon: React.FC<MailRibbonProps> = ({
   hasSelectedEmail,
 }) => {
   return (
-    <div className="vuamail-ribbon">
+    <div className="mail-ribbon">
       <RibbonButton
         primary
         label="New mail"

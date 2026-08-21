@@ -51,7 +51,7 @@ npm run dev:sheets      # Chạy riêng VuaOffice Sheets
 npm run dev:slides      # Chạy riêng VuaOffice Slides
 npm run dev:pdf         # Chạy riêng VuaOffice PDF
 npm run dev:markdown    # Chạy riêng VuaOffice Markdown
-npm run dev:mail        # Chạy riêng VuaMail Client
+npm run dev:mail        # Chạy riêng AI Mail Client
 ```
 
 ---

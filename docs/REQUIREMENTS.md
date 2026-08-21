@@ -69,7 +69,7 @@
 - **Định dạng Hỗ trợ**: `.md`, `.markdown`.
 - **Tính năng Soạn thảo**: Tiptap Editor hỗ trợ GitHub Flavored Markdown (GFM), công thức toán học KaTeX, sơ đồ tư duy/kiến trúc Mermaid, Task Lists và xuất bản sang HTML/PDF.
 
-### 2.7 Ứng dụng Email Doanh nghiệp VuaMail (`apps/mail`)
+### 2.7 Ứng dụng Email Doanh nghiệp AI Mail (`apps/mail`)
 - **Kiến trúc & Lưu trữ**: SQLite cục bộ lưu trữ metadata, full-text search index và hàng đợi ngoại tuyến OpQueue.
 - **Giao diện**: Giao diện Fluent UI Ribbon 3 cột theo chuẩn Microsoft Outlook.
 - **Khả năng AI**: Tóm tắt chuỗi email dài, gợi ý trả lời nhanh (Smart Reply), hỗ trợ soạn thảo thư doanh nghiệp.

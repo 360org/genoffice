@@ -9,7 +9,7 @@ interface AppRailProps {
 
 export const AppRail: React.FC<AppRailProps> = ({ activeTab, onTabChange }) => {
   return (
-    <div className="vuamail-apprail">
+    <div className="mail-apprail">
       <button
         className={`apprail-btn ${activeTab === 'mail' ? 'active' : ''}`}
         title="Mail"

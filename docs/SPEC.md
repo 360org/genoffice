@@ -18,7 +18,7 @@ vuaoffice/
 │   ├── slides/             # Ứng dụng Trình chiếu & Thiết kế Slide (.pptx)
 │   ├── pdf/                # Ứng dụng Xem & Ghi chú PDF (.pdf)
 │   ├── markdown/           # Ứng dụng Soạn thảo GFM Notes (.md)
-│   ├── mail/               # Ứng dụng VuaMail Client (Email & Lịch)
+│   ├── mail/               # Ứng dụng Mail Client (Email & Lịch)
 │   └── shell/              # Khung ứng dụng Desktop chính (Host Shell)
 ├── packages/
 │   ├── docx-engine/        # Lõi phân tích và bố cục OpenXML DOCX
