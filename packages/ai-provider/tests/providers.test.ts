@@ -100,12 +100,12 @@ describe('resolveAiSettings', () => {
 })
 
 describe('activeProvider', () => {
-  it('honors a configured BYOK provider and falls back to genspark otherwise', () => {
+  it('honors a configured BYOK provider and falls back to default router otherwise', () => {
     const settings = defaultAiSettings()
-    expect(activeProvider(settings)).toBe('genspark')
+    expect(activeProvider(settings)).toBe('ninerouter')
 
     settings.provider = 'kimi'
-    expect(activeProvider(settings)).toBe('genspark') // no key yet
+    expect(activeProvider(settings)).toBe('ninerouter') // no key yet
     settings.providers.kimi.apiKey = 'sk-user'
     expect(activeProvider(settings)).toBe('kimi')
   })
@@ -114,17 +114,17 @@ describe('activeProvider', () => {
     const settings = defaultAiSettings()
     settings.provider = 'custom'
     settings.providers.custom.apiKey = 'k'
-    expect(activeProvider(settings)).toBe('genspark')
+    expect(activeProvider(settings)).toBe('ninerouter')
     settings.providers.custom.baseUrl = 'http://localhost:1234/v1'
-    expect(activeProvider(settings)).toBe('genspark') // custom's default model is empty
+    expect(activeProvider(settings)).toBe('ninerouter') // custom's default model is empty
     settings.providers.custom.model = 'my-model'
     expect(activeProvider(settings)).toBe('custom')
   })
 
-  it('falls back to genspark for unknown ids from a hand-edited settings file', () => {
+  it('falls back to default router for unknown ids from a hand-edited settings file', () => {
     const settings = defaultAiSettings()
     settings.provider = 'nonsense' as AiProviderId
-    expect(activeProvider(settings)).toBe('genspark')
+    expect(activeProvider(settings)).toBe('ninerouter')
   })
 
   it('genspark never requires a key (injected from the gsk login at request time)', () => {
