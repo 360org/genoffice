@@ -173,7 +173,7 @@ const tMain = createI18n({
     menuAiProofread: 'AI 校对',
     menuWindow: '窗口',
     menuHelp: '帮助',
-    menuDocsHelp: 'VuaOffice Docs 帮助',
+    menuDocsHelp: 'GenOffice Docs 帮助',
   },
   en: {
     dlgOpenDoc: 'Open Document',
@@ -266,7 +266,7 @@ const tMain = createI18n({
     menuAiProofread: 'AI Proofread',
     menuWindow: 'Window',
     menuHelp: 'Help',
-    menuDocsHelp: 'VuaOffice Docs Help',
+    menuDocsHelp: 'GenOffice Docs Help',
   },
   ja: {
     dlgOpenDoc: '文書を開く',
@@ -359,7 +359,7 @@ const tMain = createI18n({
     menuAiProofread: 'AI 校正',
     menuWindow: 'ウィンドウ',
     menuHelp: 'ヘルプ',
-    menuDocsHelp: 'VuaOffice Docs ヘルプ',
+    menuDocsHelp: 'GenOffice Docs ヘルプ',
   },
   ko: {
     dlgOpenDoc: '문서 열기',
@@ -453,7 +453,7 @@ const tMain = createI18n({
     menuAiProofread: 'AI 교정',
     menuWindow: '창',
     menuHelp: '도움말',
-    menuDocsHelp: 'VuaOffice Docs 도움말',
+    menuDocsHelp: 'GenOffice Docs 도움말',
   },
   fr: {
     dlgOpenDoc: 'Ouvrir un document',
@@ -548,7 +548,7 @@ const tMain = createI18n({
     menuAiProofread: 'Relecture IA',
     menuWindow: 'Fenêtre',
     menuHelp: 'Aide',
-    menuDocsHelp: 'Aide VuaOffice Docs',
+    menuDocsHelp: 'Aide GenOffice Docs',
   },
   de: {
     dlgOpenDoc: 'Dokument öffnen',
@@ -643,7 +643,7 @@ const tMain = createI18n({
     menuAiProofread: 'KI-Korrektur',
     menuWindow: 'Fenster',
     menuHelp: 'Hilfe',
-    menuDocsHelp: 'VuaOffice Docs-Hilfe',
+    menuDocsHelp: 'GenOffice Docs-Hilfe',
   },
   es: {
     dlgOpenDoc: 'Abrir documento',
@@ -737,7 +737,7 @@ const tMain = createI18n({
     menuAiProofread: 'Corrección con IA',
     menuWindow: 'Ventana',
     menuHelp: 'Ayuda',
-    menuDocsHelp: 'Ayuda de VuaOffice Docs',
+    menuDocsHelp: 'Ayuda de GenOffice Docs',
   },
   th: {
     dlgOpenDoc: 'เปิดเอกสาร',
@@ -830,7 +830,7 @@ const tMain = createI18n({
     menuAiProofread: 'พิสูจน์อักษรด้วย AI',
     menuWindow: 'หน้าต่าง',
     menuHelp: 'วิธีใช้',
-    menuDocsHelp: 'วิธีใช้ VuaOffice Docs',
+    menuDocsHelp: 'วิธีใช้ GenOffice Docs',
   },
   id: {
     dlgOpenDoc: 'Buka Dokumen',
@@ -923,7 +923,7 @@ const tMain = createI18n({
     menuAiProofread: 'Koreksi AI',
     menuWindow: 'Jendela',
     menuHelp: 'Bantuan',
-    menuDocsHelp: 'Bantuan VuaOffice Docs',
+    menuDocsHelp: 'Bantuan GenOffice Docs',
   },
   ru: {
     dlgOpenDoc: 'Открыть документ',
@@ -1017,7 +1017,7 @@ const tMain = createI18n({
     menuAiProofread: 'ИИ-корректура',
     menuWindow: 'Окно',
     menuHelp: 'Справка',
-    menuDocsHelp: 'Справка VuaOffice Docs',
+    menuDocsHelp: 'Справка GenOffice Docs',
   },
   ar: {
     dlgOpenDoc: 'فتح مستند',
@@ -1111,7 +1111,7 @@ const tMain = createI18n({
     menuAiProofread: 'تدقيق بالذكاء الاصطناعي',
     menuWindow: 'نافذة',
     menuHelp: 'تعليمات',
-    menuDocsHelp: 'تعليمات VuaOffice Docs',
+    menuDocsHelp: 'تعليمات GenOffice Docs',
   },
   pt: {
     dlgOpenDoc: 'Abrir Documento',
@@ -1205,7 +1205,7 @@ const tMain = createI18n({
     menuAiProofread: 'Revisão com IA',
     menuWindow: 'Janela',
     menuHelp: 'Ajuda',
-    menuDocsHelp: 'Ajuda do VuaOffice Docs',
+    menuDocsHelp: 'Ajuda do GenOffice Docs',
   },
   it: {
     dlgOpenDoc: 'Apri documento',
@@ -1299,7 +1299,7 @@ const tMain = createI18n({
     menuAiProofread: 'Correzione IA',
     menuWindow: 'Finestra',
     menuHelp: 'Aiuto',
-    menuDocsHelp: 'Guida di VuaOffice Docs',
+    menuDocsHelp: 'Guida di GenOffice Docs',
   },
   pl: {
     dlgOpenDoc: 'Otwórz dokument',
@@ -1393,7 +1393,7 @@ const tMain = createI18n({
     menuAiProofread: 'Korekta AI',
     menuWindow: 'Okno',
     menuHelp: 'Pomoc',
-    menuDocsHelp: 'Pomoc VuaOffice Docs',
+    menuDocsHelp: 'Pomoc GenOffice Docs',
   },
   nl: {
     dlgOpenDoc: 'Document openen',
@@ -1487,7 +1487,7 @@ const tMain = createI18n({
     menuAiProofread: 'AI-proeflezen',
     menuWindow: 'Venster',
     menuHelp: 'Help',
-    menuDocsHelp: 'VuaOffice Docs Help',
+    menuDocsHelp: 'GenOffice Docs Help',
   },
   ms: {
     dlgOpenDoc: 'Buka Dokumen',
@@ -1581,7 +1581,7 @@ const tMain = createI18n({
     menuAiProofread: 'Pembacaan Pruf AI',
     menuWindow: 'Tetingkap',
     menuHelp: 'Bantuan',
-    menuDocsHelp: 'Bantuan VuaOffice Docs',
+    menuDocsHelp: 'Bantuan GenOffice Docs',
   },
   he: {
     dlgOpenDoc: 'פתיחת מסמך',
@@ -1673,7 +1673,7 @@ const tMain = createI18n({
     menuAiProofread: 'הגהת AI',
     menuWindow: 'חלון',
     menuHelp: 'עזרה',
-    menuDocsHelp: 'עזרה של VuaOffice Docs',
+    menuDocsHelp: 'עזרה של GenOffice Docs',
   },
   hi: {
     dlgOpenDoc: 'दस्तावेज़ खोलें',
@@ -1767,7 +1767,7 @@ const tMain = createI18n({
     menuAiProofread: 'AI प्रूफ़रीडिंग',
     menuWindow: 'विंडो',
     menuHelp: 'सहायता',
-    menuDocsHelp: 'VuaOffice Docs सहायता',
+    menuDocsHelp: 'GenOffice Docs सहायता',
   },
   'zh-TW': {
     dlgOpenDoc: '開啟文件',
@@ -1858,7 +1858,7 @@ const tMain = createI18n({
     menuAiProofread: 'AI 校對',
     menuWindow: '視窗',
     menuHelp: '說明',
-    menuDocsHelp: 'VuaOffice Docs 說明',
+    menuDocsHelp: 'GenOffice Docs 說明',
   },
 })
 const tm = (key: Parameters<typeof tMain>[1], params?: Parameters<typeof tMain>[2]) =>
@@ -3506,7 +3506,7 @@ export function createDocsWindow(openPath?: string): BrowserWindow {
     height: 900,
     minWidth: 980,
     minHeight: 600,
-    title: 'VuaOffice Docs',
+    title: 'GenOffice Docs',
     // Word-like custom title bar (document name centered, quick-access buttons)
     ...(process.platform === 'darwin'
       ? { titleBarStyle: 'hiddenInset' as const }
@@ -3801,7 +3801,7 @@ export function startDocsStandalone(): void {
   // AI_OFFICE_USER_DATA: E2E/screenshot runs isolate userData (and the
   // single-instance lock) so parallel automation sessions don't evict each other
   if (process.env.AI_OFFICE_USER_DATA) app.setPath('userData', process.env.AI_OFFICE_USER_DATA)
-  else if (isDev) app.setPath('userData', join(app.getPath('appData'), 'VuaOffice Docs Dev'))
+  else if (isDev) app.setPath('userData', join(app.getPath('appData'), 'GenOffice Docs Dev'))
 
   const hasSingleInstanceLock = app.requestSingleInstanceLock()
   if (!hasSingleInstanceLock) {

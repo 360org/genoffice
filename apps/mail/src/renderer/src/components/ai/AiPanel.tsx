@@ -38,7 +38,7 @@ export const AiPanel: React.FC<AiPanelProps> = ({
       id: 'm_welcome',
       role: 'assistant',
       content:
-        'Xin chào Sếp! Em là VuaOffice AI Mail Agent. Em có thể giúp Sếp tóm tắt nội dung email, soạn thư trả lời chuyên nghiệp, trích xuất việc cần làm (To-Do) hoặc lên lịch họp Calendar.',
+        'Xin chào Sếp! Em là Genspark AI Mail Agent. Em có thể giúp Sếp tóm tắt nội dung email, soạn thư trả lời chuyên nghiệp, trích xuất việc cần làm (To-Do) hoặc lên lịch họp Calendar.',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ])
@@ -162,7 +162,7 @@ export const AiPanel: React.FC<AiPanelProps> = ({
           emailContext = `\n\nBối cảnh email đang mở:\n- Người gửi: ${selectedEmail.senderName} <${selectedEmail.senderEmail}>\n- Tiêu đề: ${selectedEmail.subject}\n- Nội dung tóm tắt: ${selectedEmail.snippet}`
         }
 
-        const systemPrompt = `Bạn là VuaOffice AI Mail Agent, trợ lý trí tuệ nhân tạo chuyên nghiệp của hệ sinh thái VuaOffice Suite thuộc 360 CORP. Bạn hỗ trợ Sếp Châu Lê trong việc xử lý email, tóm tắt, soạn thảo phản hồi, trích xuất việc cần làm (To-Do), và sắp xếp lịch họp. Luôn xưng "em", gọi người dùng là "Sếp" hoặc "anh", trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn và thực dụng.${emailContext}`
+        const systemPrompt = `Bạn là Genspark AI Mail Agent, trợ lý trí tuệ nhân tạo chuyên nghiệp của hệ sinh thái GenOffice Suite thuộc 360 CORP. Bạn hỗ trợ Sếp Châu Lê trong việc xử lý email, tóm tắt, soạn thảo phản hồi, trích xuất việc cần làm (To-Do), và sắp xếp lịch họp. Luôn xưng "em", gọi người dùng là "Sếp" hoặc "anh", trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn và thực dụng.${emailContext}`
 
         await window.vuaMail.aiStream({
           requestId: reqId,
@@ -203,7 +203,7 @@ export const AiPanel: React.FC<AiPanelProps> = ({
             ? `Tóm tắt nội dung email "${selectedEmail.subject}":\n\n• Người gửi: ${selectedEmail.senderName} (${selectedEmail.senderEmail})\n• Nội dung chính: ${selectedEmail.snippet}\n• Hành động đề xuất: Cần xác nhận phản hồi và kiểm tra tệp đính kèm liên quan.`
             : 'Sếp vui lòng chọn một email từ danh sách để em phân tích và tóm tắt chi tiết.'
         } else {
-          responseContent = `Dạ em đã nhận được yêu cầu: "${query}". Đang kết nối tới VuaOffice AI Gateway.`
+          responseContent = `Dạ em đã nhận được yêu cầu: "${query}". Đang kết nối tới Genspark AI Gateway.`
         }
         setMessages((prev) => {
           const last = prev[prev.length - 1]
@@ -229,10 +229,10 @@ export const AiPanel: React.FC<AiPanelProps> = ({
           type="button"
           className="ai-rail"
           onClick={onClose}
-          title="Mở bảng trợ lý VuaOffice AI"
+          title="Mở bảng trợ lý Genspark AI"
         >
           <GensparkMark size={20} />
-          <span className="ai-rail-text">VuaOffice AI</span>
+          <span className="ai-rail-text">Genspark AI</span>
         </button>
       )}
 
@@ -250,7 +250,7 @@ export const AiPanel: React.FC<AiPanelProps> = ({
           <div className="ai-panel-header">
             <div className="ai-header-left">
               <GensparkMark size={18} />
-              <span>VuaOffice AI</span>
+              <span>Genspark AI</span>
             </div>
 
             <div className="ai-header-actions">
@@ -301,7 +301,7 @@ export const AiPanel: React.FC<AiPanelProps> = ({
             {isProcessing && (
               <div className="ai-processing-state">
                 <span className="ai-spinner-dot" />
-                <span>VuaOffice AI đang phân tích và xử lý...</span>
+                <span>Genspark AI đang phân tích và xử lý...</span>
               </div>
             )}
           </div>
@@ -348,7 +348,7 @@ export const AiPanel: React.FC<AiPanelProps> = ({
             >
               <input
                 type="text"
-                placeholder="Hỏi VuaOffice AI..."
+                placeholder="Hỏi Genspark AI..."
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
               />

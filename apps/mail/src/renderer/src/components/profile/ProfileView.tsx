@@ -53,7 +53,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [authStatusMessage, setAuthStatusMessage] = useState<string | null>(null)
 
   const [signatureText, setSignatureText] = useState(
-    '--\nTrân trọng,\nChâu Lê\n360 CORP | VuaOffice Suite\nEmail: chau.le@360.org.vn | Website: https://360.org.vn'
+    '--\nTrân trọng,\nChâu Lê\n360 CORP | GenOffice Suite\nEmail: chau.le@360.org.vn | Website: https://360.org.vn'
   )
 
   // Trigger OAuth 2.0 / SSO Login Flow
@@ -173,7 +173,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div className="brain-header-main">
             <h1 className="brain-title">Hồ sơ cá nhân & Cài đặt (Profile & Settings)</h1>
             <div className="brain-subtitle">
-              Quản lý tài khoản, kết nối xác thực OAuth, chữ ký thư và cấu hình hệ thống VuaOffice Mail
+              Quản lý tài khoản, kết nối xác thực OAuth, chữ ký thư và cấu hình hệ thống GenOffice Mail
             </div>
           </div>
           <div className="brain-badge-group">
