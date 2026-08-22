@@ -13,6 +13,11 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
   - Tái cấu trúc phân hệ Mail AI đồng bộ hoàn toàn với Docs/Sheets/Slides theo kiến trúc `@genoffice/agent-core`.
   - Triển khai `mail-skill.ts` hỗ trợ Tool Calling chuyên biệt: `get_current_email`, `draft_reply`, `create_todo_task`, `schedule_calendar_event`.
   - Tích hợp bộ UI Component chuẩn VuaOffice Suite (`@genoffice/ui`: `AiComposer`, `Markdown`, `AiTypingIndicator`), hỗ trợ Markdown rendering, auto-scroll, stop streaming và phím tắt Enter/Shift+Enter.
+  - Sửa lỗi Quick Question suggestion chips không bị che bởi composer bằng cách đưa trực tiếp vào luồng cuộn tin nhắn (`.ai-starter-list`).
+- **Đồng bộ hóa Giao diện & Bộ Biểu tượng Mail Ribbon theo Chuẩn VuaOffice Suite**:
+  - Chuẩn hóa toàn bộ icon SVG theo khung hình học 24x24 / 16x16 với nét vẽ `strokeWidth={1.5}`, `strokeLinecap="round"`, `strokeLinejoin="round"`.
+  - Tích hợp bộ icon chuẩn hóa (`MailIcons.tsx`) vào toàn bộ các tab của Mail Ribbon (`Home`, `Send/Receive`, `Folder & Rules`, `View & Layout`), loại bỏ hoàn toàn các thẻ `<svg>` inline viết tay.
+  - Chuẩn hóa nút Soạn thư (`.rb-big.rb-primary`) về màu sắc monochrome tối giản của VuaOffice Suite, loại bỏ background gradient xanh lá tự do.
 
 ### Fixed & Core
 - **Tách biệt Hồ sơ (Profile) và Trí tuệ AI (Brain) trong phân hệ Mail**:

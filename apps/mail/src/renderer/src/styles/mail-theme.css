@@ -333,7 +333,7 @@ body,
   justify-content: center;
   border-radius: 4px;
   padding: 3px 6px;
-  color: var(--mail-primary-blue);
+  color: var(--text-primary, #232425);
 }
 
 .rb-big:hover:not(:disabled) {
@@ -350,10 +350,7 @@ body,
 }
 
 .rb-big.rb-primary .rb-big-icon {
-  background: linear-gradient(135deg, #00ce2c 0%, #00b326 100%);
-  color: #ffffff;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 206, 44, 0.3);
+  color: var(--text-primary, #232425);
 }
 
 .rb-big.ai-entry {
@@ -891,45 +888,50 @@ body,
 .ai-messages-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 16px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .ai-message-bubble-wrapper {
   display: flex;
   flex-direction: column;
-  max-width: 88%;
+  max-width: 100%;
 }
 
 .ai-message-bubble-wrapper.user {
   align-self: flex-end;
+  max-width: 82%;
 }
 
 .ai-message-bubble-wrapper.assistant {
-  align-self: flex-start;
+  align-self: stretch;
+  max-width: 100%;
 }
 
 .ai-message-bubble {
-  padding: 8px 12px;
-  font-size: 12px;
-  line-height: 1.45;
-  border-radius: 12px;
-  white-space: pre-line;
+  padding: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  border-radius: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .user .ai-message-bubble {
-  background-color: var(--mail-primary-blue);
-  color: #ffffff;
-  border-bottom-right-radius: 2px;
-}
-
-.assistant .ai-message-bubble {
   background-color: var(--surface-subtle, #f6f7f9);
   color: var(--text-primary, #232425);
   border: 1px solid var(--border, #e3e6ea);
-  border-bottom-left-radius: 2px;
+  padding: 8px 14px;
+  border-radius: 14px;
+}
+
+.assistant .ai-message-bubble {
+  background-color: transparent;
+  color: var(--text-primary, #232425);
+  border: none;
+  padding: 0;
 }
 
 .ai-message-time {
@@ -977,77 +979,165 @@ body,
   to { transform: rotate(360deg); }
 }
 
-.ai-chips-bar {
-  padding: 6px 10px;
+.ai-starter-list {
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  border-top: 1px solid var(--border-subtle, #efefef);
-  scrollbar-width: none;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 14px;
 }
 
-.ai-chips-bar::-webkit-scrollbar {
-  display: none;
-}
-
-.ai-chip {
-  white-space: nowrap;
-  padding: 3px 8px;
-  border-radius: 12px;
-  border: 1px solid var(--border, #e3e6ea);
-  background-color: var(--surface, #ffffff);
-  color: var(--text-primary, #232425);
-  font-size: 10.5px;
-  cursor: pointer;
-  transition: all 0.1s ease;
-}
-
-.ai-chip:hover {
-  background-color: var(--mail-primary-blue-soft);
-  border-color: var(--mail-primary-blue);
-  color: var(--mail-primary-blue);
-}
-
-.ai-input-wrapper {
-  padding: 8px 10px;
-  border-top: 1px solid var(--border, #e3e6ea);
-  background-color: var(--surface-subtle, #f6f7f9);
-}
-
-.ai-input-form {
+.ai-starter {
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.ai-input-form input {
-  flex: 1;
-  padding: 6px 12px;
-  border-radius: 18px;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
   border: 1px solid var(--border, #e3e6ea);
   background: var(--surface, #ffffff);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
   color: var(--text-primary, #232425);
-  font-size: 11.5px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.ai-starter:hover {
+  border-color: var(--mail-primary-blue, #0077cd);
+  background: var(--hover, #e8f2fc);
+  color: var(--mail-primary-blue, #0077cd);
+}
+
+.ai-starter:active {
+  filter: brightness(0.95);
+  transform: scale(0.99);
+}
+
+/* ==========================================================================
+   AiComposer Unified Token Styles for Mail
+   ========================================================================== */
+
+.ai-input-box {
+  border: 1px solid var(--border, #e3e6ea);
+  border-radius: 16px;
+  background: var(--surface, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ai-input-box:focus-within {
+  border-color: var(--border-strong, #c8ccd0);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ai-input-box textarea {
+  display: block;
+  width: 100%;
+  resize: none;
+  border: none;
+  background: none;
+  border-radius: 16px 16px 0 0;
+  padding: 0 14px;
+  margin: 12px 0 4px;
+  font-size: 13.5px;
+  font-family: inherit;
+  line-height: 20px;
+  outline: none;
+  color: var(--text-primary, #232425);
+  min-height: 40px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.ai-input-box textarea:focus,
+.ai-input-box textarea:focus-visible {
+  border-color: transparent;
+  box-shadow: none;
   outline: none;
 }
 
-.ai-send-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--mail-primary-blue);
-  color: #ffffff;
-  border: none;
-  cursor: pointer;
+.ai-input-box textarea::placeholder {
+  color: var(--text-muted, #878e96);
+}
+
+.ai-input-footer {
   display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 4px 8px 8px 10px;
+}
+
+.ai-input-footer .ai-send-btn {
+  margin-left: auto;
+}
+
+.ai-attach-btn {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  font-size: 12px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s ease;
+}
+
+.ai-attach-btn img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ai-attach-btn:hover {
+  filter: brightness(0.7);
+}
+
+.ai-send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 35%;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.ai-send-btn img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ai-send-btn:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.ai-send-btn:active:not(:disabled) {
+  filter: brightness(0.88);
+  transform: scale(0.96);
 }
 
 .ai-send-btn:disabled {
-  background-color: var(--border, #e3e6ea);
   cursor: default;
+}
+
+.ai-send-btn.ai-stop-btn {
+  background: transparent;
+}
+
+.ai-send-btn.ai-stop-btn:hover {
+  filter: brightness(0.92);
 }
 
 /* ==========================================================================

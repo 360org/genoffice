@@ -107,6 +107,9 @@ export function registerAiIpc(): void {
     if (provider === 'genspark' && config && !config.apiKey) {
       config = { ...config, apiKey: gskApiKey() }
     }
+    if (provider === 'ninerouter' && config && !config.apiKey) {
+      config = { ...config, apiKey: 'vuaai-default-key' }
+    }
     const send = (chunk: AiStreamChunk) => {
       if (!event.sender.isDestroyed()) event.sender.send('ai:stream-chunk', chunk)
     }

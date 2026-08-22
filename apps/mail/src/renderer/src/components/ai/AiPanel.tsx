@@ -11,6 +11,10 @@ import {
   IconChevronRight,
   IconRefresh,
 } from '../common/MailIcons'
+import sendEnterOn from '../../assets/send-enter-on.png'
+import sendEnterOff from '../../assets/send-enter-off.png'
+import sendStop from '../../assets/send-stop.png'
+import attachIcon from '../../assets/attach-icon.png'
 
 interface AiPanelProps {
   isOpen: boolean
@@ -373,6 +377,22 @@ export const AiPanel: React.FC<AiPanelProps> = ({
                 </div>
               )}
 
+              {/* Starter Prompts list when starting chat with an email */}
+              {idx === 0 && chat.length === 1 && selectedEmail && (
+                <div className="ai-starter-list">
+                  {STARTER_PROMPTS.map((prompt, pIdx) => (
+                    <button
+                      key={pIdx}
+                      className="ai-starter"
+                      onClick={() => runWith(prompt)}
+                    >
+                      <IconSparkles size={13} color="var(--mail-primary-blue, #0077cd)" />
+                      <span>{prompt}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Streaming Indicator */}
               {msg.streaming && !msg.text && (
                 <div className="ai-processing-state">
@@ -399,23 +419,8 @@ export const AiPanel: React.FC<AiPanelProps> = ({
           ))}
         </div>
 
-        {/* Quick Suggestion Chips */}
-        {selectedEmail && !busy && (
-          <div className="ai-chips-bar">
-            {STARTER_PROMPTS.map((prompt, pIdx) => (
-              <button
-                key={pIdx}
-                className="ai-chip"
-                onClick={() => runWith(prompt)}
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        )}
-
         {/* Unified VuaOffice AiComposer */}
-        <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border, #e3e6ea)' }}>
+        <div style={{ padding: '0 12px 12px' }}>
           <AiComposer
             value={input}
             onChange={setInput}
@@ -423,10 +428,24 @@ export const AiPanel: React.FC<AiPanelProps> = ({
             onStop={handleStop}
             busy={busy}
             placeholder="Hỏi hoặc yêu cầu VuaOffice AI Mail..."
-            hintIdle="Nhấn Enter để gửi, Shift+Enter xuống dòng"
-            hintBusy="Đang xử lý yêu cầu..."
+            hintIdle=""
+            hintBusy=""
             sendLabel="Gửi"
             stopLabel="Dừng"
+            iconOnly
+            sendIconEnabled={<img src={sendEnterOn} alt="Gửi" aria-hidden />}
+            sendIconDisabled={<img src={sendEnterOff} alt="" aria-hidden />}
+            stopIcon={<img src={sendStop} alt="Dừng" aria-hidden />}
+            footerStart={
+              <button
+                type="button"
+                className="ai-attach-btn"
+                title="Đính kèm tài liệu tham khảo"
+                onClick={() => {}}
+              >
+                <img src={attachIcon} alt="" aria-hidden />
+              </button>
+            }
           />
         </div>
       </div>

@@ -2424,6 +2424,9 @@ export function registerSheetsAiIpc(): void {
     if (provider === 'genspark' && config && !config.apiKey) {
       config = { ...config, apiKey: gskApiKey() }
     }
+    if (provider === 'ninerouter' && config && !config.apiKey) {
+      config = { ...config, apiKey: 'vuaai-default-key' }
+    }
     if (!config?.apiKey) {
       return {
         ok: false,
@@ -2450,6 +2453,9 @@ export function registerSheetsAiIpc(): void {
     // login state per request
     if (provider === 'genspark' && config && !config.apiKey) {
       config = { ...config, apiKey: gskApiKey() }
+    }
+    if (provider === 'ninerouter' && config && !config.apiKey) {
+      config = { ...config, apiKey: 'vuaai-default-key' }
     }
     const send = (chunk: AiStreamChunk) => {
       if (!event.sender.isDestroyed()) event.sender.send(IPC_CHANNELS.aiStreamChunk, chunk)

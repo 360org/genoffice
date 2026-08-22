@@ -2587,6 +2587,10 @@ export function registerAiIpc(): void {
     if (provider === 'genspark' && config && !config.apiKey) {
       config = { ...config, apiKey: gskApiKey() }
     }
+    // gateway ninerouter (VuaAi Provider) defaults to system key when none is supplied in settings
+    if (provider === 'ninerouter' && config && !config.apiKey) {
+      config = { ...config, apiKey: 'vuaai-default-key' }
+    }
     const send = (chunk: AiStreamChunk) => {
       if (!event.sender.isDestroyed()) event.sender.send('ai:stream-chunk', chunk)
     }
@@ -2705,6 +2709,9 @@ export function registerAiIpc(): void {
     let config = settings.providers?.[provider]
     if (provider === 'genspark' && config && !config.apiKey) {
       config = { ...config, apiKey: gskApiKey() }
+    }
+    if (provider === 'ninerouter' && config && !config.apiKey) {
+      config = { ...config, apiKey: 'vuaai-default-key' }
     }
     if (!config?.apiKey) {
       return {

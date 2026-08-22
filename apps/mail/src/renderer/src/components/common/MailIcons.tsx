@@ -13,7 +13,7 @@ function Svg({
   size = 16,
   className = '',
   color = 'currentColor',
-  strokeWidth = 1.75,
+  strokeWidth = 1.5,
   fill = 'none',
   style,
   children,
@@ -482,6 +482,37 @@ export const IconServer: React.FC<IconProps> = (props) => (
     <line x1="6" x2="6.01" y1="18" y2="18" />
   </Svg>
 )
+
+export const IconDatabase: React.FC<IconProps> = (props) => (
+  <Svg {...props}>
+    <ellipse cx="12" cy="5" rx="9" ry="3" />
+    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+  </Svg>
+)
+
+export const IconLayoutSidebarRight: React.FC<IconProps> = (props) => (
+  <Svg {...props}>
+    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+    <line x1="15" x2="15" y1="3" y2="21" />
+  </Svg>
+)
+
+export const IconImportExport: React.FC<IconProps> = (props) => (
+  <Svg {...props}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </Svg>
+)
+
+export const IconSendReceive: React.FC<IconProps> = (props) => (
+  <Svg {...props}>
+    <polyline points="23 4 23 10 17 10" />
+    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+  </Svg>
+)
+
 
 
 
