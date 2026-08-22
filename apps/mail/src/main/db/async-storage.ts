@@ -65,6 +65,8 @@ export class AsyncMailStorage {
   async sendEmail(draft: {
     accountId: string
     to: string[]
+    cc?: string[]
+    bcc?: string[]
     subject: string
     bodyHtml: string
   }): Promise<{ success: boolean; emailId?: string }> {

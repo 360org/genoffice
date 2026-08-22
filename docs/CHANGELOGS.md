@@ -3,6 +3,15 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-08-22
+
+### UI & Architecture
+- **Tái thiết kế giao diện Cài đặt & Hồ sơ (Settings & Profile View)**:
+  - Chuyển đổi toàn diện sang bố cục 2 cột tiêu chuẩn Microsoft Outlook 365 / macOS Settings (Left Sidebar 250px + Right Scrollable Content Pane).
+  - Tích hợp Toggle Switch CSS (`.switch-slider`), Form controls đồng bộ Semantic Tokens (`var(--surface)`, `var(--border)`, `var(--mail-primary-blue)`).
+  - Tích hợp Lưới đăng nhập nhanh 1-Click thông minh cho Microsoft 365, Google Workspace, 360 CORP SSO và IMAP/SMTP.
+  - Quản lý danh mục chữ ký HTML và thư mẫu Quick Parts trực quan.
+
 ## [1.0.8] - 2026-08-22
 
 ### Upstream Sync & Core Architecture

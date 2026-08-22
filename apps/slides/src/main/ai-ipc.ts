@@ -90,7 +90,7 @@ export function registerAiIpc(): void {
   )
 
   ipcMain.handle('ai:gsk-login', () => {
-    ensureGenofficeLogin((url) => void shell.openExternal(url))
+    void shell.openExternal('https://vuahethong.net/web/login?redirect=/vuaoffice/auth/desktop_callback')
   })
 
   ipcMain.handle('ai:set-settings', (_event, settings: AiSettings) => {

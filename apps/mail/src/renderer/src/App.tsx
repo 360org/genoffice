@@ -50,7 +50,13 @@ export const App: React.FC = () => {
     },
   ])
   const [searchQuery, setSearchQuery] = useState('')
-  const [composeInitial, setComposeInitial] = useState<{ to?: string; subject?: string; body?: string }>({})
+  const [composeInitial, setComposeInitial] = useState<{
+    to?: string
+    cc?: string
+    bcc?: string
+    subject?: string
+    body?: string
+  }>({})
   const [isSyncing, setIsSyncing] = useState(false)
 
   // Load initial accounts & all folders
@@ -207,11 +213,19 @@ export const App: React.FC = () => {
     }
   }
 
-  const handleSendDraft = async (draft: { to: string[]; subject: string; bodyHtml: string }) => {
+  const handleSendDraft = async (draft: {
+    to: string[]
+    cc?: string[]
+    bcc?: string[]
+    subject: string
+    bodyHtml: string
+  }) => {
     if (!window.vuaMail || !activeAccount) return
     await window.vuaMail.sendEmail({
       accountId: activeAccount.id,
       to: draft.to,
+      cc: draft.cc,
+      bcc: draft.bcc,
       subject: draft.subject,
       bodyHtml: draft.bodyHtml,
     })
@@ -327,6 +341,38 @@ export const App: React.FC = () => {
                 categoryTab={categoryTab}
                 onCategoryChange={setCategoryTab}
                 onRefresh={handleSyncNow}
+                onDeleteEmail={async (emailId, e) => {
+                  e.stopPropagation()
+                  if (window.vuaMail) await window.vuaMail.deleteEmail(emailId)
+                  setEmails((prev) => prev.filter((item) => item.id !== emailId))
+                  if (selectedEmailId === emailId) setSelectedEmailId(null)
+                }}
+                onArchiveEmail={async (emailId, e) => {
+                  e.stopPropagation()
+                  if (window.vuaMail) await window.vuaMail.archiveEmail(emailId)
+                  setEmails((prev) => prev.filter((item) => item.id !== emailId))
+                  if (selectedEmailId === emailId) setSelectedEmailId(null)
+                }}
+                onToggleReadEmail={async (emailId, e) => {
+                  e.stopPropagation()
+                  const target = emails.find((item) => item.id === emailId)
+                  if (!target) return
+                  const nextRead = !target.isRead
+                  if (window.vuaMail) await window.vuaMail.markRead(emailId, nextRead)
+                  setEmails((prev) =>
+                    prev.map((item) => (item.id === emailId ? { ...item, isRead: nextRead } : item))
+                  )
+                }}
+                onToggleFlagEmail={async (emailId, e) => {
+                  e.stopPropagation()
+                  const target = emails.find((item) => item.id === emailId)
+                  if (!target) return
+                  const nextStarred = !target.isStarred
+                  if (window.vuaMail) await window.vuaMail.toggleStarred(emailId)
+                  setEmails((prev) =>
+                    prev.map((item) => (item.id === emailId ? { ...item, isStarred: nextStarred } : item))
+                  )
+                }}
               />
 
               <ReadingPane
@@ -340,8 +386,21 @@ export const App: React.FC = () => {
                 onReply={handleReplySelected}
                 onReplyAll={handleReplySelected}
                 onForward={handleReplySelected}
+                onExpandReply={(text) => {
+                  if (!selectedEmail) return
+                  setComposeInitial({
+                    to: selectedEmail.senderEmail,
+                    subject: selectedEmail.subject.startsWith('Re:') ? selectedEmail.subject : `Re: ${selectedEmail.subject}`,
+                    body: text
+                      ? `${text}\n\n---\nOn ${new Date(selectedEmail.dateIso).toLocaleString()}, ${selectedEmail.senderName} wrote:\n> ${selectedEmail.snippet}`
+                      : `\n\n---\nOn ${new Date(selectedEmail.dateIso).toLocaleString()}, ${selectedEmail.senderName} wrote:\n> ${selectedEmail.snippet}`,
+                  })
+                  setIsComposeOpen(true)
+                }}
                 onDelete={handleDelete}
                 onArchive={handleArchive}
+                onCreateTask={(_title) => setActiveRailTab('todo')}
+                onCreateCalendar={(_title) => setActiveRailTab('calendar')}
               />
 
               {/* VuaOffice Sliding AI Dock (Collapses to 34px rail when closed) */}
@@ -373,6 +432,8 @@ export const App: React.FC = () => {
       <ComposeModal
         isOpen={isComposeOpen}
         initialTo={composeInitial.to}
+        initialCc={composeInitial.cc}
+        initialBcc={composeInitial.bcc}
         initialSubject={composeInitial.subject}
         initialBody={composeInitial.body}
         onClose={() => setIsComposeOpen(false)}
@@ -404,6 +465,46 @@ export const App: React.FC = () => {
         onSaveRules={(newRules) => {
           setRules(newRules)
         }}
+        onRunRulesNow={(rulesToRun) => {
+          // Execute rules immediately on currently loaded emails (Outlook Parity)
+          setEmails((prev) =>
+            prev.map((email) => {
+              let updated = { ...email }
+              for (const rule of rulesToRun) {
+                if (!rule.enabled) continue
+                const condMatches = rule.conditions.map((cond) => {
+                  let fieldVal = ''
+                  if (cond.field === 'from') fieldVal = `${email.senderName} ${email.senderEmail}`
+                  else if (cond.field === 'to') fieldVal = email.senderEmail
+                  else if (cond.field === 'subject') fieldVal = email.subject
+                  else if (cond.field === 'body') fieldVal = email.snippet
+                  else if (cond.field === 'hasAttachments') return email.hasAttachments === Boolean(cond.value)
+
+                  const sVal = String(cond.value).toLowerCase()
+                  const fVal = fieldVal.toLowerCase()
+                  if (cond.operator === 'contains') return fVal.includes(sVal)
+                  if (cond.operator === 'equals') return fVal === sVal
+                  if (cond.operator === 'startsWith') return fVal.startsWith(sVal)
+                  if (cond.operator === 'endsWith') return fVal.endsWith(sVal)
+                  return false
+                })
+
+                const isMatch = rule.matchAllConditions
+                  ? condMatches.every(Boolean)
+                  : condMatches.some(Boolean)
+
+                if (isMatch) {
+                  for (const act of rule.actions) {
+                    if (act.type === 'markAsStarred') updated.isStarred = true
+                    if (act.type === 'markAsRead') updated.isRead = true
+                    if (act.type === 'applyLabel') updated.category = 'focused'
+                  }
+                }
+              }
+              return updated
+            })
+          )
+        }}
       />
 
       {/* Profile & Account Settings Modal (Opened from Top-Right Account Trigger) */}
@@ -417,28 +518,15 @@ export const App: React.FC = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.4)',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(4px)',
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <div
-            className="modal-content-card"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '880px',
-              maxWidth: '92vw',
-              height: '82vh',
-              backgroundColor: 'var(--surface, #ffffff)',
-              borderRadius: '8px',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-            }}
-          >
+          <div onClick={(e) => e.stopPropagation()}>
             <ProfileView
               accounts={accounts}
               activeAccountId={activeAccountId}

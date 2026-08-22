@@ -5,7 +5,11 @@ import {
   IconStar,
   IconPaperclip,
   IconMail,
-  IconCheck,
+  IconMailUnread,
+  IconTrash,
+  IconArchive,
+  IconFlag,
+  IconPin,
 } from '../common/MailIcons'
 
 interface MailListProps {
@@ -15,15 +19,11 @@ interface MailListProps {
   categoryTab: string
   onCategoryChange: (cat: string) => void
   onRefresh?: () => void
+  onDeleteEmail?: (emailId: string, e: React.MouseEvent) => void
+  onArchiveEmail?: (emailId: string, e: React.MouseEvent) => void
+  onToggleReadEmail?: (emailId: string, e: React.MouseEvent) => void
+  onToggleFlagEmail?: (emailId: string, e: React.MouseEvent) => void
 }
-
-const CATEGORY_TABS = [
-  { id: 'all', label: 'Tất cả' },
-  { id: 'primary', label: 'Chính (Primary)' },
-  { id: 'social', label: 'Mạng xã hội' },
-  { id: 'promotions', label: 'Khuyến mãi' },
-  { id: 'updates', label: 'Cập nhật' },
-]
 
 type FilterType = 'all' | 'unread' | 'flagged' | 'attachments'
 
@@ -36,18 +36,19 @@ export const MailList: React.FC<MailListProps> = ({
   categoryTab,
   onCategoryChange,
   onRefresh,
+  onDeleteEmail,
+  onArchiveEmail,
+  onToggleReadEmail,
+  onToggleFlagEmail,
 }) => {
   const [filterQuery, setFilterQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
+  const [hoveredEmailId, setHoveredEmailId] = useState<string | null>(null)
 
   const filtered = emails.filter((m) => {
-    // Category tab filter
-    if (categoryTab !== 'all') {
-      if (categoryTab === 'primary' && m.category === 'other') return false
-      if (categoryTab === 'social' && !m.snippet.toLowerCase().includes('social') && !m.subject.toLowerCase().includes('mạng xã hội')) return false
-      if (categoryTab === 'promotions' && !m.snippet.toLowerCase().includes('khuyến mãi') && !m.subject.toLowerCase().includes('ưu đãi')) return false
-      if (categoryTab === 'updates' && !m.snippet.toLowerCase().includes('cập nhật') && !m.subject.toLowerCase().includes('update') && !m.subject.toLowerCase().includes('vcloud') && !m.subject.toLowerCase().includes('testflight')) return false
-    }
+    // Category tab filter (Focused / Other / All)
+    if (categoryTab === 'primary' && m.category === 'other') return false
+    if (categoryTab === 'other' && m.category !== 'other') return false
 
     // Advanced filter type (unread / flagged / attachments)
     if (activeFilter === 'unread' && m.isRead) return false
@@ -66,21 +67,16 @@ export const MailList: React.FC<MailListProps> = ({
     return true
   })
 
-  // Group emails by Today / Yesterday / Earlier
-  const now = new Date(2026, 7, 16) // Mock current date 2026-08-16
+  // Group emails by Today / Earlier
+  const now = new Date(2026, 7, 16)
   const todayEmails = filtered.filter((m) => {
     const d = new Date(m.dateIso)
     return d.getDate() === now.getDate() && d.getMonth() === now.getMonth()
   })
 
-  const yesterdayEmails = filtered.filter((m) => {
-    const d = new Date(m.dateIso)
-    return d.getDate() === now.getDate() - 1 && d.getMonth() === now.getMonth()
-  })
-
   const earlierEmails = filtered.filter((m) => {
     const d = new Date(m.dateIso)
-    return d.getDate() < now.getDate() - 1 || d.getMonth() < now.getMonth()
+    return d.getDate() !== now.getDate() || d.getMonth() !== now.getMonth()
   })
 
   const renderEmailCard = (msg: EmailMessage, index: number) => {
@@ -91,6 +87,7 @@ export const MailList: React.FC<MailListProps> = ({
       : `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`
 
     const isSelected = msg.id === selectedEmailId
+    const isHovered = msg.id === hoveredEmailId
     const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length]
     const initial = (msg.senderName || msg.senderEmail || 'U').charAt(0).toUpperCase()
 
@@ -99,6 +96,8 @@ export const MailList: React.FC<MailListProps> = ({
         key={msg.id}
         className={`msg-card ${isSelected ? 'active' : ''} ${!msg.isRead ? 'unread' : ''}`}
         onClick={() => onSelectEmail(msg.id)}
+        onMouseEnter={() => setHoveredEmailId(msg.id)}
+        onMouseLeave={() => setHoveredEmailId(null)}
         style={{
           display: 'flex',
           alignItems: 'flex-start',
@@ -106,7 +105,7 @@ export const MailList: React.FC<MailListProps> = ({
           padding: '10px 14px',
           cursor: 'pointer',
           borderBottom: '1px solid var(--border-subtle, #efefef)',
-          backgroundColor: isSelected ? 'var(--mail-primary-blue-soft, #e5f3fc)' : 'transparent',
+          backgroundColor: isSelected ? 'var(--mail-primary-blue-soft, #e5f3fc)' : isHovered ? 'var(--surface-subtle, #f8f9fa)' : 'transparent',
           borderLeft: isSelected ? '3px solid var(--mail-primary-blue, #0077cd)' : '3px solid transparent',
           position: 'relative',
           transition: 'background 0.12s ease',
@@ -161,17 +160,67 @@ export const MailList: React.FC<MailListProps> = ({
             >
               {msg.senderName || msg.senderEmail}
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, marginLeft: '6px' }}>
-              {msg.hasAttachments && (
-                <IconPaperclip size={12} color="var(--text-muted, #878e96)" />
-              )}
-              {msg.isStarred && (
-                <IconStar size={12} active />
-              )}
-              <span style={{ fontSize: '11px', color: 'var(--text-muted, #878e96)' }}>
-                {dateStr}
-              </span>
-            </div>
+
+            {/* Normal date / hover actions toggle (Outlook style) */}
+            {isHovered ? (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2px',
+                  backgroundColor: isSelected ? 'var(--mail-primary-blue-soft, #e5f3fc)' : 'var(--surface, #ffffff)',
+                  borderRadius: '4px',
+                  padding: '1px 2px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="mail-hover-btn"
+                  title={msg.isRead ? 'Đánh dấu Chưa đọc' : 'Đánh dấu Đã đọc'}
+                  onClick={(e) => onToggleReadEmail?.(msg.id, e)}
+                >
+                  {msg.isRead ? <IconMailUnread size={13} /> : <IconMail size={13} />}
+                </button>
+                <button
+                  type="button"
+                  className="mail-hover-btn"
+                  title="Gắn cờ theo dõi"
+                  onClick={(e) => onToggleFlagEmail?.(msg.id, e)}
+                >
+                  <IconFlag size={13} active={msg.isStarred} />
+                </button>
+                <button
+                  type="button"
+                  className="mail-hover-btn"
+                  title="Lưu trữ"
+                  onClick={(e) => onArchiveEmail?.(msg.id, e)}
+                >
+                  <IconArchive size={13} />
+                </button>
+                <button
+                  type="button"
+                  className="mail-hover-btn delete-action"
+                  title="Xoá thư"
+                  onClick={(e) => onDeleteEmail?.(msg.id, e)}
+                >
+                  <IconTrash size={13} />
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0, marginLeft: '6px' }}>
+                {msg.hasAttachments && (
+                  <IconPaperclip size={12} color="var(--text-muted, #878e96)" />
+                )}
+                {msg.isStarred && (
+                  <IconStar size={12} active />
+                )}
+                <span style={{ fontSize: '11px', color: 'var(--text-muted, #878e96)' }}>
+                  {dateStr}
+                </span>
+              </div>
+            )}
           </div>
 
           <div
@@ -204,6 +253,9 @@ export const MailList: React.FC<MailListProps> = ({
       </div>
     )
   }
+
+  const focusedCount = emails.filter((m) => m.category !== 'other').length
+  const otherCount = emails.filter((m) => m.category === 'other').length
 
   return (
     <div
@@ -253,7 +305,102 @@ export const MailList: React.FC<MailListProps> = ({
         </div>
       </div>
 
-      {/* Advanced Quick Filters: All / Unread / Flagged / Attachments */}
+      {/* Outlook Parity: Focused (Ưu tiên) / Other (Khác) Tab Switcher */}
+      <div
+        style={{
+          display: 'flex',
+          borderBottom: '1px solid var(--border, #e3e6ea)',
+          backgroundColor: 'var(--surface-subtle, #f8f9fa)',
+          padding: '0 8px',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => onCategoryChange('primary')}
+          style={{
+            flex: 1,
+            padding: '8px 10px',
+            border: 'none',
+            borderBottom: categoryTab === 'primary' ? '2px solid var(--mail-primary-blue, #0077cd)' : '2px solid transparent',
+            background: 'transparent',
+            color: categoryTab === 'primary' ? 'var(--mail-primary-blue, #0077cd)' : 'var(--text-secondary, #606366)',
+            fontWeight: categoryTab === 'primary' ? 700 : 500,
+            fontSize: '12px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+          }}
+        >
+          <span>Ưu tiên</span>
+          <span
+            style={{
+              fontSize: '10px',
+              padding: '1px 5px',
+              borderRadius: '10px',
+              backgroundColor: categoryTab === 'primary' ? 'var(--mail-primary-blue-soft, #e5f3fc)' : 'var(--border, #e3e6ea)',
+              color: categoryTab === 'primary' ? 'var(--mail-primary-blue, #0077cd)' : 'var(--text-muted, #878e96)',
+              fontWeight: 700,
+            }}
+          >
+            {focusedCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onCategoryChange('other')}
+          style={{
+            flex: 1,
+            padding: '8px 10px',
+            border: 'none',
+            borderBottom: categoryTab === 'other' ? '2px solid var(--mail-primary-blue, #0077cd)' : '2px solid transparent',
+            background: 'transparent',
+            color: categoryTab === 'other' ? 'var(--mail-primary-blue, #0077cd)' : 'var(--text-secondary, #606366)',
+            fontWeight: categoryTab === 'other' ? 700 : 500,
+            fontSize: '12px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+          }}
+        >
+          <span>Khác</span>
+          <span
+            style={{
+              fontSize: '10px',
+              padding: '1px 5px',
+              borderRadius: '10px',
+              backgroundColor: categoryTab === 'other' ? 'var(--mail-primary-blue-soft, #e5f3fc)' : 'var(--border, #e3e6ea)',
+              color: categoryTab === 'other' ? 'var(--mail-primary-blue, #0077cd)' : 'var(--text-muted, #878e96)',
+              fontWeight: 700,
+            }}
+          >
+            {otherCount}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onCategoryChange('all')}
+          style={{
+            padding: '8px 10px',
+            border: 'none',
+            borderBottom: categoryTab === 'all' ? '2px solid var(--mail-primary-blue, #0077cd)' : '2px solid transparent',
+            background: 'transparent',
+            color: categoryTab === 'all' ? 'var(--mail-primary-blue, #0077cd)' : 'var(--text-secondary, #606366)',
+            fontWeight: categoryTab === 'all' ? 700 : 500,
+            fontSize: '12px',
+            cursor: 'pointer',
+          }}
+        >
+          Tất cả
+        </button>
+      </div>
+
+      {/* Quick Filters: All / Unread / Flagged / Attachments */}
       <div
         style={{
           display: 'flex',
@@ -282,7 +429,7 @@ export const MailList: React.FC<MailListProps> = ({
                 color: isActive ? 'var(--mail-primary-blue, #0077cd)' : 'var(--text-secondary, #606366)',
                 fontWeight: isActive ? 700 : 500,
                 fontSize: '11.5px',
-                padding: '4px 8px',
+                padding: '3px 7px',
                 borderRadius: '4px',
                 cursor: 'pointer',
                 transition: 'all 0.12s ease',
@@ -297,78 +444,57 @@ export const MailList: React.FC<MailListProps> = ({
         })}
       </div>
 
-      {/* Category Filter Pills (GenMail + Outlook hybrid) */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '6px',
-          padding: '8px 12px',
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          borderBottom: '1px solid var(--border, #e3e6ea)',
-          backgroundColor: 'var(--surface-subtle, #f6f7f9)',
-        }}
-      >
-        {CATEGORY_TABS.map((tab) => {
-          const isActive = categoryTab === tab.id
-          return (
-            <button
-              type="button"
-              key={tab.id}
-              onClick={() => onCategoryChange(tab.id)}
-              style={{
-                padding: '4px 10px',
-                borderRadius: '14px',
-                border: isActive ? '1px solid var(--mail-primary-blue, #0077cd)' : '1px solid var(--border, #e3e6ea)',
-                backgroundColor: isActive ? 'var(--mail-primary-blue, #0077cd)' : 'var(--surface, #ffffff)',
-                color: isActive ? '#ffffff' : 'var(--text-primary, #232425)',
-                fontSize: '11px',
-                fontWeight: isActive ? 600 : 500,
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.12s ease',
-              }}
-            >
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
-
       {/* Email Items Grouped by Date */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {filtered.length === 0 ? (
-          <div style={{ padding: '36px 16px', textAlign: 'center', color: 'var(--text-muted, #878e96)', fontSize: '13px' }}>
-            Không có thư nào trong mục này
+          <div
+            style={{
+              padding: '32px 16px',
+              textAlign: 'center',
+              color: 'var(--text-muted, #878e96)',
+              fontSize: '13px',
+            }}
+          >
+            Không tìm thấy email nào
           </div>
         ) : (
           <>
             {todayEmails.length > 0 && (
-              <div>
-                <div style={{ padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted, #878e96)', textTransform: 'uppercase', backgroundColor: 'var(--surface-subtle, #f6f7f9)' }}>
-                  Hôm nay (Today)
+              <>
+                <div
+                  style={{
+                    padding: '6px 14px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: 'var(--text-muted, #878e96)',
+                    backgroundColor: 'var(--surface-subtle, #f6f7f9)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Hôm nay ({todayEmails.length})
                 </div>
-                {todayEmails.map((msg, i) => renderEmailCard(msg, i))}
-              </div>
-            )}
-
-            {yesterdayEmails.length > 0 && (
-              <div>
-                <div style={{ padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted, #878e96)', textTransform: 'uppercase', backgroundColor: 'var(--surface-subtle, #f6f7f9)' }}>
-                  Hôm qua (Yesterday)
-                </div>
-                {yesterdayEmails.map((msg, i) => renderEmailCard(msg, i + 10))}
-              </div>
+                {todayEmails.map((msg, idx) => renderEmailCard(msg, idx))}
+              </>
             )}
 
             {earlierEmails.length > 0 && (
-              <div>
-                <div style={{ padding: '6px 14px', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted, #878e96)', textTransform: 'uppercase', backgroundColor: 'var(--surface-subtle, #f6f7f9)' }}>
-                  Trước đó (Earlier)
+              <>
+                <div
+                  style={{
+                    padding: '6px 14px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: 'var(--text-muted, #878e96)',
+                    backgroundColor: 'var(--surface-subtle, #f6f7f9)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Trước đó ({earlierEmails.length})
                 </div>
-                {earlierEmails.map((msg, i) => renderEmailCard(msg, i + 20))}
-              </div>
+                {earlierEmails.map((msg, idx) => renderEmailCard(msg, todayEmails.length + idx))}
+              </>
             )}
           </>
         )}

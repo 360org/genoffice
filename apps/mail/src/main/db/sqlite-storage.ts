@@ -494,6 +494,8 @@ export class SQLiteMailStorage {
   sendEmail(draft: {
     accountId: string
     to: string[]
+    cc?: string[]
+    bcc?: string[]
     subject: string
     bodyHtml: string
   }): { success: boolean; emailId?: string } {
@@ -510,6 +512,8 @@ export class SQLiteMailStorage {
       senderName: targetAccount ? targetAccount.name : 'Châu Lê',
       senderEmail: targetAccount ? targetAccount.email : 'chau.le@360.org.vn',
       recipientEmails: draft.to,
+      ccEmails: draft.cc,
+      bccEmails: draft.bcc,
       subject: draft.subject,
       snippet,
       dateIso: nowIso,

@@ -7,7 +7,13 @@
     ],
     "additionalDirectories": [
       "/Volumes/DATA/DEV/vuaoffice",
-      "/Volumes/DATA/DEV/VuaMail"
+      "/Volumes/DATA/DEV/VuaMail",
+      "/Volumes/DATA/DEV/aiac"
+    ],
+    "allowedWorkspaces": [
+      "/Volumes/DATA/DEV/vuaoffice",
+      "/Volumes/DATA/DEV/VuaMail",
+      "/Volumes/DATA/DEV/aiac"
     ]
   }
 }

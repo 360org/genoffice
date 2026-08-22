@@ -10,7 +10,11 @@ import {
   IconSparkles,
   IconPaperclip,
   IconFileText,
+  IconCalendarCheck,
+  IconCheckSquare,
+  IconExternalLink,
   IconX,
+  IconMaximize,
 } from '../common/MailIcons'
 
 interface ReadingPaneProps {
@@ -24,8 +28,11 @@ interface ReadingPaneProps {
   onReply?: () => void
   onReplyAll?: () => void
   onForward?: () => void
+  onExpandReply?: (currentText: string) => void
   onDelete?: () => void
   onArchive?: () => void
+  onCreateTask?: (title: string) => void
+  onCreateCalendar?: (title: string) => void
 }
 
 export const ReadingPane: React.FC<ReadingPaneProps> = ({
@@ -39,8 +46,11 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
   onReply,
   onReplyAll,
   onForward,
+  onExpandReply,
   onDelete,
   onArchive,
+  onCreateTask,
+  onCreateCalendar,
 }) => {
   const [quickReplyText, setQuickReplyText] = useState('')
   const [isQuickReplying, setIsQuickReplying] = useState(false)
@@ -216,6 +226,63 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
         </div>
       </div>
 
+      {/* Outlook & VuaOffice Smart Action Strip (AI Proactive Suggestions) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 12px',
+          backgroundColor: 'var(--surface-subtle, #f6f7f9)',
+          border: '1px solid var(--border, #e3e6ea)',
+          borderRadius: '6px',
+          marginBottom: '14px',
+        }}
+      >
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', fontWeight: 700, color: 'var(--mail-primary-blue, #0077cd)' }}>
+          <IconSparkles size={13} />
+          <span>Đề xuất AI:</span>
+        </span>
+        <button
+          type="button"
+          onClick={() => onCreateTask?.(email.subject || 'Công việc từ email')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            padding: '3px 8px',
+            backgroundColor: 'var(--surface, #ffffff)',
+            border: '1px solid var(--border, #e3e6ea)',
+            borderRadius: '4px',
+            fontSize: '11.5px',
+            color: 'var(--text-primary, #232425)',
+            cursor: 'pointer',
+          }}
+        >
+          <IconCheckSquare size={12} color="var(--mail-brand-green, #00ce2c)" />
+          <span>Tạo To-Do</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onCreateCalendar?.(email.subject || 'Lịch hẹn từ email')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            padding: '3px 8px',
+            backgroundColor: 'var(--surface, #ffffff)',
+            border: '1px solid var(--border, #e3e6ea)',
+            borderRadius: '4px',
+            fontSize: '11.5px',
+            color: 'var(--text-primary, #232425)',
+            cursor: 'pointer',
+          }}
+        >
+          <IconCalendarCheck size={12} color="var(--mail-primary-blue, #0077cd)" />
+          <span>Lên lịch họp</span>
+        </button>
+      </div>
+
       {aiSummary && (
         <div className="ai-summary-card">
           <div className="ai-summary-title">
@@ -246,7 +313,7 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
         <div className="reading-body">{body?.plainText || email.snippet}</div>
       )}
 
-      {/* Attachments Section */}
+      {/* Attachments Section with Enhanced Card Design */}
       {email.hasAttachments && email.attachments && email.attachments.length > 0 && (
         <div className="reading-attachments">
           <div className="attachments-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -255,18 +322,44 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
           </div>
           <div className="attachments-list">
             {email.attachments.map((att) => (
-              <div key={att.id} className="attachment-chip">
-                <IconFileText size={15} color="var(--mail-primary-blue, #0077cd)" />
+              <div
+                key={att.id}
+                className="attachment-chip"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '8px 12px',
+                  backgroundColor: 'var(--surface-subtle, #f6f7f9)',
+                  border: '1px solid var(--border, #e3e6ea)',
+                  borderRadius: '6px',
+                }}
+              >
+                <IconFileText size={18} color="var(--mail-primary-blue, #0077cd)" />
                 <div>
-                  <div className="attachment-name">{att.filename}</div>
-                  <div className="attachment-size">{formatFileSize(att.sizeBytes)}</div>
+                  <div className="attachment-name" style={{ fontSize: '12px', fontWeight: 600 }}>{att.filename}</div>
+                  <div className="attachment-size" style={{ fontSize: '10.5px', color: 'var(--text-muted, #878e96)' }}>{formatFileSize(att.sizeBytes)}</div>
                 </div>
                 <button
                   type="button"
-                  className="attachment-btn"
                   onClick={() => onPreviewAttachment?.(att)}
+                  style={{
+                    marginLeft: '8px',
+                    padding: '3px 8px',
+                    backgroundColor: 'var(--surface, #ffffff)',
+                    border: '1px solid var(--border, #e3e6ea)',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--mail-primary-blue, #0077cd)',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
                 >
-                  Xem trước
+                  <IconExternalLink size={11} />
+                  <span>Xem nhanh</span>
                 </button>
               </div>
             ))}
@@ -341,13 +434,43 @@ export const ReadingPane: React.FC<ReadingPaneProps> = ({
           <div style={{ border: '1px solid var(--mail-primary-blue, #0077cd)', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'var(--surface, #ffffff)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <div style={{ padding: '8px 14px', backgroundColor: 'var(--surface-subtle, #f6f7f9)', borderBottom: '1px solid var(--border, #e3e6ea)', fontSize: '12px', color: 'var(--text-secondary, #606366)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>Trả lời tới: <b>{email.senderEmail}</b></span>
-              <button
-                type="button"
-                onClick={() => setIsQuickReplying(false)}
-                style={{ border: 'none', background: 'none', color: 'var(--text-muted, #878e96)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-              >
-                <IconX size={14} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onExpandReply) {
+                      onExpandReply(quickReplyText)
+                    } else {
+                      onReply?.()
+                    }
+                    setIsQuickReplying(false)
+                  }}
+                  title="Phóng to thành cửa sổ soạn thư đầy đủ (Expand)"
+                  style={{
+                    border: '1px solid var(--border, #e3e6ea)',
+                    background: 'var(--surface, #ffffff)',
+                    color: 'var(--text-primary, #232425)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '3px 8px',
+                    borderRadius: '4px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                  }}
+                >
+                  <IconMaximize size={12} color="var(--mail-primary-blue, #0077cd)" />
+                  <span>Phóng to</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsQuickReplying(false)}
+                  style={{ border: 'none', background: 'none', color: 'var(--text-muted, #878e96)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                >
+                  <IconX size={14} />
+                </button>
+              </div>
             </div>
             <textarea
               value={quickReplyText}

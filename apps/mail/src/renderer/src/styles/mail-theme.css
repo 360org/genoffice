@@ -161,21 +161,27 @@ body,
 
 .ribbon-search-box {
   flex: 1;
-  max-width: 460px;
-  margin: 0 16px;
+  max-width: 580px;
+  margin: 0 20px;
   display: flex;
   align-items: center;
   background: var(--surface, #ffffff);
   border: 1px solid var(--border, #d0d4d9);
   border-radius: 6px;
-  padding: 4px 10px;
-  gap: 8px;
-  transition: all 0.15s ease;
+  padding: 6px 14px;
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.ribbon-search-box:hover {
+  border-color: var(--mail-primary-blue);
 }
 
 .ribbon-search-box:focus-within {
   border-color: var(--mail-primary-blue);
-  box-shadow: 0 0 0 2px var(--mail-primary-blue-soft);
+  box-shadow: 0 0 0 3px var(--mail-primary-blue-soft, #e5f3fc);
+  background: var(--surface, #ffffff);
 }
 
 .ribbon-search-box input {
@@ -183,8 +189,14 @@ body,
   border: none;
   background: transparent;
   outline: none;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 450;
   color: var(--text-primary, #232425);
+}
+
+.ribbon-search-box input::placeholder {
+  color: var(--text-muted, #878e96);
+  font-size: 12.5px;
 }
 
 .search-clear-btn {
@@ -192,8 +204,17 @@ body,
   background: transparent;
   cursor: pointer;
   color: var(--text-muted, #878e96);
-  font-size: 11px;
-  padding: 2px;
+  font-size: 12px;
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-clear-btn:hover {
+  background: var(--hover, #e8f2fc);
+  color: var(--text-primary, #232425);
 }
 
 .ribbon-tabs-right {
@@ -749,6 +770,29 @@ body,
   color: var(--mail-primary-blue);
 }
 
+.mail-hover-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary, #606366);
+  padding: 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+
+.mail-hover-btn:hover {
+  background: var(--hover, #e8f2fc);
+  color: var(--mail-primary-blue, #0077cd);
+}
+
+.mail-hover-btn.delete-action:hover {
+  background: rgba(209, 52, 56, 0.1);
+  color: #d13438;
+}
+
 /* ==========================================================================
    VuaOffice Sliding AI Dock (.ai-dock)
    ========================================================================== */
@@ -1141,7 +1185,330 @@ body,
 }
 
 /* ==========================================================================
-   Profile & Email Brain View (.brain-container, .brain-card...)
+   VuaOffice Mail Enterprise Settings & Profile Window (.settings-layout-*)
+   ========================================================================== */
+
+.settings-window {
+  display: flex;
+  width: 960px;
+  max-width: 94vw;
+  height: 640px;
+  max-height: 86vh;
+  background-color: var(--surface, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22), 0 0 0 1px var(--border, #e3e6ea);
+  overflow: hidden;
+  user-select: none;
+}
+
+.settings-sidebar {
+  width: 250px;
+  background-color: var(--surface-subtle, #f6f7f9);
+  border-right: 1px solid var(--border, #e3e6ea);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.settings-sidebar-header {
+  padding: 18px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-sidebar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary, #232425);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-sidebar-subtitle {
+  font-size: 11px;
+  color: var(--text-muted, #878e96);
+}
+
+.settings-nav-group {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-nav-group-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted, #878e96);
+  padding: 6px 8px 2px;
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #606366);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.settings-nav-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-nav-item:hover {
+  background-color: var(--hover, #e8f2fc);
+  color: var(--text-primary, #232425);
+}
+
+.settings-nav-item.active {
+  background-color: var(--mail-primary-blue);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.settings-nav-item.active .nav-badge {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.nav-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: var(--border, #e3e6ea);
+  color: var(--text-secondary, #606366);
+  font-weight: 600;
+}
+
+.settings-sidebar-footer {
+  margin-top: auto;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border, #e3e6ea);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted, #878e96);
+  background-color: rgba(0, 0, 0, 0.015);
+}
+
+.settings-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--surface, #ffffff);
+  overflow: hidden;
+}
+
+.settings-main-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border, #e3e6ea);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface, #ffffff);
+}
+
+.settings-main-title-box h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary, #232425);
+}
+
+.settings-main-title-box p {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: var(--text-secondary, #606366);
+}
+
+.settings-close-btn {
+  background: transparent;
+  border: 1px solid var(--border, #e3e6ea);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #606366);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.settings-close-btn:hover {
+  background: var(--hover, #e8f2fc);
+  color: var(--text-primary, #232425);
+  border-color: var(--border-strong, #c8ccd0);
+}
+
+.settings-body-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Settings Cards & Controls */
+.settings-card {
+  background-color: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e3e6ea);
+  border-radius: 8px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle, #efefef);
+  padding-bottom: 10px;
+}
+
+.settings-card-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-primary, #232425);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #e3e6ea);
+  background-color: var(--surface, #ffffff);
+  transition: all 0.15s ease;
+}
+
+.settings-account-row:hover {
+  border-color: var(--border-strong, #c8ccd0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.settings-account-row.active-account {
+  border-color: var(--mail-primary-blue);
+  background-color: rgba(0, 119, 205, 0.02);
+}
+
+.account-avatar-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+/* Modern Toggle Switch */
+.switch-label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: #cbd5e1;
+  border-radius: 20px;
+  transition: 0.2s;
+  display: inline-block;
+}
+
+.switch-slider::before {
+  position: absolute;
+  content: '';
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.switch-input:checked + .switch-slider {
+  background-color: var(--mail-primary-blue, #0077cd);
+}
+
+.switch-input:checked + .switch-slider::before {
+  transform: translateX(16px);
+}
+
+/* Provider Tile Grid */
+.provider-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #e3e6ea);
+  background-color: var(--surface, #ffffff);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.provider-tile:hover {
+  border-color: var(--mail-primary-blue, #0077cd);
+  background-color: var(--hover, #f0f7ff);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 119, 205, 0.08);
+}
+
+.provider-tile-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary, #232425);
+}
+
+.provider-tile-desc {
+  font-size: 10.5px;
+  color: var(--text-muted, #878e96);
+}
+
+/* Profile & Email Brain View (.brain-container, .brain-card...)
    ========================================================================== */
 
 .brain-container {

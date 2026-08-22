@@ -147,13 +147,13 @@ export const MailRibbon: React.FC<MailRibbonProps> = ({
 
         {/* Global Search Bar centered/aligned */}
         <div className="ribbon-search-box">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary, #606366)" strokeWidth="1.6">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
           <input
             type="text"
-            placeholder="Tìm kiếm thư, người gửi, tài liệu..."
+            placeholder="Tìm kiếm thư, người gửi, tài liệu (Ctrl+E)..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
           />
@@ -162,25 +162,15 @@ export const MailRibbon: React.FC<MailRibbonProps> = ({
               type="button"
               className="search-clear-btn"
               onClick={() => onSearchChange('')}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title="Xoá tìm kiếm"
             >
-              <IconX size={12} />
+              <IconX size={13} />
             </button>
           )}
         </div>
 
-        {/* Top-right AI Trigger & Profile/Settings Trigger */}
+        {/* Top-right Profile/Settings Trigger */}
         <div className="ribbon-tabs-right">
-          <button
-            type="button"
-            className={`copilot-btn ${aiOpen ? 'active' : ''}`}
-            onClick={onToggleAi}
-            title="Bật/Tắt trợ lý VuaOffice AI"
-          >
-            <GensparkMark size={16} />
-            <span>VuaOffice AI</span>
-          </button>
-
           {onOpenProfile && (
             <button
               type="button"

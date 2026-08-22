@@ -128,6 +128,7 @@ export interface VuaMailApi {
     accountId: string
     to: string[]
     cc?: string[]
+    bcc?: string[]
     subject: string
     bodyHtml: string
     attachments?: EmailAttachment[]
