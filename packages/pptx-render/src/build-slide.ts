@@ -17,6 +17,7 @@ import type {
 // Subpath import: the renderer bundles this package, so pulling the engine's index
 // (Node-only imports like node:crypto) would break the browser build
 import { tableRowGridCols } from '@genoffice/pptx-engine/table-grid'
+import { elementDurableId, groupChildDurableId } from '@genoffice/pptx-engine/identity'
 import { isBackgroundLikeElement } from '@genoffice/pptx-engine/background-promote'
 import { buildChartNode } from './build-chart'
 import type {
@@ -49,6 +50,13 @@ import {
   presetPolygon,
   presetPath,
 } from './preset-geometry'
+import {
+  buildExtrusion,
+  inPlaneRotationDeg,
+  flattenSvgPath,
+  ellipseRing,
+  roundRectRing,
+} from './scene3d'
 
 export interface BuildOptions {
   /** Target canvas width (px); height follows the slide aspect ratio. */
@@ -96,6 +104,18 @@ const CHIP_LABEL: Record<string, string> = {
   connector: 'Connector',
   media: 'Media',
   unknown: 'Unsupported element',
+}
+
+/** White-DC backing for a metafile picture, after any clrChange keyed to that white. */
+function metafileDcColor(
+  isMetafile: boolean,
+  cc: { from: string; to: string } | undefined,
+): { bgColor: string } | undefined {
+  if (!isMetafile) return undefined
+  if (!cc || !cc.from.toUpperCase().startsWith('#FFFFFF')) return { bgColor: '#FFFFFF' }
+  const alpha = cc.to.length >= 9 ? parseInt(cc.to.slice(7, 9), 16) : 255
+  // Keep the target's alpha: a semi-transparent recolor backs with a translucent panel
+  return alpha > 0 ? { bgColor: cc.to } : undefined
 }
 
 export function buildRenderSlide(
@@ -167,6 +187,26 @@ export function buildRenderSlide(
 }
 
 function buildNode(
+  el: SlideElement,
+  vp: Viewport,
+  metrics: FontMetricsProvider,
+  media: MediaResolver | undefined,
+  parentOffset: ParentPlacement,
+  parentGroup?: SlideElement,
+): RenderNode | null {
+  const node = buildNodeInner(el, vp, metrics, media, parentOffset)
+  // Durable id attached centrally so every node kind (charts and placeholder
+  // chips included) carries it — the AI projection prefers it over sourceId.
+  // Group children resolve through the parent's bytes (their creationId lives
+  // there), keeping the id continuous across group/ungroup.
+  if (node) {
+    const durable = parentGroup ? groupChildDurableId(parentGroup, el) : elementDurableId(el)
+    if (durable) node.durableId = durable
+  }
+  return node
+}
+
+function buildNodeInner(
   el: SlideElement,
   vp: Viewport,
   metrics: FontMetricsProvider,
@@ -334,6 +374,8 @@ function buildShape(
     ...(el.placeholder ? { placeholder: el.placeholder } : {}),
     ...(el.presetGeometry ? { presetGeometry: el.presetGeometry } : {}),
   }
+  // Raw avLst values ride along for the edit layer (yellow adjust handles)
+  if (el.adjust) node.adjust = { ...el.adjust }
   // custGeom: the normalized path is scaled to local px by the element box (mutually exclusive with preset, takes priority)
   if (el.customGeometry) {
     const g = el.customGeometry
@@ -381,6 +423,7 @@ function buildShape(
   if (shadow) node.shadow = shadow
   const glow = resolveGlow(el.glow, vp)
   if (glow) node.glow = glow
+  if (el.scene3d) applyScene3D(el, node, vp)
   if (el.text && el.text.paragraphs.length) {
     node.text = layoutText({
       body: el.text,
@@ -391,6 +434,54 @@ function buildShape(
     })
   }
   return node
+}
+
+/**
+ * scene3d/sp3d: a camera with only an in-plane revolution spins the flat shape;
+ * anything with a real 3D rotation or extrusion depth gets meshed, projected and
+ * shaded (see scene3d.ts) — depth 0 projects just the tilted front cap.
+ */
+function applyScene3D(el: TextElement, node: ShapeRenderNode, vp: Viewport): void {
+  if (node.line) return // connectors keep their polyline rendering
+  const scene = el.scene3d!
+  const spin = inPlaneRotationDeg(scene)
+  if (spin != null) {
+    if (spin !== 0) node.box = { ...node.box, rotationDeg: node.box.rotationDeg + spin }
+    return
+  }
+  const depthPx = emuToPx(scene.extrusionEmu ?? 0, vp.scale)
+  const box = node.box
+  let rings: number[][] | undefined
+  if (node.pathData ?? node.fillPathData)
+    rings = flattenSvgPath((node.pathData ?? node.fillPathData)!)
+  else if (node.polygonPoints) rings = [node.polygonPoints]
+  else if (node.presetGeometry === 'ellipse' || node.presetGeometry === 'circle')
+    rings = [ellipseRing(box.w, box.h)]
+  else if (node.cornerRadiusPx != null) rings = [roundRectRing(box.w, box.h, node.cornerRadiusPx)]
+  else rings = [[0, 0, box.w, 0, box.w, box.h, 0, box.h]]
+  if (!rings.length) return
+  const fill = node.fill
+  const frontSolid = fill.kind === 'solid' ? fill.color : undefined
+  const gradientMid =
+    fill.kind === 'gradient' && fill.stops.length
+      ? fill.stops[Math.floor(fill.stops.length / 2)]!.color
+      : undefined
+  const frontColor = frontSolid ?? gradientMid ?? '#FFFFFF'
+  // PowerPoint colors the extruded walls with the outline color when one exists, else the fill.
+  const sideColor = scene.extrusionColor ?? node.stroke?.color ?? frontColor
+  const ext = buildExtrusion({
+    rings,
+    w: box.w,
+    h: box.h,
+    depthPx,
+    zPx: emuToPx(scene.zEmu ?? 0, vp.scale),
+    scene,
+    frontColor,
+    sideColor,
+    ...(node.stroke ? { strokeColor: node.stroke.color, strokeWidthPx: node.stroke.widthPx } : {}),
+    ...(fill.kind !== 'solid' ? { frontUsesFill: true } : {}),
+  })
+  if (ext) node.extrusion = ext
 }
 
 /** Picture shape geometry -> three clip channels (same preset implementation as shape geometry). */
@@ -446,8 +537,12 @@ function buildPicture(
     ...(el.name ? { name: el.name } : {}),
     ...(el.descr ? { descr: el.descr } : {}),
     ...(el.fill && el.fill.type !== 'none' ? { fill: resolveFill(el.fill, vp, media) } : {}),
-    ...(isMetafile ? { bgColor: '#FFFFFF' } : {}),
+    // clrChange applies to the metafile playback result including that white DC:
+    // a clrChange keyed to white recolors the backing (an alpha-0 target drops it —
+    // tdf113163's black master bg shows through); other keys leave the DC white
+    ...(metafileDcColor(isMetafile, el.clrChange) ?? {}),
     ...(el.duotone ? { duotone: el.duotone } : {}),
+    ...(el.lum ? { lum: el.lum } : {}),
     ...(el.clrChange ? { clrChange: el.clrChange } : {}),
   }
   const stroke = resolveStroke(el.stroke, vp)
@@ -494,7 +589,7 @@ function buildGroup(
 
   const children: RenderNode[] = []
   for (const child of el.children ?? []) {
-    const c = buildNode(child, vp, metrics, media, parentOffset)
+    const c = buildNode(child, vp, metrics, media, parentOffset, el)
     if (c) children.push(c)
   }
   return {
@@ -510,9 +605,9 @@ function buildGroup(
 
 /**
  * Table → TableRenderNode. Cell coordinates are relative to the table's top-left (px).
- * Column widths/row heights are distributed by EMU ratio over the frame's actual px size.
- * Row height is a minimum in PPT: rows whose wrapped cell text needs more space grow to
- * fit it, and the node box grows with the total so nothing is clipped.
+ * Columns and rows render at their EMU sizes (the grid is authoritative; the frame ext
+ * is often stale). Row height is a minimum in PPT: rows whose wrapped cell text needs
+ * more space grow to fit it, and the node box grows with the total so nothing is clipped.
  */
 function buildTable(
   el: TableElement,
@@ -521,14 +616,24 @@ function buildTable(
   metrics: FontMetricsProvider,
   media: MediaResolver | undefined,
 ): TableRenderNode {
-  const sumW = el.colWidths.reduce((a, b) => a + b, 0) || 1
-  const colPx = el.colWidths.map((w) => (w / sumW) * box.w)
+  // a:gridCol w is authoritative in PowerPoint: a stale frame cx (generator tools write
+  // placeholder exts) never squeezes the columns — the table renders at its grid width,
+  // just like rows ignore a stale cy below. Group placement bakes ext/chExt scaling into
+  // the box, so recover that factor from box vs the element's own ext (1 outside groups,
+  // where box comes from the same ext — a stale ext still cancels out).
+  const extWpx = emuToPx(el.transform?.offset.cx ?? 0, vp.scale)
+  const extHpx = emuToPx(el.transform?.offset.cy ?? 0, vp.scale)
+  const groupScaleX = extWpx > 0 ? box.w / extWpx : 1
+  const groupScaleY = extHpx > 0 ? box.h / extHpx : 1
+  const colPx = el.colWidths.map((w) => emuToPx(w, vp.scale) * groupScaleX)
   // a:tr h is an absolute minimum height (h=0 → size to content); PowerPoint ignores a
   // stale frame cy and recomputes the table height from the rows
-  const rowPx = el.rowHeights.map((h) => emuToPx(h, vp.scale))
+  const rowPx = el.rowHeights.map((h) => emuToPx(h, vp.scale) * groupScaleY)
   // Prefix sums → start of each column
   const colX: number[] = [0]
   for (const w of colPx) colX.push(colX[colX.length - 1]! + w)
+  const totalW = colX[colX.length - 1]!
+  if (Math.abs(totalW - box.w) > 0.5) box = { ...box, w: totalW }
 
   // Measure pass: grow any row whose cell content wraps taller than the stored height
   // (rowSpan cells are skipped — their height is ambiguous to attribute to one row).
@@ -568,10 +673,13 @@ function buildTable(
       const gridSpan = cell.gridSpan ?? 1
       if (cell.merged) return
       const rowSpan = cell.rowSpan ?? 1
-      const x = colX[cIdx] ?? 0
+      const xLogical = colX[cIdx] ?? 0
       const y = rowY[r] ?? 0
-      const w = (colX[Math.min(cIdx + gridSpan, colX.length - 1)] ?? x) - x
+      const w = (colX[Math.min(cIdx + gridSpan, colX.length - 1)] ?? xLogical) - xLogical
       const h = (rowY[Math.min(r + rowSpan, rowY.length - 1)] ?? y) - y
+      // rtl="1" mirrors the grid: logical column 1 renders rightmost (style banding and
+      // firstCol/lastCol regions stay on logical indices; only geometry flips)
+      const x = el.rtl ? totalW - xLogical - w : xLogical
       const out: TableCellRender = {
         x,
         y,
@@ -586,7 +694,8 @@ function buildTable(
       const borders: NonNullable<TableCellRender['borders']> = {}
       for (const k of ['l', 'r', 't', 'b'] as const) {
         const s = resolveStroke(cell.borders?.[k], vp)
-        if (s) borders[k] = s
+        // Mirrored geometry puts a cell's logical-left edge on the visual right
+        if (s) borders[el.rtl && k === 'l' ? 'r' : el.rtl && k === 'r' ? 'l' : k] = s
       }
       if (Object.keys(borders).length) out.borders = borders
       if (cell.text && cell.text.paragraphs.length) {
@@ -612,6 +721,7 @@ function buildTable(
     ...(el.bgFill ? { bgFill: resolveFill(el.bgFill, vp, media) } : {}),
     gridX: colX,
     gridY: rowY,
+    ...(el.rtl ? { rtl: true } : {}),
     ...(el.styleFlags ? { styleFlags: el.styleFlags } : {}),
   }
 }

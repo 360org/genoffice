@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react'
-import type { EmailMessage } from '../../../../shared/types'
+import type { EmailMessage, EmailBody } from '../../../../shared/types'
+import { AgentLoop } from '@genoffice/agent-core'
+import { Markdown, AiComposer, AiTypingIndicator } from '@genoffice/ui'
+import { createMailSkill } from './mail-skill'
+import { createMailTransport } from './mail-transport'
 import { GensparkMark } from '../ribbon/GensparkMark'
 import {
   IconMail,
   IconSparkles,
-  IconReply,
-  IconCheckSquare,
-  IconSend,
+  IconChevronRight,
   IconRefresh,
-  IconX,
 } from '../common/MailIcons'
 
 interface AiPanelProps {
@@ -17,44 +18,62 @@ interface AiPanelProps {
   selectedEmail: EmailMessage | null
   onApplyReply: (replyText: string) => void
   onCreateTask: (taskTitle: string) => void
+  onCreateCalendar?: (event: any) => void
 }
 
-interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: string
+interface ToolActivity {
+  name: string
+  summary: string
+  running?: boolean
+  isError?: boolean
 }
+
+interface ChatEntry {
+  role: 'user' | 'assistant'
+  text: string
+  error?: string
+  streaming?: boolean
+  tools?: ToolActivity[]
+}
+
+const STARTER_PROMPTS = [
+  'Tóm tắt các điểm chính của email này',
+  'Soạn thư đồng ý và xác nhận cuộc hẹn',
+  'Trích xuất việc cần làm (To-Do) từ email',
+  'Lên lịch họp theo thông tin trong email',
+]
 
 export const AiPanel: React.FC<AiPanelProps> = ({
   isOpen,
   onClose,
   selectedEmail,
-  onApplyReply: _onApplyReply,
-  onCreateTask: _onCreateTask,
+  onApplyReply,
+  onCreateTask,
+  onCreateCalendar,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [chat, setChat] = useState<ChatEntry[]>([
     {
-      id: 'm_welcome',
       role: 'assistant',
-      content:
-        'Xin chào Sếp! Em là Genspark AI Mail Agent. Em có thể giúp Sếp tóm tắt nội dung email, soạn thư trả lời chuyên nghiệp, trích xuất việc cần làm (To-Do) hoặc lên lịch họp Calendar.',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      text: 'Xin chào Sếp! Em là VuaOffice AI Mail Agent. Em có thể hỗ trợ Sếp tóm tắt email, soạn thư trả lời chuyên nghiệp, tạo công việc To-Do hoặc lên lịch họp Calendar.',
     },
   ])
-  const [inputQuery, setInputQuery] = useState('')
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [panelWidth, setPanelWidth] = useState(340)
+  const [input, setInput] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [panelWidth, setPanelWidth] = useState(360)
+
   const isDraggingRef = useRef(false)
   const startXRef = useRef(0)
-  const startWidthRef = useRef(340)
+  const startWidthRef = useRef(360)
+  const logRef = useRef<HTMLDivElement>(null)
+  const loopRef = useRef<AgentLoop | null>(null)
+  const aiSettingsRef = useRef<any>(null)
 
   // Resizing logic for AI Dock
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return
       const delta = startXRef.current - e.clientX
-      const newWidth = Math.min(Math.max(280, startWidthRef.current + delta), 540)
+      const newWidth = Math.min(Math.max(280, startWidthRef.current + delta), 600)
       setPanelWidth(newWidth)
     }
 
@@ -80,291 +99,337 @@ export const AiPanel: React.FC<AiPanelProps> = ({
     document.body.style.userSelect = 'none'
   }
 
-  const activeStreamIdRef = useRef<string | null>(null)
-
-  // Listen to incoming AI stream chunks from main process
+  // Load AI Settings on mount
   useEffect(() => {
-    if (!window.vuaMail?.onAiStream) return
-    const unsub = window.vuaMail.onAiStream((chunk: any) => {
-      if (!chunk || chunk.requestId !== activeStreamIdRef.current) return
-
-      if (chunk.type === 'delta' && chunk.text) {
-        setMessages((prev) => {
-          const last = prev[prev.length - 1]
-          if (!last || last.role !== 'assistant') return prev
-          return [
-            ...prev.slice(0, -1),
-            {
-              ...last,
-              content: last.content + chunk.text,
-            },
-          ]
-        })
-      } else if (chunk.type === 'done') {
-        setIsProcessing(false)
-        activeStreamIdRef.current = null
-      } else if (chunk.type === 'error') {
-        setMessages((prev) => {
-          const last = prev[prev.length - 1]
-          if (!last || last.role !== 'assistant') return prev
-          return [
-            ...prev.slice(0, -1),
-            {
-              ...last,
-              content: last.content
-                ? `${last.content}\n\n[Lỗi: ${chunk.error || 'Mất kết nối AI'}]`
-                : `Không thể hoàn tất phản hồi từ AI Vendor: ${chunk.error || 'Lỗi kết nối hoặc API Key chưa được cài đặt.'}`,
-            },
-          ]
-        })
-        setIsProcessing(false)
-        activeStreamIdRef.current = null
+    async function loadSettings() {
+      if (window.vuaMail?.getAiSettings) {
+        try {
+          const s = await window.vuaMail.getAiSettings()
+          aiSettingsRef.current = s
+        } catch {
+          // ignore
+        }
       }
+    }
+    loadSettings()
+  }, [])
+
+  // Auto-scroll chat log
+  useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' })
+    }
+  }, [chat])
+
+  // Instantiate AgentLoop with MailSkill & Transport
+  useEffect(() => {
+    const mailSkill = createMailSkill({
+      getSelectedEmail: () => selectedEmail,
+      getEmailBody: async (emailId: string): Promise<EmailBody | null> => {
+        if (!window.vuaMail) return null
+        return window.vuaMail.getEmailBody(emailId)
+      },
+      onDraftReply: (replyText: string) => {
+        onApplyReply(replyText)
+      },
+      onCreateTodo: (taskTitle: string) => {
+        onCreateTask(taskTitle)
+      },
+      onCreateCalendarEvent: (evt) => {
+        if (onCreateCalendar) onCreateCalendar(evt)
+      },
+    })
+
+    const transport = createMailTransport(() => aiSettingsRef.current)
+
+    loopRef.current = new AgentLoop({
+      skill: mailSkill,
+      transport,
+      events: {
+        onText: (text: string) => {
+          setChat((prev) => {
+            const next = [...prev]
+            const last = next.at(-1)
+            if (last && last.role === 'assistant') {
+              next[next.length - 1] = {
+                ...last,
+                text,
+              }
+            }
+            return next
+          })
+        },
+        onToolStart: (call) => {
+          setChat((prev) => {
+            const next = [...prev]
+            const last = next.at(-1)
+            if (last && last.role === 'assistant') {
+              const currentTools = last.tools || []
+              next[next.length - 1] = {
+                ...last,
+                tools: [...currentTools, { name: call.name, summary: `Đang thực hiện ${call.name}...`, running: true }],
+              }
+            }
+            return next
+          })
+        },
+        onToolExecuted: (event) => {
+          setChat((prev) => {
+            const next = [...prev]
+            const last = next.at(-1)
+            if (last && last.role === 'assistant') {
+              const currentTools = (last.tools || []).map((tl) =>
+                tl.name === event.call.name && tl.running
+                  ? { ...tl, summary: event.execution.summary || event.call.name, running: false, isError: event.execution.isError }
+                  : tl
+              )
+              next[next.length - 1] = {
+                ...last,
+                tools: currentTools,
+              }
+            }
+            return next
+          })
+        },
+        onTurnEnd: () => {
+          setChat((prev) => {
+            const next = [...prev]
+            const last = next.at(-1)
+            if (last && last.role === 'assistant') {
+              next[next.length - 1] = { ...last, streaming: false }
+            }
+            return [...next, { role: 'assistant', text: '', streaming: true }]
+          })
+        },
+        onDone: ({ text, cancelled }) => {
+          setChat((prev) => {
+            const next = [...prev]
+            const last = next.at(-1)
+            if (last && last.role === 'assistant') {
+              next[next.length - 1] = {
+                ...last,
+                streaming: false,
+                text: text || last.text || (cancelled ? 'Đã dừng xử lý.' : 'Đã hoàn tất tác vụ.'),
+                tools: last.tools?.filter((tl) => !tl.running),
+              }
+            }
+            return next
+          })
+          setBusy(false)
+        },
+        onError: (error: string) => {
+          setChat((prev) => {
+            const next = [...prev]
+            const last = next.at(-1)
+            if (last && last.role === 'assistant') {
+              next[next.length - 1] = {
+                ...last,
+                streaming: false,
+                error: error || 'Lỗi xử lý yêu cầu.',
+              }
+            }
+            return next
+          })
+          setBusy(false)
+        },
+      },
     })
 
     return () => {
-      unsub()
+      loopRef.current?.cancel()
     }
-  }, [])
+  }, [selectedEmail, onApplyReply, onCreateTask, onCreateCalendar])
 
-  const handleSend = async (textToSend?: string) => {
-    const query = textToSend || inputQuery
-    if (!query.trim() || isProcessing) return
+  const runWith = (query: string) => {
+    const trimmed = query.trim()
+    if (!trimmed || busy || !loopRef.current) return
 
-    const userMsg: ChatMessage = {
-      id: `u_${Date.now()}`,
-      role: 'user',
-      content: query.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    }
+    setInput('')
+    setChat((prev) => [
+      ...prev,
+      { role: 'user', text: trimmed },
+      { role: 'assistant', text: '', streaming: true },
+    ])
+    setBusy(true)
 
-    const aiMsgId = `a_${Date.now()}`
-    const aiMsg: ChatMessage = {
-      id: aiMsgId,
-      role: 'assistant',
-      content: '',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    }
+    loopRef.current.run(trimmed)
+  }
 
-    setMessages((prev) => [...prev, userMsg, aiMsg])
-    setInputQuery('')
-    setIsProcessing(true)
-
-    // Check if real AI IPC is available
-    if (window.vuaMail?.aiStream && window.vuaMail?.getAiSettings) {
-      try {
-        const settings = await window.vuaMail.getAiSettings()
-        const reqId = `mail_ai_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
-        activeStreamIdRef.current = reqId
-
-        let emailContext = ''
-        if (selectedEmail) {
-          emailContext = `\n\nBối cảnh email đang mở:\n- Người gửi: ${selectedEmail.senderName} <${selectedEmail.senderEmail}>\n- Tiêu đề: ${selectedEmail.subject}\n- Nội dung tóm tắt: ${selectedEmail.snippet}`
-        }
-
-        const systemPrompt = `Bạn là Genspark AI Mail Agent, trợ lý trí tuệ nhân tạo chuyên nghiệp của hệ sinh thái GenOffice Suite thuộc 360 CORP. Bạn hỗ trợ Sếp Châu Lê trong việc xử lý email, tóm tắt, soạn thảo phản hồi, trích xuất việc cần làm (To-Do), và sắp xếp lịch họp. Luôn xưng "em", gọi người dùng là "Sếp" hoặc "anh", trả lời bằng tiếng Việt chuyên nghiệp, ngắn gọn và thực dụng.${emailContext}`
-
-        await window.vuaMail.aiStream({
-          requestId: reqId,
-          settings,
-          system: systemPrompt,
-          messages: [
-            ...messages
-              .filter((m) => m.id !== 'm_welcome')
-              .map((m) => ({
-                role: m.role,
-                content: m.content,
-              })),
-            { role: 'user', content: query.trim() },
-          ],
-        })
-      } catch (err: any) {
-        setMessages((prev) => {
-          const last = prev[prev.length - 1]
-          if (!last || last.role !== 'assistant') return prev
-          return [
-            ...prev.slice(0, -1),
-            {
-              ...last,
-              content: `Lỗi kết nối AI: ${err.message || 'Không thể gọi AI Vendor'}`,
-            },
-          ]
-        })
-        setIsProcessing(false)
-        activeStreamIdRef.current = null
-      }
-    } else {
-      // Fallback
-      setTimeout(() => {
-        let responseContent = ''
-        const q = query.toLowerCase()
-        if (q.includes('tóm tắt') || q.includes('summary')) {
-          responseContent = selectedEmail
-            ? `Tóm tắt nội dung email "${selectedEmail.subject}":\n\n• Người gửi: ${selectedEmail.senderName} (${selectedEmail.senderEmail})\n• Nội dung chính: ${selectedEmail.snippet}\n• Hành động đề xuất: Cần xác nhận phản hồi và kiểm tra tệp đính kèm liên quan.`
-            : 'Sếp vui lòng chọn một email từ danh sách để em phân tích và tóm tắt chi tiết.'
-        } else {
-          responseContent = `Dạ em đã nhận được yêu cầu: "${query}". Đang kết nối tới Genspark AI Gateway.`
-        }
-        setMessages((prev) => {
-          const last = prev[prev.length - 1]
-          if (!last || last.role !== 'assistant') return prev
-          return [
-            ...prev.slice(0, -1),
-            { ...last, content: responseContent },
-          ]
-        })
-        setIsProcessing(false)
-      }, 500)
+  const handleStop = () => {
+    if (loopRef.current && busy) {
+      loopRef.current.cancel()
+      setBusy(false)
     }
   }
 
-  return (
-    <div
-      className={`ai-dock ${isOpen ? 'open' : 'collapsed'}`}
-      style={{ width: isOpen ? `${panelWidth}px` : '34px' }}
-    >
-      {/* Collapsed Rail Button */}
-      {!isOpen && (
+  const handleNewChat = () => {
+    if (loopRef.current) {
+      loopRef.current.reset()
+    }
+    setBusy(false)
+    setChat([
+      {
+        role: 'assistant',
+        text: 'Cuộc trò chuyện mới đã bắt đầu. Sếp muốn em hỗ trợ xử lý email nào?',
+      },
+    ])
+  }
+
+  if (!isOpen) {
+    return (
+      <aside className="ai-dock collapsed" style={{ width: 34 }}>
         <button
-          type="button"
           className="ai-rail"
           onClick={onClose}
-          title="Mở bảng trợ lý Genspark AI"
+          title="Mở VuaOffice AI Mail"
         >
-          <GensparkMark size={20} />
-          <span className="ai-rail-text">Genspark AI</span>
+          <GensparkMark size={18} />
+          <span className="ai-rail-text">VUAOFFICE AI</span>
         </button>
-      )}
+      </aside>
+    )
+  }
 
-      {/* Expanded AI Panel Dock */}
-      {isOpen && (
-        <div className="ai-dock-content">
-          {/* Drag Resizer Left Edge */}
-          <div
-            className="ai-dock-resizer"
-            onMouseDown={handleStartResize}
-            title="Kéo để thay đổi độ rộng bảng AI"
-          />
+  return (
+    <aside className="ai-dock" style={{ width: panelWidth }}>
+      {/* Resizer handle */}
+      <div className="ai-dock-resizer" onMouseDown={handleStartResize} />
 
-          {/* AI Panel Header */}
-          <div className="ai-panel-header">
-            <div className="ai-header-left">
-              <GensparkMark size={18} />
-              <span>Genspark AI</span>
-            </div>
-
-            <div className="ai-header-actions">
-              <button
-                type="button"
-                className="ai-action-btn"
-                onClick={() => setMessages([messages[0]])}
-                title="Làm mới đoạn chat"
-              >
-                <IconRefresh size={13} />
-              </button>
-              <button
-                type="button"
-                className="ai-action-btn"
-                onClick={onClose}
-                title="Thu gọn bảng AI"
-              >
-                <IconX size={14} />
-              </button>
-            </div>
+      <div className="ai-dock-content">
+        {/* Header */}
+        <div className="ai-panel-header">
+          <div className="ai-header-left">
+            <GensparkMark size={18} />
+            <span>VuaOffice AI</span>
           </div>
-
-          {/* Selected Email Context Tag */}
-          {selectedEmail && (
-            <div className="ai-context-banner">
-              <span className="context-icon" style={{ display: 'flex', alignItems: 'center' }}>
-                <IconMail size={13} color="var(--mail-primary-blue, #0077cd)" />
-              </span>
-              <span className="context-subject">{selectedEmail.subject || '(Không có tiêu đề)'}</span>
-              <span className="context-badge">Context</span>
-            </div>
-          )}
-
-          {/* Chat Messages Body */}
-          <div className="ai-messages-scroll">
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={`ai-message-bubble-wrapper ${m.role === 'user' ? 'user' : 'assistant'}`}
-              >
-                <div className="ai-message-bubble">
-                  {m.content}
-                </div>
-                <span className="ai-message-time">{m.timestamp}</span>
-              </div>
-            ))}
-
-            {isProcessing && (
-              <div className="ai-processing-state">
-                <span className="ai-spinner-dot" />
-                <span>Genspark AI đang phân tích và xử lý...</span>
-              </div>
-            )}
-          </div>
-
-          {/* Quick Action Suggestion Chips */}
-          <div className="ai-chips-bar">
+          <div className="ai-header-actions">
             <button
-              type="button"
-              className="ai-chip"
-              onClick={() => handleSend('Tóm tắt email này cho anh')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              className="ai-action-btn"
+              onClick={handleNewChat}
+              title="Làm mới cuộc trò chuyện"
             >
-              <IconSparkles size={12} color="var(--mail-primary-blue, #0077cd)" />
-              <span>Tóm tắt</span>
+              <IconRefresh size={14} />
             </button>
             <button
-              type="button"
-              className="ai-chip"
-              onClick={() => handleSend('Soạn thư trả lời đồng ý và cảm ơn')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              className="ai-action-btn"
+              onClick={onClose}
+              title="Thu nhỏ AI"
             >
-              <IconReply size={12} color="var(--mail-primary-blue, #0077cd)" />
-              <span>Soạn trả lời</span>
+              <IconChevronRight size={16} />
             </button>
-            <button
-              type="button"
-              className="ai-chip"
-              onClick={() => handleSend('Trích xuất việc cần làm vào To-Do')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-            >
-              <IconCheckSquare size={12} color="var(--mail-brand-green, #00ce2c)" />
-              <span>Tạo To-Do</span>
-            </button>
-          </div>
-
-          {/* Chat Input Box */}
-          <div className="ai-input-wrapper">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                handleSend()
-              }}
-              className="ai-input-form"
-            >
-              <input
-                type="text"
-                placeholder="Hỏi Genspark AI..."
-                value={inputQuery}
-                onChange={(e) => setInputQuery(e.target.value)}
-              />
-              <button
-                type="submit"
-                disabled={!inputQuery.trim() || isProcessing}
-                className="ai-send-btn"
-                title="Gửi câu hỏi"
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <IconSend size={13} color="#ffffff" />
-              </button>
-            </form>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* Selected Email Context Banner */}
+        {selectedEmail && (
+          <div className="ai-context-banner">
+            <IconMail size={13} color="var(--mail-primary-blue, #0077cd)" />
+            <span className="context-subject">{selectedEmail.subject || '(Không có tiêu đề)'}</span>
+            <span className="context-badge">{selectedEmail.senderName}</span>
+          </div>
+        )}
+
+        {/* Messages Log */}
+        <div className="ai-messages-scroll" ref={logRef}>
+          {chat.map((msg, idx) => (
+            <div key={idx} className={`ai-message-bubble-wrapper ${msg.role}`}>
+              {/* Tool activity indicators */}
+              {msg.tools && msg.tools.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '6px' }}>
+                  {msg.tools.map((tl, tIdx) => (
+                    <div
+                      key={tIdx}
+                      style={{
+                        fontSize: '11px',
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        backgroundColor: 'var(--surface-subtle, #f6f7f9)',
+                        border: '1px solid var(--border, #e3e6ea)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: tl.isError ? '#d32f2f' : 'var(--text-secondary, #606366)',
+                      }}
+                    >
+                      {tl.running ? (
+                        <span className="ai-spinner-dot" />
+                      ) : (
+                        <IconSparkles size={11} color="var(--mail-primary-blue, #0077cd)" />
+                      )}
+                      <span>{tl.summary}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Message text with Markdown rendering */}
+              {msg.text && (
+                <div className="ai-message-bubble">
+                  {msg.role === 'assistant' ? (
+                    <Markdown text={msg.text} />
+                  ) : (
+                    <span>{msg.text}</span>
+                  )}
+                </div>
+              )}
+
+              {/* Streaming Indicator */}
+              {msg.streaming && !msg.text && (
+                <div className="ai-processing-state">
+                  <AiTypingIndicator label="Đang suy nghĩ" />
+                </div>
+              )}
+
+              {/* Error notification */}
+              {msg.error && (
+                <div
+                  style={{
+                    color: '#d32f2f',
+                    fontSize: '11.5px',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                    marginTop: '4px',
+                  }}
+                >
+                  {msg.error}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Suggestion Chips */}
+        {selectedEmail && !busy && (
+          <div className="ai-chips-bar">
+            {STARTER_PROMPTS.map((prompt, pIdx) => (
+              <button
+                key={pIdx}
+                className="ai-chip"
+                onClick={() => runWith(prompt)}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Unified VuaOffice AiComposer */}
+        <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border, #e3e6ea)' }}>
+          <AiComposer
+            value={input}
+            onChange={setInput}
+            onSend={() => runWith(input)}
+            onStop={handleStop}
+            busy={busy}
+            placeholder="Hỏi hoặc yêu cầu VuaOffice AI Mail..."
+            hintIdle="Nhấn Enter để gửi, Shift+Enter xuống dòng"
+            hintBusy="Đang xử lý yêu cầu..."
+            sendLabel="Gửi"
+            stopLabel="Dừng"
+          />
+        </div>
+      </div>
+    </aside>
   )
 }

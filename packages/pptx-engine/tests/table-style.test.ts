@@ -68,6 +68,31 @@ describe('built-in table style Medium Style 2 (PowerPoint default)', () => {
     expect(run.bold).toBe(false)
     expect(run.color).toBe('#000000')
   })
+
+  it('explicit <a:noFill/> on tcPr overrides the style fill (cell stays transparent)', () => {
+    const slide2 = parseSlide({
+      path: 'ppt/slides/slide1.xml',
+      slideXml: tableSlideXml('firstRow="1" bandRow="1"', MEDIUM2_A1).replace(
+        /<a:tcPr\/>/,
+        '<a:tcPr><a:noFill/></a:tcPr>',
+      ),
+      ctx: { theme },
+    })
+    const t2 = slide2.elements[0] as any
+    expect(t2.rows[0][0].fill).toBeUndefined()
+    // Remaining cells keep the style fill
+    expect(t2.rows[0][1].fill).toEqual({ type: 'solid', color: '#4472C4' })
+  })
+
+  it('tblPr rtl="1" is parsed onto the table element', () => {
+    const slide2 = parseSlide({
+      path: 'ppt/slides/slide1.xml',
+      slideXml: tableSlideXml('rtl="1" firstRow="1"', MEDIUM2_A1),
+      ctx: { theme },
+    })
+    expect((slide2.elements[0] as any).rtl).toBe(true)
+    expect((slide.elements[0] as any).rtl).toBeUndefined()
+  })
 })
 
 describe('tableStyles.xml custom styles', () => {
@@ -92,6 +117,20 @@ describe('tableStyles.xml custom styles', () => {
   it('unknown styleId that is not built-in → undefined (stays unstyled)', () => {
     expect(resolveTableStyle('{DEAD-BEEF}', xml, theme)).toBeUndefined()
     expect(resolveTableStyle(undefined, xml, theme)).toBeUndefined()
+  })
+
+  it('a populated part without the referenced built-in id renders unstyled; an empty part keeps the built-in', () => {
+    // PowerPoint-measured: the built-in gallery only backs a def-id-only part
+    expect(resolveTableStyle(MEDIUM2_A1, xml, theme)).toBeUndefined()
+    const emptyPart = `<?xml version="1.0"?><a:tblStyleLst xmlns:a="a" def="${MEDIUM2_A1}"/>`
+    expect(resolveTableStyle(MEDIUM2_A1, emptyPart, theme)?.firstRow?.fill).toEqual({
+      type: 'solid',
+      color: '#4472C4',
+    })
+    expect(resolveTableStyle(MEDIUM2_A1, undefined, theme)?.firstRow?.fill).toEqual({
+      type: 'solid',
+      color: '#4472C4',
+    })
   })
 
   it('tblBg fillRef + alpha band fills + lnRef borders (bnc480256)', () => {

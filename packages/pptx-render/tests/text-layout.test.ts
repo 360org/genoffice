@@ -145,6 +145,46 @@ describe('2.3 text layout', () => {
     expect(layout.lines.length).toBeGreaterThan(1)
   })
 
+  it('kinsoku: a closing mark never starts a line (its predecessor is pulled down)', () => {
+    // 4 chars fit per line (4 × 24px = 96px); without kinsoku 、would head line 2
+    const layout = layoutText({
+      body: body({ paragraphs: [{ runs: [{ text: 'ああああ、いい', fontSize: 24 }] }] }),
+      boxWidthPx: 96,
+      boxHeightPx: 3000,
+      metrics: new HeuristicMetrics(),
+      vp,
+    })
+    const lines = layout.lines.map((l) => l.runs.map((r) => r.text).join(''))
+    expect(lines[0]).toBe('あああ')
+    expect(lines[1]!.startsWith('あ、')).toBe(true)
+  })
+
+  it('kinsoku: chained closing marks pull the whole tail down', () => {
+    const layout = layoutText({
+      body: body({ paragraphs: [{ runs: [{ text: 'あああ。」いい', fontSize: 24 }] }] }),
+      boxWidthPx: 96,
+      boxHeightPx: 3000,
+      metrics: new HeuristicMetrics(),
+      vp,
+    })
+    const lines = layout.lines.map((l) => l.runs.map((r) => r.text).join(''))
+    expect(lines[0]).toBe('ああ')
+    expect(lines[1]!.startsWith('あ。」')).toBe(true)
+  })
+
+  it('kinsoku: an opening bracket never ends a line', () => {
+    const layout = layoutText({
+      body: body({ paragraphs: [{ runs: [{ text: 'あああ「いいい', fontSize: 24 }] }] }),
+      boxWidthPx: 96,
+      boxHeightPx: 3000,
+      metrics: new HeuristicMetrics(),
+      vp,
+    })
+    const lines = layout.lines.map((l) => l.runs.map((r) => r.text).join(''))
+    expect(lines[0]).toBe('あああ')
+    expect(lines[1]!.startsWith('「い')).toBe(true)
+  })
+
   it('autofit=shrink reduces font scale when content overflows height', () => {
     const many = Array.from({ length: 30 }, (_, i) => ({
       runs: [{ text: `Line ${i} of text`, fontSize: 40 }],
@@ -974,5 +1014,56 @@ describe('bodyPr numCol columns', () => {
       vp,
     })
     expect(layout.lines.length).toBe(1)
+  })
+})
+
+describe('WordArt effect passthrough', () => {
+  const m = new HeuristicMetrics()
+  const run = {
+    text: 'Word',
+    fontSize: 20,
+    color: '#111111',
+    gradient: {
+      stops: [
+        { pos: 0, color: '#FF0000' },
+        { pos: 1, color: '#0000FF' },
+      ],
+      angle: 5400000,
+    },
+    glow: { color: '#ED7D31', radius: 53100 },
+    reflection: true,
+  }
+
+  it('gradient/glow/reflection reach the glyph runs (angle in degrees, glow in px)', () => {
+    const layout = layoutText({
+      body: body({ paragraphs: [{ runs: [run] }] }),
+      boxWidthPx: 400,
+      boxHeightPx: 100,
+      metrics: m,
+      vp,
+    })
+    const g = layout.lines[0]!.runs[0]!
+    expect(g.gradient?.angleDeg).toBe(90)
+    expect(g.gradient?.stops).toHaveLength(2)
+    expect(g.glow?.color).toBe('#ED7D31')
+    expect(g.glow?.blurPx).toBeGreaterThan(0)
+    expect(g.reflection).toBe(true)
+  })
+
+  it('bodyPr extrusion projects to a screen offset (lat 30° → downward)', () => {
+    const layout = layoutText({
+      body: body({
+        paragraphs: [{ runs: [{ text: 'W', fontSize: 20, color: '#111111' }] }],
+        extrusion3d: { color: '#C0504D', depthEmu: 127000, latDeg: 30, lonDeg: 0 },
+      }),
+      boxWidthPx: 400,
+      boxHeightPx: 100,
+      metrics: m,
+      vp,
+    })
+    expect(layout.extrusion?.color).toBe('#C0504D')
+    expect(layout.extrusion?.dx).toBeCloseTo(0, 5)
+    // PowerPoint renders the depth below the glyphs for a positive camera latitude
+    expect(layout.extrusion!.dy).toBeGreaterThan(0)
   })
 })

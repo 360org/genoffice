@@ -1,5 +1,5 @@
+import type { AiChatResponse, AiProviderMeta, AiSettings } from '@genoffice/ai-provider'
 import type { UpdateChannel } from './update-api'
-import type { AiSettings } from '@genoffice/ai-provider'
 
 /** UI language; kept self-contained here (mirrors Lang in @genoffice/i18n) */
 export type UiLanguage =
@@ -79,6 +79,8 @@ export interface HomeApi {
   newSlide(opts?: { projectId?: string }): Promise<void>
   /** open a blank markdown editor tab */
   newMarkdown(opts?: { projectId?: string }): Promise<void>
+  /** create a blank single-page PDF in the default save folder and open it */
+  newPdf(opts?: { projectId?: string }): Promise<void>
   /** open VuaOffice Mail tab */
   newMail(): Promise<void>
   /** drop entries from the recent list (does not touch the files) */
@@ -115,12 +117,22 @@ export interface HomeApi {
   getAppVersion(): Promise<string>
   /** whether the first-run onboarding has been completed or skipped (persisted in userData/app-settings.json) */
   onboardingSeen(): Promise<boolean>
-  /** mark the first-run onboarding as done so it never shows again */
-  setOnboardingSeen(): Promise<void>
+  /** mark onboarding done; analytics remains enabled unless separately opted out */
+  setOnboardingSeen(): Promise<boolean>
   /** current UI theme preference (persisted in userData/app-settings.json) */
   getTheme(): Promise<UiTheme>
   /** switch + persist the UI theme; broadcasts 'app:theme-changed' to all web contents */
   setTheme(theme: UiTheme): Promise<void>
+  /** whether anonymous usage statistics are enabled (default true in official builds) */
+  getAnalyticsEnabled(): Promise<boolean>
+  /** persist an explicit analytics opt-in or opt-out */
+  setAnalyticsEnabled(enabled: boolean): Promise<boolean>
+  /** effective default save folder for new/untitled files (configured in userData/app-settings.json, falls back to <Documents>/GenOffice) */
+  getDefaultSaveDir(): Promise<string>
+  /** directory picker to change the default save folder; resolves to the new folder, or null when canceled or the pick was unusable */
+  pickDefaultSaveDir(): Promise<string | null>
+  /** theme switched anywhere (broadcast from the main process) */
+  onThemeChanged?(handler: (theme: UiTheme) => void): () => void
   /** open the GenTeam community page in the default browser */
   openGenTeam(): Promise<void>
   /** open the Genspark credit-usage page in the default browser */
@@ -142,26 +154,31 @@ export interface HomeApi {
   cloudProjectsSync(): Promise<CloudProjectsSnapshot | null>
   /** open a cloud project (relative '/agents?id=...' URL) in the default browser */
   openCloudProject(projectUrl: string): Promise<void>
-  /** default save location for new documents (undefined when using default OS Documents folder) */
-  getDefaultSaveDir(): Promise<string | undefined>
-  /** open a directory picker dialog to select default save folder */
-  pickDefaultSaveDir(): Promise<string | undefined>
-  /** get AI settings containing API keys, models, etc. */
+  /** AI settings (userData/ai-settings.json, shared by every editor); the genspark key never appears here */
   getAiSettings(): Promise<AiSettings>
-  /** save AI settings */
+  /** persist AI settings; open editors pick the change up on their next settings read */
   setAiSettings(settings: AiSettings): Promise<void>
+  /** provider catalog with each fixed endpoint's default base URL (empty for genspark/custom) */
+  getAiProviders?(): AiCatalogEntry[]
+  /** one-shot round trip against the given (possibly unsaved) settings — the settings-UI connection test */
+  testAiSettings?(settings: AiSettings): Promise<AiChatResponse>
   /** check for software updates manually */
-  checkForUpdates(): Promise<void>
+  checkForUpdates?(): Promise<void>
   /** subscribe to developer mode changes from application menu */
   onDeveloperModeChanged?(handler: (isDevMode: boolean) => void): () => void
   /** generate a sanitized diagnostic and log report */
-  generateDiagnosticReport(): Promise<DiagnosticReportData>
+  generateDiagnosticReport?(): Promise<DiagnosticReportData>
   /** export diagnostic report to local disk file */
-  exportDiagnosticReport(report: DiagnosticReportData): Promise<DiagnosticExportResult>
+  exportDiagnosticReport?(report: DiagnosticReportData): Promise<DiagnosticExportResult>
   /** send diagnostic report to GitLab issues */
-  sendDiagnosticReport(report: DiagnosticReportData, userNote?: string): Promise<DiagnosticSubmitResult>
+  sendDiagnosticReport?(report: DiagnosticReportData, userNote?: string): Promise<DiagnosticSubmitResult>
   /** subscribe to menu trigger for opening the diagnostic report modal */
   onOpenDiagnosticReport?(handler: () => void): () => void
+}
+
+export interface AiCatalogEntry extends AiProviderMeta {
+  /** default endpoint for fixed-endpoint providers ('' = model-dependent or user-supplied) */
+  defaultBaseUrl: string
 }
 
 export interface DiagnosticEndpointStatus {
@@ -320,6 +337,7 @@ export const HOME_CHANNELS = {
   newSheet: 'home:new-sheet',
   newSlide: 'home:new-slide',
   newMarkdown: 'home:new-markdown',
+  newPdf: 'home:new-pdf',
   newMail: 'home:new-mail',
   removeRecent: 'home:remove-recent',
   revealPath: 'home:reveal-path',
@@ -341,6 +359,8 @@ export const HOME_CHANNELS = {
   setOnboardingSeen: 'home:set-onboarding-seen',
   getTheme: 'home:get-theme',
   setTheme: 'home:set-theme',
+  getAnalyticsEnabled: 'home:get-analytics-enabled',
+  setAnalyticsEnabled: 'home:set-analytics-enabled',
   openGenTeam: 'home:open-genteam',
   openGitHubRepo: 'home:open-github-repo',
   openVuaOfficeWebsite: 'home:open-vuaoffice-website',

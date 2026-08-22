@@ -170,10 +170,10 @@ export const MailRibbon: React.FC<MailRibbonProps> = ({
             type="button"
             className={`copilot-btn ${aiOpen ? 'active' : ''}`}
             onClick={onToggleAi}
-            title="Bật/Tắt trợ lý Genspark AI"
+            title="Bật/Tắt trợ lý VuaOffice AI"
           >
             <GensparkMark size={16} />
-            <span>Genspark AI</span>
+            <span>VuaOffice AI</span>
           </button>
 
           {onOpenProfile && (
@@ -464,19 +464,19 @@ export const MailRibbon: React.FC<MailRibbonProps> = ({
                   type="button"
                   className={`rb-big ai-entry ${aiOpen ? 'active' : ''}`}
                   onClick={onToggleAi}
-                  title="Mở bảng trợ lý Genspark AI"
+                  title="Mở bảng trợ lý VuaOffice AI"
                 >
                   <span className="rb-big-icon">
                     <GensparkMark size={24} />
                   </span>
-                  <span>Genspark AI</span>
+                  <span>VuaOffice AI</span>
                 </button>
                 <button
                   type="button"
                   className="rb-big ai-entry"
                   disabled={!hasSelectedEmail}
                   onClick={onAiAssist}
-                  title="Tóm tắt nội dung email bằng Genspark AI"
+                  title="Tóm tắt nội dung email bằng VuaOffice AI"
                 >
                   <span className="rb-big-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

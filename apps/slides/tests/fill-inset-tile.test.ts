@@ -78,3 +78,69 @@ describe('fillToKonva stretch fillRect insets (tdf153466)', () => {
     expect(r.fillPatternScaleX).toBeCloseTo(1280 / 155, 5)
   })
 })
+
+describe('gradient ramps interpolate in linear sRGB (tdf105739)', () => {
+  it('subdivides a two-stop ramp with linear-light midpoints', () => {
+    const r = fillToKonva(
+      {
+        kind: 'gradient',
+        angleDeg: 45,
+        stops: [
+          { pos: 0, color: '#FF0000' },
+          { pos: 1, color: '#00B050' },
+        ],
+      } as any,
+      100,
+      100,
+    )
+    const stops = r.fillLinearGradientColorStops!
+    // 2 original + 7 inserted midpoints, position/color interleaved
+    expect(stops.length).toBe((2 + 7) * 2)
+    const mid = stops[stops.indexOf(0.5) + 1] as string
+    // PowerPoint-measured midpoint (188,129,55); raw sRGB blending would give (128,88,40)
+    const [r0, g0, b0] = mid.match(/\d+/g)!.map(Number)
+    expect(Math.abs(r0 - 188)).toBeLessThanOrEqual(2)
+    expect(Math.abs(g0 - 129)).toBeLessThanOrEqual(2)
+    expect(Math.abs(b0 - 55)).toBeLessThanOrEqual(2)
+  })
+
+  it('alpha fades interpolate premultiplied: a transparent stop contributes no color', () => {
+    const r = fillToKonva(
+      {
+        kind: 'gradient',
+        angleDeg: 0,
+        stops: [
+          { pos: 0, color: '#FFFFFF00' },
+          { pos: 1, color: '#29354D' },
+        ],
+      } as any,
+      100,
+      100,
+    )
+    const stops = r.fillLinearGradientColorStops!
+    // Straight interpolation would wash the midpoint toward white; PowerPoint keeps the
+    // opaque stop's hue through the fade and only ramps the alpha.
+    const mid = stops[stops.indexOf(0.5) + 1] as string
+    const [r0, g0, b0, a0] = mid.match(/[\d.]+/g)!.map(Number)
+    expect(Math.abs(r0 - 41)).toBeLessThanOrEqual(1)
+    expect(Math.abs(g0 - 53)).toBeLessThanOrEqual(1)
+    expect(Math.abs(b0 - 77)).toBeLessThanOrEqual(1)
+    expect(a0).toBeCloseTo(0.5, 2)
+  })
+
+  it('keeps equal-color stop pairs unsubdivided', () => {
+    const r = fillToKonva(
+      {
+        kind: 'gradient',
+        angleDeg: 0,
+        stops: [
+          { pos: 0, color: '#123456' },
+          { pos: 1, color: '#123456' },
+        ],
+      } as any,
+      100,
+      100,
+    )
+    expect(r.fillLinearGradientColorStops!.length).toBe(4)
+  })
+})

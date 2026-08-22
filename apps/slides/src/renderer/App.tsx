@@ -17,6 +17,7 @@ import type {
   AttachmentMeta,
   EditChartOp,
   EditParagraph,
+  EditStrokeOp,
   EditTableStyleOp,
   GetLayoutsResult,
   GradientFillSpec,
@@ -38,6 +39,7 @@ import { TextEditOverlay, firstFontFamily, liveAlign, liveBulletChar } from './T
 import { CropOverlay } from './CropOverlay'
 import { createImageLoader } from './image-loader'
 import { syncPrivateFonts } from './doc-fonts'
+import { toPickerHex } from './color-input'
 import { InkOverlay } from './InkOverlay'
 import { inkNodesOf, type InkPenSettings, type InkStroke, type InkTool } from './ink'
 import type { SlideThemePreset } from './themes'
@@ -51,6 +53,7 @@ import { PrintDialog } from './components/PrintDialog'
 import { FindReplaceDialog } from './components/FindReplaceDialog'
 import { formatClock, type CustomShow } from './slideshow-utils'
 import { ContextMenu } from './components/ContextMenu'
+import { ShapeGalleryPopover } from './components/ShapeGalleryPopover'
 import { PasteOptionsFloater } from './components/PasteOptionsFloater'
 import { FormatBackgroundPane, type BgPaneOp } from './components/FormatBackgroundPane'
 import { FormatPane } from './components/FormatPane'
@@ -368,6 +371,12 @@ export function App() {
     width: 10,
   })
   const [ctxMenu, setCtxMenu] = useState<CtxMenuState>(null)
+  /** "Change Shape" gallery popover: anchor point + the shape it retargets */
+  const [shapeGalleryAt, setShapeGalleryAt] = useState<{
+    targetId: string
+    x: number
+    y: number
+  } | null>(null)
   // ── Sections: grouping data + collapsed state + renaming state ────────────────
   const [sections, setSections] = useState<SectionInfo[]>([])
   const [collapsedSecs, setCollapsedSecs] = useState<Set<string>>(new Set())
@@ -1093,7 +1102,7 @@ export function App() {
     [],
   )
   const onStroke = useCallback(
-    (sourceId: string, stroke: { color: string; widthPt: number; dash?: string } | null) =>
+    (sourceId: string, stroke: EditStrokeOp['stroke']) =>
       styleActions.onStroke(ctxRef.current, sourceId, stroke),
     [],
   )
@@ -1383,6 +1392,14 @@ export function App() {
   const openBgFormat = useCallback(() => {
     setShowBgFormat(true)
     setShowFormat(false)
+    setShowAnimPane(false)
+    setShowComments(false)
+  }, [])
+
+  /** Open the format pane (Home ribbon toggle / element context menu); never auto-opens on selection */
+  const openFormat = useCallback(() => {
+    setShowFormat(true)
+    setShowBgFormat(false)
     setShowAnimPane(false)
     setShowComments(false)
   }, [])
@@ -2008,6 +2025,31 @@ export function App() {
     [current],
   )
 
+  // Yellow adjust-handle drag: throttled preview commits keep the geometry live,
+  // the release commit is never dropped (edit-transform gesture undo semantics)
+  const adjustLastSent = useRef(0)
+  const onAdjust = useCallback(
+    (sourceId: string, adjust: Record<string, number>, preview: boolean) => {
+      const now = performance.now()
+      if (preview && now - adjustLastSent.current < 80) return
+      adjustLastSent.current = now
+      void window.slidesApi
+        .setShapeAdjust({
+          slideIndex: current,
+          sourceId,
+          adjust,
+          ...(preview ? { preview: true } : {}),
+        })
+        .then((r) => {
+          if (r) {
+            setSlides((s) => s.map((sl, i) => (i === current ? r : sl)))
+            setDirty(true)
+          }
+        })
+    },
+    [current],
+  )
+
   // Connector endpoint drag: new endpoints + attach/detach for the dragged end
   const onEditConnectorEndpoints = useCallback(
     async (
@@ -2388,6 +2430,8 @@ export function App() {
     setBrushFormat,
     brushMode,
     setBrushMode,
+    inkTool,
+    setInkTool,
     animations,
     setAnimations,
     selAnim,
@@ -2436,6 +2480,8 @@ export function App() {
     redo,
     onTransform,
     openBgFormat,
+    openFormat,
+    openChangeShape: (targetId, x, y) => setShapeGalleryAt({ targetId, x, y }),
   }
 
   // Context menu items (context-menu-items.ts); the deps list covers all state the builder reads
@@ -2670,6 +2716,20 @@ export function App() {
             }
           }
         }}
+        onChangeShape={
+          selectedNode?.type === 'shape' && !selectedNode.line
+            ? (prst) => {
+                void window.slidesApi
+                  .changeShape({
+                    slideIndex: current,
+                    sourceId: selectedNode.sourceId,
+                    prst,
+                    groupId: groupIdOf(selectedNode.sourceId),
+                  })
+                  .then((r) => r && applySlide(current, r))
+              }
+            : undefined
+        }
         onShapeStyle={(s) => {
           // fill + outline together, applied to every selected shape (sequentially: both
           // edits rewrite the same slide XML in the main process); a selected group
@@ -2731,6 +2791,41 @@ export function App() {
             }
           })()
         }}
+        onShapeFillImage={(mode, source) => {
+          void (async () => {
+            const targets: Array<{ sourceId: string; groupId?: string }> = []
+            for (const id of selectedIds) {
+              const n = findNodeCtx(id)?.node
+              if (n?.type === 'shape') {
+                targets.push({ sourceId: id })
+              } else if (n?.type === 'group') {
+                for (const c of (n as GroupRenderNode).children) {
+                  if (c.type === 'shape')
+                    targets.push({ sourceId: c.sourceId, groupId: n.sourceId })
+                }
+              }
+            }
+            if (targets.length === 0) return
+            const r = await window.slidesApi.editImageFill({
+              slideIndex: current,
+              targets,
+              mode,
+              ...(source ? { source } : {}),
+            })
+            if (r) applySlide(current, r)
+          })()
+        }}
+        contextShapeFill={
+          selectedNode?.type === 'shape'
+            ? (selectedNode as ShapeRenderNode).fill.kind === 'solid'
+              ? toPickerHex(
+                  (selectedNode as ShapeRenderNode & { fill: { color: string } }).fill.color,
+                )
+              : (selectedNode as ShapeRenderNode).fill.kind === 'none'
+                ? 'none'
+                : null
+            : null
+        }
         onPictureCrop={startCrop}
         cropActive={cropTarget != null}
         onPictureCutout={startCutout}
@@ -3098,7 +3193,7 @@ export function App() {
                             onClick={toggleAi}
                           >
                             <GensparkMark size={14} />
-                            <span>Genspark AI</span>
+                            <span>VuaOffice AI</span>
                           </button>
                           {/* Same one-click presets as the Home tab; hidden instead of
                         disabled while the deck has no real content */}
@@ -3214,6 +3309,7 @@ export function App() {
                                 drawKindRef.current = null
                                 setDrawKind(null)
                               }}
+                              onAdjust={onAdjust}
                               editingText={
                                 editing
                                   ? { sourceId: editing.sourceId }
@@ -3474,7 +3570,11 @@ export function App() {
                     onFill={(id, fill) => void onFill(id, fill)}
                     onImageFill={(id) =>
                       void window.slidesApi
-                        .editImageFill({ slideIndex: current, sourceId: id })
+                        .editImageFill({
+                          slideIndex: current,
+                          targets: [{ sourceId: id }],
+                          mode: 'stretch',
+                        })
                         .then((r) => r && applySlide(current, r))
                     }
                     onTextAnchor={(id, anchor) =>
@@ -3692,6 +3792,25 @@ export function App() {
           onClose={() => setCtxMenu(null)}
         />
       )}
+
+      {shapeGalleryAt && (
+        <ShapeGalleryPopover
+          x={shapeGalleryAt.x}
+          y={shapeGalleryAt.y}
+          onPick={(prst) => {
+            const { targetId } = shapeGalleryAt
+            void window.slidesApi
+              .changeShape({
+                slideIndex: current,
+                sourceId: targetId,
+                prst,
+                groupId: groupIdOf(targetId),
+              })
+              .then((r) => r && applySlide(current, r))
+          }}
+          onClose={() => setShapeGalleryAt(null)}
+        />
+      )}
     </div>
   )
 }
@@ -3732,6 +3851,7 @@ function ZoomControls({
         min={25}
         max={300}
         step={5}
+        style={{ '--zoom-pct': `${((live - 25) / 275) * 100}%` } as React.CSSProperties}
         value={live}
         onChange={(e) => {
           const v = Number(e.target.value)

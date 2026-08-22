@@ -3,8 +3,8 @@ import { useI18n } from './locale'
 
 const LOCAL_STRINGS: Record<string, Record<string, string>> = {
   zh: {
-    aboutTitle: '关于 GenOffice',
-    appName: 'GenOffice Suite',
+    aboutTitle: '关于 VuaOffice',
+    appName: 'VuaOffice Suite',
     copyright: '© 2026 360 CORP & Mainfunc, Inc. 保留所有权利。',
     licenseTitle: '开源许可与致谢 (Apache 2.0)',
     licenseNotice: '本软件基于 GenOffice 开源项目构建，并遵循 Apache License 2.0 协议。',
@@ -12,8 +12,8 @@ const LOCAL_STRINGS: Record<string, Record<string, string>> = {
     close: '关闭',
   },
   'zh-TW': {
-    aboutTitle: '關於 GenOffice',
-    appName: 'GenOffice Suite',
+    aboutTitle: '關於 VuaOffice',
+    appName: 'VuaOffice Suite',
     copyright: '© 2026 360 CORP & Mainfunc, Inc. 保留所有權利。',
     licenseTitle: '開源許可與致謝 (Apache 2.0)',
     licenseNotice: '本軟體基於 GenOffice 開源項目構建，並遵循 Apache License 2.0 協議。',
@@ -21,8 +21,8 @@ const LOCAL_STRINGS: Record<string, Record<string, string>> = {
     close: '關閉',
   },
   vi: {
-    aboutTitle: 'Về GenOffice',
-    appName: 'Bộ ứng dụng văn phòng GenOffice',
+    aboutTitle: 'Về VuaOffice',
+    appName: 'Bộ ứng dụng văn phòng VuaOffice',
     copyright: '© 2026 360 CORP & Mainfunc, Inc. Bảo lưu mọi quyền.',
     licenseTitle: 'Giấy phép mã nguồn mở & Ghi nhận (Apache 2.0)',
     licenseNotice: 'VuaOffice được phát triển dựa trên dự án mã nguồn mở GenOffice theo Giấy phép Apache License 2.0.',
@@ -30,8 +30,8 @@ const LOCAL_STRINGS: Record<string, Record<string, string>> = {
     close: 'Đóng',
   },
   en: {
-    aboutTitle: 'About GenOffice',
-    appName: 'GenOffice Suite',
+    aboutTitle: 'About VuaOffice',
+    appName: 'VuaOffice Suite',
     copyright: '© 2026 360 CORP & Mainfunc, Inc. All rights reserved.',
     licenseTitle: 'Open Source License & Attribution (Apache 2.0)',
     licenseNotice: 'VuaOffice is built on the open-source GenOffice project under the Apache License, Version 2.0.',

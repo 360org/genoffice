@@ -1,4 +1,4 @@
-import { readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import {
   PDFArray,
   PDFBool,
@@ -28,6 +28,7 @@ import type {
   TextEditFailure,
   TextInsertFailure,
 } from '../shared/ipc'
+import { writePdfAtomically } from './atomic-write'
 
 const num = (v: number) => Math.round(v * 100) / 100
 const STATIC_FORM_FILLS_KEY = PDFName.of('GenOfficeStaticFormFills')
@@ -160,7 +161,7 @@ function addMarkup(pdfDoc: PDFDocument, page: PDFPage, m: MarkupInput): void {
     QuadPoints: m.quads.flat(),
     C: m.color,
     F: 4, // print
-    T: 'GenOffice',
+    T: 'VuaOffice',
     P: page.ref,
     AP: { N: apRef },
   })
@@ -232,7 +233,7 @@ async function addImageStamp(
     P: page.ref,
     AP: { N: pdfDoc.context.register(ap) },
   })
-  annot.set(PDFName.of('T'), PDFHexString.fromText('GenOffice'))
+  annot.set(PDFName.of('T'), PDFHexString.fromText('VuaOffice'))
   setVisualSignatureMetadata(annot, d.formFieldName)
   appendAnnot(pdfDoc, page, pdfDoc.context.register(annot))
 }
@@ -316,7 +317,7 @@ function addDrawing(
       P: page.ref,
     })
     annot.set(PDFName.of('Contents'), PDFHexString.fromText(d.contents))
-    annot.set(PDFName.of('T'), PDFHexString.fromText(d.author || 'GenOffice'))
+    annot.set(PDFName.of('T'), PDFHexString.fromText(d.author || 'VuaOffice'))
     const when = pdfDateString(d.createdMs ?? Date.now())
     annot.set(PDFName.of('CreationDate'), PDFString.of(when))
     annot.set(PDFName.of('M'), PDFString.of(when))
@@ -403,7 +404,7 @@ function addDrawing(
   if (d.kind === 'line' || d.kind === 'arrow') {
     annot.set(PDFName.of('L'), pdfDoc.context.obj([...d.from, ...d.to]))
   }
-  annot.set(PDFName.of('T'), PDFHexString.fromText('GenOffice'))
+  annot.set(PDFName.of('T'), PDFHexString.fromText('VuaOffice'))
   if (d.kind === 'ink') setVisualSignatureMetadata(annot, d.formFieldName)
   appendAnnot(pdfDoc, page, pdfDoc.context.register(annot))
 }
@@ -845,14 +846,7 @@ export async function savePdfToPath(
     request,
   )
   await verifyContentEdits(bytes, request, skips)
-  const tmp = `${targetPath}.gensave-${process.pid}.tmp`
-  try {
-    await writeFile(tmp, bytes)
-    await rename(tmp, targetPath)
-  } catch (err) {
-    await rm(tmp, { force: true })
-    throw err
-  }
+  await writePdfAtomically(targetPath, bytes)
   return skips
 }
 
@@ -886,12 +880,18 @@ export async function applySaveRequest(
     const applied = await applyTextEdits(bytes, request.textEdits)
     bytes = applied.bytes
     skippedTextEdits = applied.skipped
+    for (const s of skippedTextEdits) {
+      console.warn(`[pdf] text edit skipped on page ${s.pageIndex + 1}: ${s.reason}`)
+    }
   }
   if (request.textInserts && request.textInserts.length > 0) {
     const { applyTextInserts } = await import('./text-edit')
     const applied = await applyTextInserts(bytes, request.textInserts)
     bytes = applied.bytes
     skippedTextInserts = applied.skipped
+    for (const s of skippedTextInserts) {
+      console.warn(`[pdf] text insert skipped on page ${s.pageIndex + 1}: ${s.reason}`)
+    }
   }
   if (request.imageEdits && request.imageEdits.length > 0) {
     const { applyImageEdits } = await import('./image-edit')

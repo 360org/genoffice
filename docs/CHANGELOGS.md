@@ -3,7 +3,16 @@
 Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaOffice sẽ được ghi lại trong tài liệu này.
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/) và dự án này tuân thủ [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.8] - 2026-08-21
+## [1.0.8] - 2026-08-22
+
+### Upstream Sync & Core Architecture
+- **Đồng bộ toàn diện Upstream 2026-08-22 (`genspark-ai/genoffice`)**:
+  - Tích hợp 21 tệp tin thay đổi thuộc Shell, Docs, Sheets, Slides, PDF, Markdown, UI, Agent Core và AI Provider.
+  - Khắc phục xung đột merge, bảo toàn cơ chế Whitelabel độc quyền VuaOffice và vượt qua bộ 3 cổng kiểm soát `brand:gate`.
+- **Chuẩn hóa Kiến trúc VuaOffice Mail AI (`AgentLoop` & Tool Calling)**:
+  - Tái cấu trúc phân hệ Mail AI đồng bộ hoàn toàn với Docs/Sheets/Slides theo kiến trúc `@genoffice/agent-core`.
+  - Triển khai `mail-skill.ts` hỗ trợ Tool Calling chuyên biệt: `get_current_email`, `draft_reply`, `create_todo_task`, `schedule_calendar_event`.
+  - Tích hợp bộ UI Component chuẩn VuaOffice Suite (`@genoffice/ui`: `AiComposer`, `Markdown`, `AiTypingIndicator`), hỗ trợ Markdown rendering, auto-scroll, stop streaming và phím tắt Enter/Shift+Enter.
 
 ### Fixed & Core
 - **Tách biệt Hồ sơ (Profile) và Trí tuệ AI (Brain) trong phân hệ Mail**:

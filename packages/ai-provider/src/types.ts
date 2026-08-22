@@ -6,6 +6,13 @@ export type AiProviderId =
   | 'gemini'
   | 'deepseek'
   | 'openai'
+  | 'kimi'
+  | 'glm'
+  | 'qwen'
+  | 'doubao'
+  | 'minimax'
+  | 'xai'
+  | 'mistral'
   | 'openrouter'
   | 'custom'
   | 'omirouter'
@@ -21,7 +28,7 @@ export interface GenSparkAccountStatus {
 export interface AiProviderConfig {
   apiKey: string
   model: string
-  /** only used by the custom (OpenAI-compatible) provider */
+  /** required for custom; for other direct providers it overrides the default endpoint (regional mirrors) */
   baseUrl?: string | undefined
 }
 
@@ -38,6 +45,14 @@ export interface AiSettings {
   provider: AiProviderId
   providers: Record<AiProviderId, AiProviderConfig>
   developerMode?: boolean | undefined
+  /**
+   * Genspark cloud tools (web/image search via gsk, image generation, media
+   * analysis). Default true; false makes tools skip the gsk backend entirely
+   * (search falls back to free sources, gsk-only tools are unavailable).
+   * Only meaningful while signed in — signed out, the gsk backend is
+   * unavailable regardless.
+   */
+  gskToolsEnabled?: boolean
 }
 
 /** pre-provider settings shape (single OpenAI-compatible endpoint); migrated into "custom" */

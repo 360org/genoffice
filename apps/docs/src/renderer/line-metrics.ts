@@ -136,6 +136,11 @@ export function lineHeightFactor(fontFamily: string): number {
   if (f.includes('pmingliu') || f.includes('mingliu') || f.includes('細明體')) {
     return 1.3029
   }
+  // NanumGothic: mac Word lays out with the OS downloadable asset — factor =
+  // its hhea total (1.15em) × Word's 1.3 EA multiplier (the same rule
+  // reproduces Batang 1.3029, Malgun 1.7371, Meiryo 1.9429, Yu 1.44);
+  // ink-band measured 20.24pt at 10pt/1.35x on regression sample run7/19
+  if (/nanum ?gothic|나눔 ?고딕/.test(f)) return 1.495
   // Korean faces (Word probe 2026-08-13: Malgun 1.7371, Batang class 1.3029)
   if (KO_FONT_RE.test(f)) return /malgun|맑은/.test(f) ? 1.7371 : 1.3029
   // Japanese faces: MS (P)Mincho/Gothic substitute into the Hiragino class
@@ -367,6 +372,8 @@ export const BUNDLED_FONTS = new Set([
   'Noto Serif CJK SC',
   'GenOffice Sans KR',
   'GenOffice Serif KR',
+  'VuaOffice Gothic KR',
+  'VuaOffice Tamil',
   'GenOffice Fullwidth TC',
   'GenOffice Songti SC',
   'Carlito GO',
@@ -572,12 +579,15 @@ export function cssFontFamily(font: string): string {
       nfkc,
     )
   ) {
-    // vendor faces (Nanum...) missing locally follow Word's Batang-ward substitution;
-    // Windows core faces (Malgun/Gulim/Dotum) map cleanly to the sans chain.
-    // Installed Nanum resolves at the literal head (family name is 'NanumGothic',
-    // unspaced, matching the declared name); when missing, mac Word may still use
-    // the OS downloadable asset Chromium cannot see (M3 probe sample 19) — parity
-    // there needs a bundled Nanum-normalized face, not chain order.
+    // Nanum gothic-class declares: mac Word lays out with the OS downloadable
+    // Nanum asset Chromium cannot see (M3 probe sample 19), so the bundled
+    // real-metric subset leads the sans chain instead of the Batang-ward
+    // substitution. Installed Nanum still resolves at the literal head.
+    if (/nanum ?gothic|나눔 ?고딕/i.test(nfkc)) {
+      return `${chain(font, 'VuaOffice Gothic KR', ...KO_SANS)},sans-serif`
+    }
+    // other vendor faces missing locally follow Word's Batang-ward substitution;
+    // Windows core faces (Malgun/Gulim/Dotum) map cleanly to the sans chain
     const knownCore = /malgun|맑은|gulim|굴림|dotum|돋움|apple (sd )?gothic/i.test(nfkc)
     const serif =
       /batang|바탕|myeongjo|myungjo|명조|gungsuh|궁서/i.test(nfkc) ||
@@ -598,11 +608,12 @@ export function cssFontFamily(font: string): string {
   if (/nyala|ebrima|abyssinica|ethiopic/i.test(nfkc)) {
     return `${chain(font, 'GenOffice Ethiopic')},sans-serif`
   }
-  // Tamil: macOS system faces stand in for Latha/Noto Sans Tamil; on Windows
-  // the declared name resolves natively.
-  // TODO: size-adjust alias to match Latha advances once sample 16 is re-shot
+  // Tamil: Word substitutes missing Tamil families with Latha; the bundled
+  // Latha-metric face (fonts.css) keeps line breaks aligned. On Windows the
+  // declared name resolves natively ahead of it; macOS system faces stay as
+  // coverage tails (the subset ships no Latin letters).
   if (/tamil|latha|vijaya|inaimathi/i.test(nfkc)) {
-    return `${chain(font, 'InaiMathi', 'Tamil MN', 'Tamil Sangam MN')},sans-serif`
+    return `${chain(font, 'VuaOffice Tamil', 'InaiMathi', 'Tamil MN', 'Tamil Sangam MN')},sans-serif`
   }
   // unknown font family: guess serif-ness by name (Song/Ming/Serif → serif fallback)
   const serifLike = /宋|明|serif|song|ming/i.test(font)
@@ -1305,6 +1316,15 @@ interface HfRunLike {
   image?: { heightPx?: number }
 }
 
+/** header push-down geometry of a section (twips → px) for estimateHfHeight's geom param */
+export function hfHeaderGeom(set: { marginTop: number; headerDist?: number }): {
+  marginTopPx: number
+  headerDistPx: number
+} {
+  const toPx = (twips: number) => (twips / 1440) * 96
+  return { marginTopPx: toPx(set.marginTop), headerDistPx: toPx(set.headerDist ?? 720) }
+}
+
 export function estimateHfHeight(
   part:
     | {
@@ -1324,12 +1344,38 @@ export function estimateHfHeight(
     | undefined,
   contentWidthPx: number,
   /** images in the part (logos): non-floating ones count as one line of height (same as the display layer) */
-  images?: Array<{ heightPx?: number; floating?: boolean }> | null,
+  images?: Array<{
+    heightPx?: number
+    floating?: boolean
+    behind?: boolean
+    wrap?: 'none' | 'square' | 'tight' | 'through' | 'topBottom'
+    posYPx?: number
+    posVRel?: 'page' | 'margin' | 'paragraph'
+  }> | null,
+  /** header geometry (px): pass for headers so wrapped anchored images push the body below their bottom edge (Word); watermarks (wrapNone/behindDoc) still reserve nothing */
+  geom?: { marginTopPx: number; headerDistPx: number },
 ): number {
   const inlineImages = (images ?? []).filter((im) => !im.floating && im.heightPx)
   const imagesHeight =
     inlineImages.length > 0 ? Math.max(...inlineImages.map((im) => im.heightPx!)) + 2 : 0
-  if (!part) return imagesHeight
+  let anchoredPx = 0
+  if (geom) {
+    for (const im of images ?? []) {
+      if (!im.floating || im.behind || !im.heightPx) continue
+      if (!im.wrap || im.wrap === 'none') continue
+      if (im.posYPx == null || !im.posVRel) continue
+      // bottom edge in page coordinates; the anchor paragraph sits at the header strip top
+      const bottom =
+        im.posVRel === 'page'
+          ? im.posYPx + im.heightPx
+          : im.posVRel === 'margin'
+            ? geom.marginTopPx + im.posYPx + im.heightPx
+            : geom.headerDistPx + im.posYPx + im.heightPx
+      // effectiveTopPx adds headerDist back: dist + this = the image bottom
+      anchoredPx = Math.max(anchoredPx, bottom - geom.headerDistPx)
+    }
+  }
+  if (!part) return Math.max(imagesHeight, anchoredPx)
   type HfPara = NonNullable<typeof part.paras>[number]
   const paras: HfPara[] = part.paras?.length
     ? part.paras
@@ -1374,7 +1420,7 @@ export function estimateHfHeight(
     }
     height += lineH(p.runs, p)
   }
-  return height + imagesHeight
+  return Math.max(height + imagesHeight, anchoredPx)
 }
 
 /**

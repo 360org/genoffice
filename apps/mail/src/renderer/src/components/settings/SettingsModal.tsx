@@ -49,7 +49,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [isSaving, setIsSaving] = useState(false)
   const [authStatus, setAuthStatus] = useState<string | null>(null)
   const [signatureText, setSignatureText] = useState(
-    '--\nTrân trọng,\nChâu Lê\n360 CORP | GenOffice Suite\nEmail: chau.le@360.org.vn | Website: https://360.org.vn'
+    '--\nTrân trọng,\nChâu Lê\n360 CORP | VuaOffice Suite\nEmail: chau.le@360.org.vn | Website: https://360.org.vn'
   )
 
   if (!isOpen) return null
@@ -296,7 +296,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {activeTab === 'general' && 'Cấu hình hệ thống chung'}
               {activeTab === 'accounts' && 'Quản lý Tài khoản Mail & Xác thực Outlook'}
               {activeTab === 'signatures' && 'Quản lý Chữ ký điện tử'}
-              {activeTab === 'shortcuts' && 'Danh mục Phím tắt GenOffice Mail'}
+              {activeTab === 'shortcuts' && 'Danh mục Phím tắt VuaOffice Mail'}
             </h3>
             <button
               onClick={onClose}

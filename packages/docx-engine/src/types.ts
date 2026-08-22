@@ -35,8 +35,12 @@ export interface Run {
   /** Latin-slot font (w:rFonts ascii/hAnsi) when the run declares one; may equal `font`.
    * Kept separate so editing one script's font never flattens the other slot. */
   fontAscii?: string
-  /** Complex-script font (w:rFonts cs/cstheme). Display only; saving is kept faithful by rawRPr */
+  /** complex-script-slot font (w:rFonts w:cs, literal attribute only — theme refs stay in rawRPr) */
+  fontCs?: string
+  /** Complex-script font (w:rFonts cs/cstheme, theme-resolved). Display only; saving is kept faithful by rawRPr */
   csFont?: string
+  /** right-to-left run (w:rtl): text stored in logical order, rendered RTL */
+  rtl?: boolean
   /** Character spacing (w:spacing, twips, may be negative). Display only; saving is kept faithful by rawRPr */
   charSpacingTwips?: number
   /** w:caps ('all') / w:smallCaps ('small') display transform. Display only; saving is kept faithful by rawRPr */
@@ -138,6 +142,13 @@ export interface Run {
     wrap?: ImageWrap
     offsetXEmu?: number
     offsetYEmu?: number
+    /** wp:anchor allowOverlap="0" (display-only collision hint) */
+    noOverlap?: boolean
+    /** picture outline (pic:spPr a:ln solid fill, display-only) */
+    border?: { color: string; widthPt: number }
+    /** wp:positionV relativeFrom="line" align="center": the floating picture
+     *  centers on its anchor line instead of hanging below it (display-only) */
+    lineCenterV?: boolean
   }
 }
 
@@ -214,6 +225,31 @@ export interface ParaBorderLine {
 }
 
 /** Paragraph-level formatting that survives regeneration (subset of w:pPr). */
+/**
+ * Absolutely positioned paragraph frame (w:framePr). All lengths in twips;
+ * x/y measure from the anchor's top-left (page anchors by default). Height is
+ * auto unless hTwips is set — auto frames grow with substituted-font wrap
+ * instead of clipping.
+ */
+export interface ParaFrame {
+  /** frame width (w:w); text wraps inside it */
+  wTwips: number
+  /** frame height (w:h); omit for auto height */
+  hTwips?: number
+  /** height rule, only written with hTwips (default 'atLeast') */
+  hRule?: 'atLeast' | 'exact'
+  /** x offset from the hAnchor's left edge (w:x) */
+  xTwips: number
+  /** y offset from the vAnchor's top edge (w:y) */
+  yTwips: number
+  /** horizontal anchor (w:hAnchor, default 'page') */
+  hAnchor?: 'page' | 'margin' | 'text'
+  /** vertical anchor (w:vAnchor, default 'page') */
+  vAnchor?: 'page' | 'margin' | 'text'
+  /** body-text wrapping around the frame (w:wrap, default 'none') */
+  wrap?: 'none' | 'around' | 'through' | 'notBeside' | 'auto'
+}
+
 export interface ParaFormat {
   /** w:jc */
   align?: ParaAlign
@@ -257,12 +293,24 @@ export interface ParaFormat {
   shadingFill?: string
   /** paragraph borders, subset of "tblr" e.g. "b" or "tblr" (w:pBdr, single lines) */
   borders?: string
+  /**
+   * style details for the `borders` sides: hex color (no '#', default auto),
+   * thickness in eighth-points (default 4 = 0.5pt), gap to the text in points
+   * (w:space, Word clamps to 0–31, default 1)
+   */
+  borderStyle?: { color?: string; szEighths?: number; spacePt?: number }
   /** per-side color/width of `borders` (w:color / w:sz); side absent = auto color, default width */
   borderLines?: Partial<Record<'t' | 'b' | 'l' | 'r', ParaBorderLine>>
   /** custom tab stops from w:tabs (non-empty overrides default 0.5in grid) */
   tabStops?: TabStop[]
   /** first-line drop cap (w:framePr w:dropCap="drop|margin") */
   dropCap?: { type: 'drop' | 'margin'; lines: number }
+  /**
+   * positioned paragraph frame (w:framePr, P19 canvas pages): the paragraph
+   * leaves the text flow and renders at an absolute position. Takes
+   * precedence over dropCap (both target the single w:framePr element).
+   */
+  frame?: ParaFrame
   /**
    * RTL paragraph (w:bidi). align stores the visual value: per Word's quirk,
    * w:jc left/right swap meaning in bidi paragraphs; parsing converts to the
@@ -275,6 +323,12 @@ export interface ParaFormat {
    * the paragraph has no runs, so empty lines keep their Word height.
    */
   emptyRunSizeHalfPoints?: number
+  /**
+   * w:rFonts (ascii/hAnsi/eastAsia) from the same sources: the empty line lays
+   * out with this face's metrics. Read-only for fidelity — generate leaves the
+   * paragraph-mark rPr bytes untouched unless the size changed.
+   */
+  emptyRunFontFamily?: string
 }
 
 /**
@@ -305,6 +359,17 @@ export interface SectionSettings {
   columns: number
   /** column gap (w:cols w:space, twips; OOXML default 720) */
   colSpace?: number
+  /**
+   * explicit unequal column widths (w:cols w:equalWidth="0" > w:col w:w),
+   * twips, layout order; length must equal `columns`. Absent = equal columns.
+   * applySectionSettings only rebuilds w:cols children when this is provided.
+   */
+  colWidths?: number[]
+  /**
+   * section base direction (sectPr w:bidi): Word fills columns right-to-left.
+   * undefined = leave the document's tag untouched (round-trip safe).
+   */
+  bidi?: boolean
   /** Header distance from the page top (w:pgMar w:header, twips; default 720). A tall header pushes the body down */
   headerDist?: number
   /** Footer distance from the page bottom (w:pgMar w:footer, twips; default 720). A tall footer pushes the body up */
@@ -321,7 +386,7 @@ export interface SectionSettings {
 export interface SectionInfo {
   settings: SectionSettings
   /** Section-break type w:type (how this section starts; meaningless for the first section), default nextPage */
-  startType: 'nextPage' | 'continuous' | 'evenPage' | 'oddPage'
+  startType: 'nextPage' | 'continuous' | 'evenPage' | 'oddPage' | 'nextColumn'
   /** docxIndex range of this section's blocks (inclusive; the section-break paragraph / trailing hidden sectPr block belong to this section) */
   firstBlockIndex: number
   lastBlockIndex: number
@@ -435,8 +500,10 @@ export interface HfImage {
   posYPx?: number
   /** wp:positionH relativeFrom: offsets measure from the page edge or the margin box */
   posHRel?: 'page' | 'margin'
-  /** wp:positionV relativeFrom */
-  posVRel?: 'page' | 'margin'
+  /** wp:positionV relativeFrom ('paragraph' also covers 'line'; placement treats it like 'margin') */
+  posVRel?: 'page' | 'margin' | 'paragraph'
+  /** wp:anchor wrap mode; square/tight/through/topBottom header images push the body below them */
+  wrap?: 'none' | 'square' | 'tight' | 'through' | 'topBottom'
   /** v:imagedata gain/blacklevel present (Word watermark washout preset) */
   washout?: boolean
   /** w:jc of the containing paragraph (inline images follow paragraph alignment) */
@@ -463,6 +530,10 @@ export interface NoteRun {
   /** hex without '#' */
   color?: string
   sizeHalfPoints?: number
+  /** Latin font (w:ascii / w:hAnsi) — save-side only, parse does not recover it */
+  fontAscii?: string
+  /** East-Asian font (w:eastAsia) — save-side only, parse does not recover it */
+  font?: string
   /** w:caps ('all') / w:smallCaps ('small') display transform */
   caps?: 'all' | 'small'
 }
@@ -542,6 +613,10 @@ export interface DiagramShape {
   prst?: string
   /** solid fill (hex without '#') */
   fillHex?: string
+  /** a:ln stroke color (hex without '#'); connectors (prst=line, zero cx/cy) render as rules */
+  lnHex?: string
+  /** a:ln stroke width in px */
+  lnWPx?: number
   /** picture fill (a:blipFill) */
   imageDataUrl?: string
   /** a:stretch/a:fillRect fractions of the picture fill (negative = bleed) */
@@ -673,6 +748,19 @@ export interface TableModel {
   align?: 'left' | 'center' | 'right'
   /** table left indent (w:tblInd, twips; effective only with left alignment) */
   indentTwips?: number
+  /**
+   * absolutely positioned floating table (w:tblpPr + w:tblOverlap, P19 canvas
+   * pages): x/y in twips from the anchors' top-left (page anchors by
+   * default). Only applies when the tblPr is built fresh (generated tables).
+   */
+  floatPos?: {
+    xTwips: number
+    yTwips: number
+    horzAnchor?: 'page' | 'margin' | 'text'
+    vertAnchor?: 'page' | 'margin' | 'text'
+  }
+  /** floating table (w:tblpPr): text wraps around the side opposite the anchor */
+  floatSide?: 'left' | 'right'
   /** per-row height (twips, w:trHeight; null = not set), aligned with rows */
   rowHeightsTwips?: Array<number | null>
   /** per-row height rule (w:trHeight w:hRule; absent/legacy models = atLeast), aligned with rows */
@@ -754,6 +842,30 @@ export interface NewImage {
   align?: 'left' | 'center' | 'right'
   /** floating wrap mode; absent = inline */
   wrap?: ImageWrap
+  /**
+   * numeric anchor position in EMU (only with `wrap`): positionH relative to
+   * the column, positionV relative to the anchor paragraph. Absent = the
+   * wrap mode's default <wp:align> placement. `relativeTo: 'page'` pins both
+   * axes to the page box instead (full-page backgrounds).
+   */
+  posOffsetEmu?: { x: number; y: number; relativeTo?: 'page' }
+  /**
+   * stacking rank among anchored drawings (only with `wrap`): written as
+   * relativeHeight base + zOrder, so overlapping behindDoc anchors keep a
+   * deterministic paint order (higher = in front). Absent = base value.
+   */
+  zOrder?: number
+  /**
+   * explicit w:spacing on the picture's holder paragraph. Layout-rebuilding
+   * writers (pdf2docx) set this so the paragraph does not inherit the
+   * template docDefaults (space-after + multiplied line height).
+   */
+  paraSpacing?: {
+    beforeTwips?: number
+    afterTwips?: number
+    lineTwips?: number
+    lineRule?: 'exact' | 'atLeast'
+  }
   /** rotation in degrees clockwise (a:xfrm rot) */
   rotDeg?: number
   /** mirror flips (a:xfrm flipH/flipV) */
@@ -819,6 +931,22 @@ export interface Block {
   /** text wrapping of a floating image (wp:anchor); absent = inline (in line with text) */
   imageWrap?: ImageWrap
   /**
+   * stacking rank of a floating image among overlapping anchors, decoded from
+   * wp:anchor relativeHeight minus the 251658240 base (0 when at/below base).
+   * Higher paints in front. Round-trips so opening an untouched doc and saving
+   * preserves the original z-order, and the editor's bring-forward/send-back
+   * commands write it back. Absent = inline / base level.
+   */
+  imageZOrder?: number
+  /**
+   * imageZOrder was compressed from a wild producer relativeHeight
+   * (LibreOffice writes 1, 2, …). Word paints by the raw value, so once any
+   * wrap/z-order edit rewrites one anchor to base+rank encoding, every
+   * normalized sibling must be rewritten too or the saved paint order
+   * inverts (save-time harmonization; untouched documents keep their bytes).
+   */
+  imageZOrderNormalized?: boolean
+  /**
    * Horizontal/vertical posOffset (in EMU) of a floating image (wp:anchor
    * with wp:positionH/V using posOffset, not align). Used for free-position
    * drag. Absent when the image uses named alignment (left/center/right) or
@@ -834,6 +962,8 @@ export interface Block {
   /** picture mirror flips (pic a:xfrm flipH/flipV) */
   imageFlipH?: boolean
   imageFlipV?: boolean
+  /** picture outline (pic:spPr a:ln solid fill; display-only, like crop) */
+  imageBorder?: { color: string; widthPt: number }
   /** editable structure (type === 'table'); untouched original XML still saves byte-identically */
   table?: TableModel
   /** display-only rendering for field passthrough paragraphs (TOC lines etc.) */
@@ -898,6 +1028,8 @@ export interface Block {
   }
   /** Top-level block insertion/deletion wrapper (w:ins/w:del around w:p or w:tbl). */
   blockRevision?: { kind: 'ins' | 'del' } & RevisionInfo
+  /** Tracked deletion of the paragraph mark (w:pPr/w:rPr/w:del): Word joins the paragraph into the next one. */
+  paraMarkDel?: { author: string; date?: string; id?: string }
 }
 
 /** one paragraph inside an anchored textbox */
@@ -963,6 +1095,12 @@ export interface TextboxDisplay {
    *  paragraph with other drawings — leave the flow like Word (absolute
    *  position, no flow height) instead of stacking as blocks */
   floating?: boolean
+  /** wrapTopAndBottom (paragraph/line-relative V): the anchor paragraph keeps
+   *  flow height down to this box bottom (px) so following text resumes below */
+  bandBottomPx?: number
+  /** the band's top edge (px, offset component of bandBottomPx); the renderer
+   *  adds the live box height so in-editor autogrow moves the band with it */
+  bandTopPx?: number
   /** rotation in degrees clockwise (a:xfrm rot / 60000) */
   rotDeg?: number
   /** border width in CSS px (a:ln w) */
@@ -1070,6 +1208,8 @@ export interface StyleDisplay {
   contextualSpacing?: boolean
   /** paragraph alignment from the style (w:pPr w:jc) */
   align?: 'left' | 'center' | 'right' | 'justify'
+  /** paragraph shading from the style (w:pPr w:shd w:fill, hex without '#') */
+  shadingFill?: string
   /** CJK-Latin/digit auto spacing from the style pPr (w:autoSpaceDE/DN) */
   autoSpace?: boolean
   /** style-level w:vanish (hidden text, e.g. z-TopofForm/z-BottomofForm HTML form markers) */
@@ -1081,13 +1221,13 @@ export interface TableStyleDisplay {
   /** whole-table cell shading (hex without '#') */
   fill?: string
   /** whole-table run formatting (style-level w:rPr) */
-  wholeTable?: { color?: string; bold?: boolean }
+  wholeTable?: { color?: string; bold?: boolean; italic?: boolean; sizeHalfPoints?: number }
   /** conditional first-row formatting (w:tblStylePr w:type="firstRow") */
-  firstRow?: { fill?: string; bold?: boolean; color?: string }
+  firstRow?: { fill?: string; bold?: boolean; color?: string; sizeHalfPoints?: number }
   /** conditional first/last-column and last-row formatting (w:tblStylePr) */
-  firstCol?: { fill?: string; bold?: boolean; color?: string }
-  lastCol?: { fill?: string; bold?: boolean; color?: string }
-  lastRow?: { fill?: string; bold?: boolean; color?: string }
+  firstCol?: { fill?: string; bold?: boolean; color?: string; sizeHalfPoints?: number }
+  lastCol?: { fill?: string; bold?: boolean; color?: string; sizeHalfPoints?: number }
+  lastRow?: { fill?: string; bold?: boolean; color?: string; sizeHalfPoints?: number }
   /** odd-band row shading (band1Horz) */
   band1Fill?: string
   /** even-band row shading (band2Horz) */
@@ -1105,6 +1245,8 @@ export interface TableStyleDisplay {
     lineRule?: 'auto' | 'atLeast' | 'exact'
     lineSpacing?: number
   }
+  /** style-level w:pPr w:jc applied to every cell paragraph (Calendar styles center) */
+  paraJc?: string
 }
 
 export interface StyleInfo {
@@ -1152,6 +1294,8 @@ export interface DocDefaults {
   spaceBeforeTwips?: number
   /** F1: paragraph spacing after default (twips); undefined = not set in docDefaults */
   spaceAfterTwips?: number
+  /** rPrDefault w:lang w:val (BCP-47) — hyphenation/locale of the body text */
+  lang?: string
 }
 
 /** word/settings.xml w:documentProtection (only the editing restriction subset). */
@@ -1161,6 +1305,20 @@ export interface DocProtection {
   /** w:enforcement="1" — restriction is active */
   enforced: boolean
   /** password hash (base64, Word 2013+ iterated SHA-512 scheme); absent when there is no password protection */
+  hash?: string
+  /** salt (base64) */
+  salt?: string
+  /** iteration count (w:cryptSpinCount), Word default 100000 */
+  spinCount?: number
+  /** w:cryptAlgorithmSid, 14 = SHA-512 (the only supported value) */
+  algorithmSid?: number
+}
+
+/** word/settings.xml w:writeProtection (password to modify; honor-system, no encryption). */
+export interface WriteProtection {
+  /** w:recommended="1" — Word suggests opening read-only */
+  recommended?: boolean
+  /** password-to-modify hash (base64, same iterated-SHA-512 scheme as DocProtection); absent = no modify password */
   hash?: string
   /** salt (base64) */
   salt?: string
@@ -1239,6 +1397,10 @@ export interface ParsedDoc {
   themeColors?: ThemeColors | null
   /** editing restriction from word/settings.xml, null when none */
   protection: DocProtection | null
+  /** password-to-modify / read-only-recommended from word/settings.xml, null when none */
+  writeProtection: WriteProtection | null
+  /** settings.xml w:removePersonalInformation — remove author/organization metadata on save */
+  removePersonalInfo: boolean
   /** plain text of the default page header, null when the document has none */
   headerText?: string | null
   /** rich paragraphs of the default header (PAGE fields appear as PAGE_MARK runs) */
@@ -1262,6 +1424,10 @@ export interface ParsedDoc {
   evenAndOddHeaders?: boolean
   /** settings.xml compatSetting compatibilityMode (0 when absent; >=15 = Word 2013+ layout) */
   compatibilityMode?: number
+  /** settings.xml <w:autoHyphenation/> — Word breaks words at line ends automatically */
+  autoHyphenation?: boolean
+  /** settings.xml w:defaultTabStop in twips (absent = Word's 720); 0 = zero-width default tabs */
+  defaultTabStopTwips?: number
   /** first-page header/footer parts (w:type="first"), null when absent */
   headerFirst?: HfPartInfo | null
   footerFirst?: HfPartInfo | null

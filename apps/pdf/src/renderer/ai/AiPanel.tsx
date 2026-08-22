@@ -55,11 +55,14 @@ export function AiPanel({
   api,
   onCollapse,
   preset,
+  onRunDone,
 }: {
   api: PdfAiDeps
   onCollapse: () => void
   /** Ribbon AI buttons push a one-shot prompt; a new nonce triggers an auto-run */
   preset?: { text: string; nonce: number } | null
+  /** Fired when a run that mutated the document finishes (drives the untitled-blank auto-save) */
+  onRunDone?: () => void
 }): ReactElement {
   const { lang, t } = useI18n()
   const [chat, setChat] = useState<ChatEntry[]>([])
@@ -83,10 +86,34 @@ export function AiPanel({
     dock?.style.setProperty('--ai-panel-width', `${panelWidth}px`)
   }, [panelWidth])
   const settingsRef = useRef<AiSettings | null>(null)
+
+  /** gsk login state for the cloud-tools gate (refreshed on mount and window focus) */
+  const gskLoggedInRef = useRef(false)
+  useEffect(() => {
+    let alive = true
+    const refresh = () => {
+      void window.pdfApi
+        ?.gskStatus()
+        .then((s) => {
+          if (alive) gskLoggedInRef.current = !!s?.loggedIn
+        })
+        .catch(() => {})
+    }
+    refresh()
+    window.addEventListener('focus', refresh)
+    return () => {
+      alive = false
+      window.removeEventListener('focus', refresh)
+    }
+  }, [])
   const langRef = useRef(lang)
   langRef.current = lang
   const apiRef = useRef(api)
   apiRef.current = api
+  const onRunDoneRef = useRef(onRunDone)
+  onRunDoneRef.current = onRunDone
+  /** Any tool in the current run reported mutated: true */
+  const runMutatedRef = useRef(false)
 
   const patchLast = (patch: Partial<ChatEntry> | ((last: ChatEntry) => Partial<ChatEntry>)) => {
     setChat((prev) => {
@@ -113,6 +140,7 @@ export function AiPanel({
       gotoPage: (p) => apiRef.current.gotoPage(p),
       addMarkup: (type, idx, rects) => apiRef.current.addMarkup(type, idx, rects),
       editText: (input) => apiRef.current.editText(input),
+      insertText: (input) => apiRef.current.insertText(input),
       editFonts: () => apiRef.current.editFonts(),
       formEdits: () => apiRef.current.formEdits(),
       applyFormEdit: (v) => apiRef.current.applyFormEdit(v),
@@ -128,6 +156,7 @@ export function AiPanel({
       deleteImage: (ref) => apiRef.current.deleteImage(ref),
       searchImages: (query, max) => apiRef.current.searchImages(query, max),
       generateImage: (op) => apiRef.current.generateImage(op),
+      gskTools: () => gskLoggedInRef.current && settingsRef.current?.gskToolsEnabled !== false,
       fetchImage: (url) => apiRef.current.fetchImage(url),
     }
     loopRef.current = new AgentLoop({
@@ -141,6 +170,7 @@ export function AiPanel({
         },
         onToolExecuted: ({ call, execution }) => {
           setPhase('working')
+          if (execution.mutated) runMutatedRef.current = true
           patchLast((last) => ({
             tools: [
               ...(last.tools ?? []),
@@ -167,6 +197,10 @@ export function AiPanel({
             text: final || (last.tools?.length ? last.text : tGlobal('aiNoReply')),
           }))
           setBusy(false)
+          if (runMutatedRef.current) {
+            runMutatedRef.current = false
+            onRunDoneRef.current?.()
+          }
         },
         onError: (error) => {
           setChat((prev) => {
@@ -216,6 +250,7 @@ export function AiPanel({
     setPrompt('')
     setBusy(true)
     setPhase('thinking')
+    runMutatedRef.current = false
     void (async () => {
       try {
         settingsRef.current = await window.pdfApi.getAiSettings()
@@ -299,12 +334,12 @@ export function AiPanel({
         onPointerDown={startResize}
         role="separator"
         aria-orientation="vertical"
-        aria-label="Genspark AI"
+        aria-label="VuaOffice AI"
       />
       <header className="ai-panel-header">
         <span className="ai-panel-title">
           <GensparkMark size={22} />
-          Genspark
+          VuaOffice AI
         </span>
         <div className="ai-panel-header-actions">
           {chat.length > 0 && (

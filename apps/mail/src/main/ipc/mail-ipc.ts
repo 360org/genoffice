@@ -72,7 +72,7 @@ export function registerMailIpc(
 
   ipcMain.handle(VUA_MAIL_IPC.OPEN_ATTACHMENT, async (_evt, attachment: EmailAttachment) => {
     try {
-      const tempDir = join(app.getPath('temp'), 'GenOffice-Attachments')
+      const tempDir = join(app.getPath('temp'), 'VuaOffice-Attachments')
       if (!existsSync(tempDir)) {
         mkdirSync(tempDir, { recursive: true })
       }

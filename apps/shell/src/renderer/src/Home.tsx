@@ -1080,7 +1080,7 @@ function AccountEntry({
             role="menuitem"
             onClick={() => {
               closeMenu()
-              void window.aiOffice.checkForUpdates()
+              void window.aiOffice.checkForUpdates?.()
             }}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -2004,6 +2004,10 @@ export function Home() {
     )
   }
 
+  const handleNewPdf = () => {
+    void window.aiOffice.newPdf(selectedProjectId ? { projectId: selectedProjectId } : undefined)
+  }
+
   const handleNewMail = () => {
     if (!isDevMode) return
     void window.aiOffice.newMail()
@@ -2014,6 +2018,7 @@ export function Home() {
     { ext: 'xlsx', title: t('newSheet'), sub: '.xlsx', action: handleNewSheet, badge: 'AI', disabled: false },
     { ext: 'pptx', title: t('newSlide'), sub: '.pptx', action: handleNewSlide, badge: 'AI', disabled: false },
     { ext: 'md', title: t('newMarkdown'), sub: '.md', action: handleNewMarkdown, badge: 'AI', disabled: false },
+    { ext: 'pdf', title: t('newPdf'), sub: '.pdf', action: handleNewPdf, badge: undefined, disabled: false },
     {
       ext: 'eml',
       title: t('newMail'),
@@ -2549,7 +2554,7 @@ export function Home() {
     <div className="home">
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <img className="logo-lockup" src={logoLockup} alt="GenOffice" height="32" />
+          <img className="logo-lockup" src={logoLockup} alt="VuaOffice" height="32" />
         </div>
 
         <nav className="sidebar-nav">

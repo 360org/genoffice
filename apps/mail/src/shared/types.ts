@@ -5,6 +5,8 @@ export interface EmailAccount {
   provider: 'google' | 'microsoft' | 'custom_imap'
   avatarUrl?: string
   isDefault?: boolean
+  imapHost?: string
+  imapPort?: number
 }
 
 export type FolderKind = 'inbox' | 'sent' | 'drafts' | 'archive' | 'trash' | 'junk' | 'custom'
@@ -134,7 +136,7 @@ export interface VuaMailApi {
   syncNow: () => Promise<SyncStatus>
   getSyncStatus: () => Promise<SyncStatus>
   startOAuthFlow: (
-    provider: 'google' | 'microsoft' | '360' | 'icloud' | 'yahoo' | 'exchange' | 'auto',
+    provider: 'google' | 'microsoft' | 'microsoft_personal' | '360' | 'icloud' | 'yahoo' | 'exchange' | 'auto',
     emailHint?: string
   ) => Promise<{
     success: boolean
@@ -146,12 +148,6 @@ export interface VuaMailApi {
   aiStream?: (request: any) => Promise<void>
   aiStreamCancel?: (requestId: string) => Promise<void>
   onAiStream?: (handler: (chunk: any) => void) => () => void
-}
-    success: boolean
-    account?: EmailAccount
-    error?: string
-  }>
-  cancelOAuthFlow: () => Promise<boolean>
 }
 
 declare global {

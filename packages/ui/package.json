@@ -10,6 +10,7 @@
     "./tokens.css": "./src/tokens.css",
     "./screentip.css": "./src/screentip.css",
     "./color-picker.css": "./src/color-picker.css",
+    "./dropdown.css": "./src/dropdown.css",
     "./*": "./src/*"
   },
   "scripts": {
@@ -23,6 +24,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@genoffice/i18n": "*",
     "@genoffice/pptx-render": "*"
   }
 }

@@ -188,7 +188,7 @@ export interface AiChatMessage {
   /** the run failed because Genspark is signed out — render an inline sign-in button */
   readonly loginRequired?: boolean | undefined
   /** Set when this message reflects an auto-applied plan; renders an inline [Undo] button. */
-  readonly autoApplied?: { readonly opCount: number } | undefined
+  readonly autoApplied?: { readonly opCount: number; readonly undoSteps: number } | undefined
   /** attachments consumed from the composer by this user message (read-only echo chips) */
   readonly attachments?: readonly AttachmentMeta[] | undefined
 }
@@ -239,7 +239,7 @@ export function AiChatPanel({
   readonly onSend: (instruction?: string, attachments?: readonly AttachmentMeta[]) => void
   readonly onStop: () => void
   readonly onNewChat: () => void
-  readonly onUndo: () => void
+  readonly onUndo: (steps: number) => void
   readonly onExpand: () => void
   readonly onCollapse: () => void
 }): React.JSX.Element {
@@ -457,12 +457,12 @@ export function AiChatPanel({
         onPointerDown={startResize}
         role="separator"
         aria-orientation="vertical"
-        aria-label="Genspark AI"
+        aria-label="VuaOffice AI"
       />
       <header className="ai-panel-header">
         <span className="ai-panel-title">
           <GensparkMark size={22} />
-          Genspark
+          VuaOffice AI
         </span>
         <div className="ai-panel-header-actions">
           {(chat.length > 0 || historicChat.length > 0) && (
@@ -556,7 +556,11 @@ export function AiChatPanel({
                     <span className="ai-auto-applied-text">
                       {t('aiAutoApplied', { count: entry.autoApplied.opCount })}
                     </span>
-                    <button className="ai-undo-btn" onClick={onUndo} data-tip={t('aiUndoTitle')}>
+                    <button
+                      className="ai-undo-btn"
+                      onClick={() => onUndo(Math.max(1, entry.autoApplied?.undoSteps ?? 1))}
+                      data-tip={t('aiUndoTitle')}
+                    >
                       {t('aiUndo')}
                     </button>
                   </div>

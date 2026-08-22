@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { IpcRendererEvent } from 'electron'
+import { AI_PROVIDERS, getProviderAdapter } from '@genoffice/ai-provider'
+import type { AiSettings } from '@genoffice/ai-provider'
 import type {
   AccountLoginEvent,
   AccountStatus,
@@ -16,7 +18,6 @@ import type {
 import { HOME_CHANNELS, PROJECT_CHANNELS } from '../shared/home-api'
 import type { TabsApi, TabSummary } from '../shared/tabs-api'
 import { TABS_CHANNELS } from '../shared/tabs-api'
-import type { AiSettings } from '@genoffice/ai-provider'
 
 const UI_LANGUAGES: readonly UiLanguage[] = [
   'zh',
@@ -90,6 +91,9 @@ const homeApi: HomeApi = {
   async newMail() {
     await ipcRenderer.invoke(HOME_CHANNELS.newMail)
   },
+  async newPdf(opts) {
+    await ipcRenderer.invoke(HOME_CHANNELS.newPdf, opts)
+  },
   async removeRecent(paths) {
     await ipcRenderer.invoke(HOME_CHANNELS.removeRecent, paths)
   },
@@ -160,7 +164,8 @@ const homeApi: HomeApi = {
     return result === true
   },
   async setOnboardingSeen() {
-    await ipcRenderer.invoke(HOME_CHANNELS.setOnboardingSeen)
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.setOnboardingSeen)
+    return result === true
   },
   async getTheme() {
     const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getTheme)
@@ -170,6 +175,30 @@ const homeApi: HomeApi = {
     if (theme !== 'light' && theme !== 'dark' && theme !== 'system')
       throw new Error('Invalid theme.')
     await ipcRenderer.invoke(HOME_CHANNELS.setTheme, theme)
+  },
+  async getAnalyticsEnabled() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getAnalyticsEnabled)
+    return result !== false
+  },
+  async setAnalyticsEnabled(enabled) {
+    if (typeof enabled !== 'boolean') throw new Error('Invalid analytics consent.')
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.setAnalyticsEnabled, enabled)
+    return result === true
+  },
+  async getDefaultSaveDir() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getDefaultSaveDir)
+    return typeof result === 'string' ? result : ''
+  },
+  async pickDefaultSaveDir() {
+    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.pickDefaultSaveDir)
+    return typeof result === 'string' && result ? result : null
+  },
+  onThemeChanged(handler) {
+    const listener = (_event: Electron.IpcRendererEvent, theme: unknown) => {
+      if (theme === 'light' || theme === 'dark' || theme === 'system') handler(theme)
+    }
+    ipcRenderer.on('app:theme-changed', listener)
+    return () => ipcRenderer.removeListener('app:theme-changed', listener)
   },
   async openGenTeam() {
     await ipcRenderer.invoke(HOME_CHANNELS.openGenTeam)
@@ -217,14 +246,7 @@ const homeApi: HomeApi = {
     if (typeof projectUrl !== 'string' || !projectUrl) throw new Error('Invalid project URL.')
     await ipcRenderer.invoke(HOME_CHANNELS.openCloudProject, projectUrl)
   },
-  async getDefaultSaveDir() {
-    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.getDefaultSaveDir)
-    return typeof result === 'string' ? result : undefined
-  },
-  async pickDefaultSaveDir() {
-    const result: unknown = await ipcRenderer.invoke(HOME_CHANNELS.pickDefaultSaveDir)
-    return typeof result === 'string' ? result : undefined
-  },
+  // AI settings channels are registered once by the shell's aggregated docs handlers
   async getAiSettings() {
     return (await ipcRenderer.invoke('ai:get-settings')) as AiSettings
   },
@@ -252,6 +274,30 @@ const homeApi: HomeApi = {
     const listener = () => handler()
     ipcRenderer.on('app:open-diagnostic-report', listener)
     return () => ipcRenderer.removeListener('app:open-diagnostic-report', listener)
+  },
+  getAiProviders() {
+    return AI_PROVIDERS.map((meta) => {
+      let defaultBaseUrl = ''
+      // genspark routes by model and custom has no default — both stay ''
+      if (meta.id !== 'genspark' && !meta.needsBaseUrl) {
+        defaultBaseUrl = getProviderAdapter(meta.id).resolveEndpoint({
+          apiKey: '',
+          model: meta.defaultModel,
+        }).baseUrl
+      }
+      return { ...meta, defaultBaseUrl }
+    })
+  },
+  async testAiSettings(settings) {
+    const result: unknown = await ipcRenderer.invoke('ai:chat', {
+      settings,
+      system: 'You are a connectivity test. Reply with the single word OK.',
+      user: 'ping',
+    })
+    const raw = (result ?? {}) as { ok?: unknown; error?: unknown }
+    return raw.ok === true
+      ? { ok: true }
+      : { ok: false, error: typeof raw.error === 'string' ? raw.error : 'Connection failed' }
   },
 }
 

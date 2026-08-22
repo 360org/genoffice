@@ -12,9 +12,10 @@ VuaOffice bao gồm các ứng dụng làm việc cốt lõi trên nền tảng 
 1. **VuaOffice Docs**: Trình soạn thảo văn bản `.docx` hỗ trợ AI patch theo đoạn, giữ nguyên bố cục ban đầu của tệp Word.
 2. **VuaOffice Sheets**: Trình quản lý bảng tính `.xlsx` mở rộng trên nhân Univer, tích hợp engine Rust sidecar (calamine + IronCalc), biểu đồ Konva, Pivot Table và Slicer.
 3. **VuaOffice Slides**: Trình trình chiếu `.pptx` hỗ trợ thiết kế slide, HarfBuzz text shaping và công cụ AI tạo nội dung.
-4. **VuaOffice PDF**: Trình xem & chỉnh sửa tệp `.pdf` hỗ trợ chú thích, biểu mẫu, chữ ký số và phân tích nội dung qua AI.
-5. **VuaOffice Shell**: Khung ứng dụng trung tâm quản lý tab, cài đặt tài khoản 360 CORP, AI Router và tự động cập nhật (Auto-Update).
-6. **VuaOffice Mail**: Trình quản lý Email & Lịch tích hợp AI (thay thế Microsoft Office 365 Outlook, đang được lên kế hoạch phát triển ở các phiên bản tiếp theo).
+4. **VuaOffice PDF**: Trình xem & chỉnh sửa tệp `.pdf` hỗ trợ chú thích, biểu mẫu, chữ ký số, chỉnh sửa văn bản thực tế trong luồng trang giữ nguyên phông chữ gốc, chuyển đổi PDF sang Word/Excel/PowerPoint cục bộ (pdf2docx) và phân tích nội dung qua AI.
+5. **VuaOffice Markdown**: Trình soạn thảo định dạng `.md` khối Tiptap đồng bộ thời gian thực.
+6. **VuaOffice Shell**: Khung ứng dụng trung tâm quản lý tab, cài đặt tài khoản 360 CORP, AI Router và tự động cập nhật (Auto-Update).
+7. **VuaOffice Mail**: Trình quản lý Email & Lịch tích hợp AI (thay thế Microsoft Office 365 Outlook).
 
 ---
 
@@ -24,11 +25,11 @@ Tất cả các bản build phát hành được đóng gói và kiểm tra tự
 
 | Nền tảng                          | Yêu cầu hệ thống    | Tệp cài đặt                                                                                                         |
 | :-------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------ |
-| **macOS** (Apple Silicon `arm64`) | macOS 11+           | [VuaOffice-0.6.7-arm64.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7-arm64.dmg) |
-| **macOS** (Intel `x64`)           | macOS 11+           | [VuaOffice-0.6.7-x64.dmg](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7-x64.dmg)     |
-| **Windows** (x64)                 | Windows 10 / 11     | [VuaOffice-0.6.7-Windows-x64-Setup.exe](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7-Windows-x64-Setup.exe) |
-| **Linux** (Debian / Ubuntu)       | x86_64, glibc 2.34+ | [vuaoffice_0.6.7_amd64.deb](https://github.com/360org/vuaoffice/releases/latest/download/vuaoffice_0.6.7_amd64.deb) |
-| **Linux** (AppImage)              | x86_64, FUSE 2      | [VuaOffice-0.6.7.AppImage](https://github.com/360org/vuaoffice/releases/latest/download/VuaOffice-0.6.7.AppImage)   |
+| **macOS** (Apple Silicon `arm64`) | macOS 11+           | [VuaOffice-1.0.8-macOS-arm64.dmg](https://github.com/360org/vuaoffice/releases/latest) |
+| **macOS** (Intel `x64`)           | macOS 11+           | [VuaOffice-1.0.8-macOS-x64.dmg](https://github.com/360org/vuaoffice/releases/latest)     |
+| **Windows** (x64)                 | Windows 10 / 11     | [VuaOffice-1.0.8-Windows-x64-Setup.exe](https://github.com/360org/vuaoffice/releases/latest) |
+| **Linux** (Debian / Ubuntu)       | x86_64, glibc 2.34+ | [vuaoffice_1.0.8_amd64.deb](https://github.com/360org/vuaoffice/releases/latest) |
+| **Linux** (AppImage)              | x86_64, FUSE 2      | [VuaOffice-1.0.8.AppImage](https://github.com/360org/vuaoffice/releases/latest)   |
 
 ---
 
@@ -40,36 +41,34 @@ Tất cả các bản build phát hành được đóng gói và kiểm tra tự
 
 Mọi cấu hình thương hiệu VuaOffice được lưu tập trung tại `whitelabel/brand-config.json`.
 
-- Lệnh áp dụng branding: `node scripts/whitelabel.js apply`
-- Lệnh hoàn tác về codebase gốc: `node scripts/whitelabel.js restore`
+- Lệnh áp dụng branding: `npm run whitelabel:apply`
+- Lệnh hoàn tác về codebase gốc: `npm run whitelabel:restore`
+- Lệnh kiểm tra trạng thái: `npm run whitelabel:status`
+- Lệnh kiểm tra cổng: `npm run brand:gate`
 
 ### 2. Các bước Pull & Merge không conflict
 
 Khi cần đồng bộ code mới nhất từ upstream:
 
 ```bash
-<<<<<<< HEAD
 # Bước 1: Khai báo upstream (nếu chưa có) và fetch code mới nhất
-git remote add upstream https://github.com/genspark-ai/genoffice.git 2>/dev/null || true
+npm run upstream:setup
 git fetch upstream main
 
-# Bước 2: Kiểm tra khả năng conflict trước khi merge
-git merge-tree $(git merge-base HEAD upstream/main) HEAD upstream/main
+# Bước 2: Tạo nhánh sync riêng biệt và restore về chuỗi gốc upstream
+git checkout -b sync/upstream-YYYYMMDD
+npm run whitelabel:restore
 
-# Bước 3: Tiến hành Merge chính thức
-git merge upstream/main -m "merge: sync latest official upstream code into main"
+# Bước 3: Tiến hành 3-way merge
+git merge upstream/main
 
-# Bước 4: Trong trường hợp có xung đột (conflict) ở các file UI/Brand:
-# Ưu tiên giữ lại bản tùy chỉnh của VuaOffice cho các file giao diện gốc
-git checkout --ours apps/shell/src/renderer/src/Home.tsx apps/shell/src/renderer/src/strings.ts
+# Bước 4: Giải quyết xung đột và áp dụng lại nhận diện VuaOffice
+npm run whitelabel:apply
+npm run brand:gate
 
-# Bước 5: Chạy lại công cụ Whitelabel để áp dụng lại toàn bộ nhận diện VuaOffice & AI Providers
-node scripts/whitelabel.js apply
-
-# Bước 6: Thêm thay đổi và hoàn tất commit merge
-git add .
-git commit -m "merge: resolved conflicts and reapplied VuaOffice whitelabel"
-git push origin main
+# Bước 5: Kiểm tra và hoàn tất merge vào main
+npm run typecheck
+git commit
 ```
 
 ---
@@ -86,75 +85,6 @@ VuaOffice hỗ trợ kết nối trực tiếp đến các AI Gateway của 360 
 ---
 
 ## 🛠️ Hướng dẫn Phát triển Local (Development)
-=======
-sudo apt install ./genoffice_0.7.204_amd64.deb
-```
-
-On Fedora / RHEL-family / openSUSE, install the rpm instead:
-
-```bash
-sudo dnf install ./genoffice-0.7.204.x86_64.rpm     # Fedora / RHEL family
-sudo zypper install ./genoffice-0.7.204.x86_64.rpm  # openSUSE
-```
-
-The AppImage instead runs in place: install the FUSE 2 runtime
-(`sudo apt install libfuse2`; on Ubuntu 24.04 the package is `libfuse2t64`),
-make the file executable, then run it:
-
-```bash
-chmod +x GenOffice-0.7.204.AppImage
-./GenOffice-0.7.204.AppImage
-```
-
-## Apps
-
-| App             | Product                | What it is                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/docs`     | **GenOffice Docs**     | `.docx` word processor. Byte-preserving round trip: only dirty paragraphs are regenerated (paragraph patch), everything else in the original file is kept byte-for-byte, so opening and saving never breaks layout in Word. Paginated view whose line metrics reproduce the original document's layout, tracked changes, comments, styles, equations, ink.                                                                                                                                                                                                      |
-| `apps/sheets`   | **GenOffice Sheets**   | `.xlsx` spreadsheet. UI built on the open-source [Univer](https://github.com/dream-num/univer) core (Apache-2.0) with a large layer of in-house extensions; `.xlsx` import/export runs through an in-house Rust sidecar (calamine + IronCalc), charts are rendered in-house (Konva), plus pivot tables, slicers, conditional formatting, and formula tracing.                                                                                                                                                                                                   |
-| `apps/slides`   | **GenOffice Slides**   | `.pptx` presentations. In-house `.pptx` parse/render/edit engine with masters, charts, cropping, ink, and text shaping (HarfBuzz metrics).                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `apps/pdf`      | **GenOffice PDF**      | `.pdf` viewer/editor on [pdf.js](https://github.com/mozilla/pdf.js) (Apache-2.0) + [pdf-lib](https://github.com/Hopding/pdf-lib) (MIT): annotations, forms, outlines, stamps, signatures, page operations, and printing support. True text editing — paragraph selection with in-block reflow, alignment restoration, original-font preservation — and content-stream image insert/edit, all rewriting page content streams through [PDFium](https://pdfium.googlesource.com/pdfium/) wasm (BSD-3-Clause) with subset-embedded fonts — no cover-up annotations. |
-| `apps/markdown` | **GenOffice Markdown** | `.md` / `.markdown` editor: Tiptap block editor over plain Markdown files — headings, lists, tables, images, code blocks — saved back as plain Markdown, hosted in shell tabs.                                                                                                                                                                                                                                                                                                                                                                                  |
-| `apps/shell`    | **GenOffice**          | The suite shell: home screen, tabbed hosting of the five editors, light/dark/system theme, auto-update.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-
-Every app embeds the same AI panel: block-granular AI editing with version
-snapshots and diffs in docs, a tool-calling agent over workbook/slide/PDF
-state in the others.
-
-The whole suite ships light / dark / system UI themes built on shared design
-tokens (`packages/ui`), with a CI guard that keeps chrome colors on the token
-system. Document surfaces stay light in dark mode — Word-style dark chrome
-around white paper — so files render and export identically in both themes.
-
-**AI backend (Genspark).** The apps sign in to a Genspark account through a
-device-code flow; no model API key is entered or stored by the user. Model
-calls route through the Genspark proxy (Claude, GPT, and Gemini families).
-The same account also unlocks the Genspark ("gsk") tool endpoints the agents
-build on — web and image search, image generation and editing,
-image/audio/video analysis, and audio transcription — all reachable through
-`packages/ai-search` for anyone extending the agent layer.
-
-## Engine packages
-
-All pure TypeScript, no Electron dependency, unit-tested (except the UI kit):
-
-- `packages/docx-engine` — docx parsing → block tree (with `docxIndex`
-  anchors and passthrough), OOXML fragment generation, byte-level paragraph
-  patching.
-- `packages/pptx-engine` / `packages/pptx-render` — pptx model and rendering.
-- `packages/file-parse` — text extraction for AI attachments (office formats,
-  text formats).
-- `packages/agent-core` — the AI agent loop and skill composition shared by
-  every app.
-- `packages/ai-provider` — provider abstraction and streaming for the model
-  backends.
-- `packages/ai-search` — Genspark auth + web/image search tools.
-- `packages/i18n`, `packages/ui`, `packages/project-store`,
-  `packages/electron-utils` — shared i18n core, React UI kit, recent-files
-  store, and Electron main-process helpers.
-
-## Development
->>>>>>> upstream/main
 
 ```bash
 # Cài đặt phụ thuộc
@@ -180,7 +110,7 @@ npm run dist:linux
 
 ## 📚 Cấu trúc Tài liệu Dự án (Documentation)
 
-Toàn bộ tài liệu kiến trúc, đặc tả và hướng dẫn kỹ thuật của VuaOffice được tổ chức tập trung trong thư mục [`/Volumes/DATA/DEV/vuaoffice/docs/`](docs/):
+Toàn bộ tài liệu kiến trúc, đặc tả và hướng dẫn kỹ thuật của VuaOffice được tổ chức tập trung trong thư mục [`docs/`](docs/):
 
 - **Tài liệu hệ thống cốt lõi**:
   - [Ý tưởng & Định hướng (`IDEA.md`)](docs/IDEA.md)
