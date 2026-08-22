@@ -75,9 +75,10 @@ const LOCAL_STRINGS: Record<string, Record<string, string>> = {
 
 interface AiSettingsModalProps {
   onClose: () => void
+  initialDevMode?: boolean
 }
 
-export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
+export function AiSettingsModal({ onClose, initialDevMode = false }: AiSettingsModalProps) {
   const { lang, t } = useI18n()
   const [settings, setSettings] = useState<AiSettings | null>(null)
   const [activeTab, setActiveTab] = useState<AiProviderId>('ninerouter')
@@ -85,7 +86,7 @@ export function AiSettingsModal({ onClose }: AiSettingsModalProps) {
   const [isCustomModelActive, setIsCustomModelActive] = useState<Record<AiProviderId, boolean>>({} as Record<AiProviderId, boolean>)
   const [showPassword, setShowPassword] = useState(false)
 
-  const [isDeveloperMode, setIsDeveloperMode] = useState(false)
+  const [isDeveloperMode, setIsDeveloperMode] = useState(initialDevMode)
 
   const loc = LOCAL_STRINGS[lang] || LOCAL_STRINGS.en
 

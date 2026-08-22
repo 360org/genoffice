@@ -6,7 +6,8 @@
       "Bash(gh repo *)"
     ],
     "additionalDirectories": [
-      "/Volumes/DATA/DEV/vuaoffice"
+      "/Volumes/DATA/DEV/vuaoffice",
+      "/Volumes/DATA/DEV/VuaMail"
     ]
   }
 }

@@ -2005,6 +2005,7 @@ export function Home() {
   }
 
   const handleNewMail = () => {
+    if (!isDevMode) return
     void window.aiOffice.newMail()
   }
 
@@ -2016,10 +2017,10 @@ export function Home() {
     {
       ext: 'eml',
       title: t('newMail'),
-      sub: '.pst',
+      sub: isDevMode ? '.pst' : 'Coming Soon',
       action: handleNewMail,
-      badge: 'AI',
-      disabled: false,
+      badge: isDevMode ? 'AI' : 'Soon',
+      disabled: !isDevMode,
     },
   ]
 
@@ -2705,7 +2706,12 @@ export function Home() {
         </div>
       )}
 
-      {showAiSettings && <AiSettingsModal onClose={() => setShowAiSettings(false)} />}
+      {showAiSettings && (
+        <AiSettingsModal
+          initialDevMode={isDevMode}
+          onClose={() => setShowAiSettings(false)}
+        />
+      )}
       {showAbout && <AboutModal appVersion={appVersion} onClose={() => setShowAbout(false)} />}
       {showDiagnosticReport && (
         <DiagnosticReportModal onClose={() => setShowDiagnosticReport(false)} />

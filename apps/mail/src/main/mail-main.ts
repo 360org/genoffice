@@ -1,67 +1,107 @@
-import { WebContentsView, app } from 'electron'
-import { existsSync } from 'node:fs'
+import { BrowserWindow, WebContentsView, app } from 'electron'
 import { join } from 'node:path'
+import { AsyncMailStorage } from './db/async-storage'
 import { SQLiteMailStorage } from './db/sqlite-storage'
 import { registerMailIpc } from './ipc/mail-ipc'
+import { MailSyncOrchestrator } from './network/mail-sync-orchestrator'
+import { TokenStore } from './auth/token-store'
 
-let mailStorage: SQLiteMailStorage | null = null
+let asyncMailStorage: AsyncMailStorage | null = null
+let syncOrchestrator: MailSyncOrchestrator | null = null
+let tokenStore: TokenStore | null = null
 
-interface MailRuntimePaths {
-  preloadPath?: string
-  rendererUrl?: string
-  rendererFile?: string
+export interface MailRuntimeConfig {
+  preloadPath: string
+  rendererUrl?: string | undefined
+  rendererFile: string
+  openDocumentPath?: (filePath: string) => boolean
 }
 
-let runtime: MailRuntimePaths = {}
-
-export function configureMailRuntime(paths: MailRuntimePaths): void {
-  runtime = paths
+let runtime: MailRuntimeConfig = {
+  preloadPath: join(__dirname, '../preload/index.js'),
+  rendererUrl: process.env.MAIL_RENDERER_URL,
+  rendererFile: join(__dirname, '../renderer/index.html'),
 }
 
-export function initMailBackend(): SQLiteMailStorage {
-  if (!mailStorage) {
-    mailStorage = new SQLiteMailStorage()
-    registerMailIpc(mailStorage)
+export function configureMailRuntime(config: MailRuntimeConfig): void {
+  runtime = config
+}
+
+export function initMailBackend(): AsyncMailStorage {
+  if (!asyncMailStorage) {
+    // 1. Single unified SQLite storage instance (Single Source of Truth)
+    const unifiedStorage = new SQLiteMailStorage()
+    asyncMailStorage = new AsyncMailStorage(unifiedStorage)
+    tokenStore = new TokenStore()
+
+    // 2. Orchestrator and IPC share the EXACT same storage and token store
+    syncOrchestrator = new MailSyncOrchestrator(unifiedStorage, tokenStore)
+    syncOrchestrator.startSyncLoop(60000)
+
+    registerMailIpc(
+      asyncMailStorage,
+      syncOrchestrator,
+      tokenStore,
+      (filePath) => {
+        if (runtime.openDocumentPath) {
+          return runtime.openDocumentPath(filePath)
+        }
+        return false
+      }
+    )
   }
-  return mailStorage
+  return asyncMailStorage
 }
 
 export function createMailView(): WebContentsView {
   initMailBackend()
 
-  const APPS_ROOT = join(app.getAppPath(), '..')
-  const MAIL_OUT = app.isPackaged
-    ? join(process.resourcesPath, 'modules', 'mail')
-    : join(APPS_ROOT, 'mail', 'out')
-
-  const preloadPath =
-    runtime.preloadPath ||
-    (app.isPackaged
-      ? join(process.resourcesPath, 'modules', 'mail', 'preload', 'index.js')
-      : join(MAIL_OUT, 'preload', 'index.js'))
-
-  const rendererFile =
-    runtime.rendererFile ||
-    (app.isPackaged
-      ? join(process.resourcesPath, 'modules', 'mail', 'renderer', 'index.html')
-      : join(MAIL_OUT, 'renderer', 'index.html'))
-
   const view = new WebContentsView({
     webPreferences: {
-      preload: preloadPath,
+      preload: runtime.preloadPath,
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
     },
   })
 
-  if (runtime.rendererUrl || process.env.MAIL_RENDERER_URL) {
-    void view.webContents.loadURL(runtime.rendererUrl || process.env.MAIL_RENDERER_URL!)
-  } else if (!app.isPackaged && !existsSync(rendererFile)) {
-    void view.webContents.loadURL('http://localhost:5178')
-  } else {
-    void view.webContents.loadFile(rendererFile)
+  view.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  view.webContents.on('will-navigate', (event) => event.preventDefault())
+
+  if (runtime.rendererUrl) {
+    void view.webContents.loadURL(runtime.rendererUrl)
+  } else if (runtime.rendererFile) {
+    void view.webContents.loadFile(runtime.rendererFile)
   }
 
   return view
+}
+
+export function startMailStandalone(): void {
+  void app.whenReady().then(() => {
+    initMailBackend()
+    const win = new BrowserWindow({
+      width: 1200,
+      height: 800,
+      minWidth: 900,
+      minHeight: 600,
+      title: 'VuaOffice Mail',
+      webPreferences: {
+        preload: runtime.preloadPath,
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: false,
+      },
+    })
+
+    if (runtime.rendererUrl) {
+      void win.loadURL(runtime.rendererUrl)
+    } else if (runtime.rendererFile) {
+      void win.loadFile(runtime.rendererFile)
+    }
+  })
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit()
+  })
 }

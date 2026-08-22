@@ -6,11 +6,23 @@ Tất cả các thay đổi đáng chú ý đối với dự án whitelabel VuaO
 ## [1.0.8] - 2026-08-21
 
 ### Fixed & Core
-- **Khắc phục triệt để lỗi không mở được thẻ AI Mail**:
+- **Tách biệt Hồ sơ (Profile) và Trí tuệ AI (Brain) trong phân hệ Mail**:
+  - Trả AppRail tab Brain về component `BrainView` (phân tích thông tin học hỏi từ email).
+  - Đưa trigger mở `ProfileView` lên góc trên bên phải header/ribbon của Mail dưới dạng cụm Icon đại diện (User & Settings + Status Dot), loại bỏ hiển thị text email theo yêu cầu UI.
+- **Tích hợp Real AI Stream IPC cho Chat Mail**:
+  - Kết nối `AiPanel.tsx` trực tiếp với luồng IPC streaming `ai:stream`, `ai:stream-chunk`, `ai:get-settings`.
+  - Thay thế toàn bộ phản hồi mock giả lập `setTimeout` bằng kết nối AI Vendor thực tế của VuaOffice Suite.
+- **Loại bỏ triệt để từ khóa "Copilot" trong phân hệ Mail**:
+  - Chuẩn hóa toàn bộ nhãn hiển thị nút Ribbon, tooltip và placeholder khung chat từ "Copilot" / "AI Copilot" sang "VuaOffice AI".
+- **Khắc phục hiển thị Multi-Provider trong AI Settings Modal**:
+  - Truyền `initialDevMode` từ trạng thái `Home.tsx` vào `AiSettingsModal.tsx` để danh sách Multi-Endpoint hiển thị ngay khi mở modal mà không cần tắt/bật lại.
+- **Tích hợp trọn vẹn Mail Engine & Chuẩn hóa cổng Developer Mode cho AI Mail**:
+  - Đồng bộ toàn bộ tính năng hoàn chỉnh từ nhánh `origin/VuaMail` (EML parser/builder, PST/MBOX, Rules, Threading, OAuth2 PKCE, SASL XOAUTH2, Calendar, People, To-Do, Brain, Profile Views).
+  - Tích hợp `@genoffice/mail-engine` và cấu hình module alias trong Rollup/Vite.
+  - Phân hệ AI Mail mặc định bị vô hiệu hóa (`pointer-events: none`, opacity mờ, chip "SOON", subtitle "Coming Soon") đối với người dùng thông thường.
+  - Phân hệ AI Mail chỉ mở khóa và cho phép click truy cập khi bật **Developer Mode** trong Help Menu.
   - Chuyển đổi engine lưu trữ `SQLiteMailStorage` từ native C++ binary sang Pure JS JSON (`mail-local.json`) tránh crash native binding khi đóng gói app.
-  - Cấu hình đầy đủ `configureMailRuntime` và `MAIL_OUT` trong `apps/shell/src/main/index.ts` đồng bộ đường dẫn preload và renderer với các phân hệ Docs/Sheets/Slides/PDF/Markdown.
-  - Kích hoạt sự kiện click trực tiếp thẻ AI Mail trên màn hình Home.
-  - Đồng bộ toàn bộ định danh, interface, IPC channel và CSS class từ `vuamail` / `VuaMail` sang `mail` / `Mail` / `mailApi` / `MAIL_IPC` đồng nhất với kiến trúc của VuaOffice Suite.
+  - Cấu hình đầy đủ `configureMailRuntime` và `MAIL_OUT` trong `apps/shell/src/main/index.ts`.
 
 ### Changed & Whitelabel
 - **Đồng bộ biểu tượng thương hiệu VuaOffice SVG chính thức**:

@@ -2,12 +2,23 @@ import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'electron-vite'
 
+const localAlias = {
+  '@genoffice/mail-engine': resolve(__dirname, '../../packages/mail-engine/src/index.ts'),
+  '@genoffice/mail-engine/eml': resolve(__dirname, '../../packages/mail-engine/src/eml/index.ts'),
+  '@genoffice/mail-engine/pst': resolve(__dirname, '../../packages/mail-engine/src/pst/index.ts'),
+  '@genoffice/mail-engine/threading': resolve(__dirname, '../../packages/mail-engine/src/threading/index.ts'),
+  '@genoffice/mail-engine/rules': resolve(__dirname, '../../packages/mail-engine/src/rules/index.ts'),
+}
+
 export default defineConfig({
   // Bundle everything into the shell main (same policy as apps/docs): the
   // imported docs/sheets main modules are TS source with no build artifacts,
   // so externalizing them would break Node ESM resolution at runtime.
-  main: {},
+  main: {
+    resolve: { alias: localAlias },
+  },
   preload: {
+    resolve: { alias: localAlias },
     build: {
       rollupOptions: {
         input: {
@@ -20,6 +31,7 @@ export default defineConfig({
   },
   renderer: {
     plugins: [react()],
+    resolve: { alias: localAlias },
     build: {
       rollupOptions: {
         input: {

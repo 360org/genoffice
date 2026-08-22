@@ -47,7 +47,8 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.1.10",
-    "@genoffice/mail": "*"
+    "@genoffice/mail": "*",
+    "@genoffice/mail-engine": "*"
   },
   "author": "360 CORP"
 }
